@@ -1,0 +1,27 @@
+{
+  "name": "chatavg-gateway",
+  "version": "1.0.0",
+  "description": "Chat AVG — API Gateway with user auth",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.9.0",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.4.1",
+    "helmet": "^8.1.0",
+    "http-proxy-middleware": "^3.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "openai": "^6.35.0",
+    "zod": "^4.4.2"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
+  }
+}

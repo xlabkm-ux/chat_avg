@@ -1,0 +1,230 @@
+/* ============================================
+   RESPONSIVE.CSS — All Breakpoints
+   Chat AVG — Mobile-First Responsive Design
+   ============================================ */
+
+/*
+   Breakpoint strategy (mobile-first):
+   base      → 0px+     phone portrait
+   @480px    → sm       phone landscape
+   @768px    → md       tablet
+   @1024px   → lg       laptop/desktop
+   @1200px   → xl       large desktop
+*/
+
+/* === BASE: Phone Portrait (0 - 479px) === */
+
+/* Sidebar: off-canvas by default */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  transform: translateX(-100%);
+  box-shadow: none;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
+}
+
+/* Show hamburger menu */
+.mobile-menu-btn {
+  display: flex;
+}
+
+/* Compact spacing */
+.messages {
+  padding: 14px;
+}
+
+.input-wrapper {
+  padding: 10px 14px 14px;
+  padding-bottom: max(14px, var(--safe-bottom));
+}
+
+.msg {
+  max-width: 95%;
+}
+
+.chat-header {
+  padding: var(--sp-md) 14px;
+}
+
+/* Single column params */
+.param-grid {
+  grid-template-columns: 1fr;
+}
+
+/* Smaller welcome */
+.welcome-screen {
+  padding: var(--sp-lg);
+}
+
+.welcome-screen h2 {
+  font-size: 1.25rem;
+}
+
+.welcome-hints {
+  gap: 6px;
+}
+
+.hint-chip {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+}
+
+/* Setup compact */
+.setup-scroll {
+  padding: 14px 14px 80px;
+}
+
+.setup-card {
+  padding: var(--sp-md);
+}
+
+/* Login compact */
+.login-box {
+  padding: var(--sp-lg);
+  margin: 0 var(--sp-md);
+}
+
+/* Context badge hide text on very small */
+.context-badge span {
+  display: none;
+}
+
+/* Touch-friendly buttons */
+.attach-btn, .send-btn, .stop-btn {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.nav-btn {
+  min-height: 44px;
+}
+
+
+/* === SM: Phone Landscape (480px+) === */
+@media (min-width: 480px) {
+  .context-badge span {
+    display: inline;
+  }
+
+  .msg {
+    max-width: 90%;
+  }
+
+  .welcome-screen {
+    padding: var(--sp-xl);
+  }
+
+  .welcome-screen h2 {
+    font-size: 1.5rem;
+  }
+}
+
+
+/* === MD: Tablet (768px+) === */
+@media (min-width: 768px) {
+  .messages {
+    padding: 20px var(--sp-lg);
+  }
+
+  .input-wrapper {
+    padding: var(--sp-md) var(--sp-lg);
+    padding-bottom: max(var(--sp-md), var(--safe-bottom));
+  }
+
+  .chat-header {
+    padding: var(--sp-md) var(--sp-lg);
+  }
+
+  .msg {
+    max-width: 85%;
+  }
+
+  .param-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .setup-scroll {
+    padding: 20px var(--sp-lg) 100px;
+  }
+
+  .setup-card {
+    padding: 20px;
+  }
+
+  .login-box {
+    padding: var(--sp-xl);
+  }
+}
+
+
+/* === LG: Laptop/Desktop (1024px+) === */
+@media (min-width: 1024px) {
+  /* Sidebar always visible */
+  .sidebar {
+    position: relative;
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* Hide hamburger & backdrop */
+  .mobile-menu-btn {
+    display: none;
+  }
+
+  .sidebar-backdrop {
+    display: none !important;
+  }
+}
+
+
+/* === XL: Large Desktop (1200px+) === */
+@media (min-width: 1200px) {
+  .messages {
+    padding: var(--sp-lg) var(--sp-xl);
+  }
+
+  .input-wrapper {
+    padding: var(--sp-md) var(--sp-xl);
+  }
+
+  .chat-header {
+    padding: var(--sp-md) var(--sp-xl);
+  }
+
+  .msg {
+    max-width: 75%;
+  }
+
+  .setup-scroll {
+    padding: var(--sp-lg) var(--sp-xl) 100px;
+    max-width: 800px;
+  }
+}
+
+
+/* === Print === */
+@media print {
+  .sidebar, .input-wrapper, .chat-header, .mobile-menu-btn {
+    display: none !important;
+  }
+
+  .view.active {
+    display: block;
+  }
+
+  .messages {
+    overflow: visible;
+    padding: 0;
+  }
+
+  .msg {
+    max-width: 100%;
+    break-inside: avoid;
+  }
+}

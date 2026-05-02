@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+.npm/
+
+# Models (too large for GitHub)
+*.gguf
+models_cache/
+gemma_app/llama_cpp/models_cache/
+
+# Runtime data
+data/
+*.log
+*.tmp
+
+# IDEs
+.vscode/
+.idea/
+
+# Windows
+Thumbs.db
+Desktop.ini

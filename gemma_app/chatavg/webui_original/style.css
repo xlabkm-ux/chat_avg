@@ -1,0 +1,17 @@
+/* ============================================
+   STYLE.CSS — Main Entry Point
+   Chat AVG — Premium UI Design System
+   
+   Import order matters:
+   1. vars     — tokens, reset, animations
+   2. layout   — app shell, sidebar, navigation
+   3. chat     — messages, input, welcome
+   4. forms    — login, setup, admin
+   5. responsive — breakpoints (must be last)
+   ============================================ */
+
+@import url('vars.css');
+@import url('layout.css');
+@import url('chat.css');
+@import url('forms.css');
+@import url('responsive.css');
