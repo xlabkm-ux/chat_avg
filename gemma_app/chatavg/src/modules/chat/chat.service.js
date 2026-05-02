@@ -29,9 +29,10 @@ class ChatService {
     }
 
     // SSRF Validation
+    const isLocalProvider = ['llamacpp', 'ollama'].includes(providerId);
     if (catSettings.endpoint_url) {
       try {
-        validateProviderUrl(catSettings.endpoint_url);
+        validateProviderUrl(catSettings.endpoint_url, isLocalProvider);
       } catch (err) {
         throw new Error(`SSRF Blocked: ${err.message}`);
       }

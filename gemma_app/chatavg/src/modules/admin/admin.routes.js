@@ -199,8 +199,9 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
   const providerId = data.provider || savedCat.provider || 'llamacpp';
   const endpointUrl = (data.endpoint_url || savedCat.endpoint_url || 'http://127.0.0.1:8081/v1').replace(/\/$/, '');
   
+  const isLocalProvider = ['llamacpp', 'ollama'].includes(providerId);
   try {
-    validateProviderUrl(endpointUrl);
+    validateProviderUrl(endpointUrl, isLocalProvider);
   } catch (err) {
     return res.status(err.status || 400).json({ error: err.message });
   }
