@@ -18,7 +18,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "blob:"],
@@ -32,28 +32,22 @@ app.use(helmet({
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Development mode or same-origin (no origin header)
-    if (!origin || isDev) return callback(null, true);
+    // Same-origin (no origin header) is allowed
+    if (!origin) return callback(null, true);
     
-    // Explicitly allow local origins
     const originStr = String(origin);
-    const isLocal = originStr.includes('127.0.0.1') || 
-                    originStr.includes('localhost') || 
-                    originStr.includes('::1') ||
-                    originStr.includes('0.0.0.0');
-
     const isAllowed = allowedOrigins.some(o => originStr === o || originStr.startsWith(o));
 
-    if (isLocal || isAllowed) {
+    if (isAllowed) {
       callback(null, true);
     } else {
-      console.warn(`[Security] CORS Blocked origin: ${origin} (isLocal=${isLocal}, isAllowed=${isAllowed})`);
+      console.warn(`[Security] CORS Blocked origin: ${origin}`);
       callback(new Error('CORS policy violation'));
     }
   }
 }));
 
-app.use(express.json({ limit: '5mb' }));
+app.use(express.json({ limit: '2mb' }));
 
 // Rate limiters
 const authLimiter = rateLimit({
@@ -85,6 +79,11 @@ app.use('/api/admin',      require('./src/modules/admin/admin.routes'));
 app.use('/api/sessions',   require('./src/modules/chat/sessions.routes'));
 app.use('/api/chat', chatLimiter, require('./src/modules/chat/chat.routes'));
 app.use('/api/providers',  require('./src/modules/providers/providers.routes'));
+
+// 404 for unknown API routes
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: { code: 'not_found', message: 'API route not found' } });
+});
 
 // ── Static Files (serve Web UI) ─────────────────────────
 app.use(express.static(WEBUI_DIR));
