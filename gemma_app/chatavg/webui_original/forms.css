@@ -23,18 +23,33 @@
 }
 
 .login-box {
-  background: rgba(22, 22, 31, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
   padding: var(--sp-xl);
   border-radius: var(--radius-lg);
   width: 100%;
   max-width: 400px;
   margin: 0 var(--sp-md);
   text-align: center;
-  box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  animation: scaleIn 0.4s ease;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 20px var(--accent-bg);
+  border: 1px solid var(--glass-border);
+  animation: scaleIn 0.5s var(--transition-spring);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-box::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: conic-gradient(from 0deg, transparent, var(--accent), transparent 30%);
+  animation: spin 4s linear infinite;
+  opacity: 0.1;
+  pointer-events: none;
 }
 
 .login-box h2 {
@@ -117,7 +132,9 @@
 }
 
 .setup-card:hover {
-  border-color: rgba(99, 102, 241, 0.2);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent-bg);
+  transform: translateY(-2px);
 }
 
 .setup-card-header {

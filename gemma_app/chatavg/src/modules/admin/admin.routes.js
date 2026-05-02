@@ -12,6 +12,7 @@ const categoryRepository = require('./category.repository');
 const sessionRepository = require('../chat/session.repository');
 const { getProvider } = require('../providers/provider.factory');
 const AuditService = require('../audit/audit.service');
+const crypto = require('../../core/crypto');
 
 const router = Router();
 
@@ -122,7 +123,7 @@ router.get('/categories', asyncHandler(async (req, res) => {
   for (const [k, v] of Object.entries(categories)) {
     safeCats[k] = { ...v };
     if (safeCats[k].api_key) {
-      safeCats[k].api_key = '********';
+      safeCats[k].api_key = crypto.maskKey(safeCats[k].api_key);
     }
   }
   res.json(safeCats);
@@ -162,7 +163,8 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
 
   let category = await categoryRepository.findByName(catName) || {};
   
-  if (parseResult.data.api_key === '********') {
+  // If api_key is masked, don't update it
+  if (parseResult.data.api_key && parseResult.data.api_key.includes('...')) {
     delete parseResult.data.api_key;
   }
   
@@ -203,7 +205,10 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
     return res.status(err.status || 400).json({ error: err.message });
   }
 
-  const apiKey = data.api_key || savedCat.api_key || '';
+  let apiKey = data.api_key || savedCat.api_key || '';
+  if (apiKey.includes('...')) {
+    apiKey = savedCat.api_key || '';
+  }
 
   const provider = getProvider(providerId);
   if (!provider) return res.status(500).json({ error: 'Провайдер не найден' });

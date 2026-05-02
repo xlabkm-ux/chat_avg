@@ -42,6 +42,14 @@ class SessionRepository {
     return info.changes > 0;
   }
 
+  async updateTitle(username, id, title) {
+    const info = db.prepare(`
+      UPDATE sessions SET title = ?, updatedAt = ? 
+      WHERE username = ? AND id = ?
+    `).run(title, Date.now(), username, id);
+    return info.changes > 0;
+  }
+
   async countTotal() {
     return db.prepare('SELECT COUNT(*) as c FROM sessions').get().c;
   }

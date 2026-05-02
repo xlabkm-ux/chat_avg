@@ -22,9 +22,12 @@
   --accent-hover: #818cf8;
   --accent-bg: rgba(99, 102, 241, 0.1);
   --accent-gradient: linear-gradient(135deg, #6366f1, #a855f7, #06b6d4);
+  --accent-glow: rgba(99, 102, 241, 0.5);
   --danger: #ef4444;
   --success: #10b981;
   --warning: #f59e0b;
+  --glass: rgba(22, 22, 31, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.08);
 
   /* Spacing */
   --sp-xs: 4px;
@@ -56,9 +59,10 @@
   --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
 
   /* Transitions */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.2s ease;
-  --transition-slow: 0.3s ease;
+  --transition-fast: 0.1s ease;
+  --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-spring: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* --- Reset --- */

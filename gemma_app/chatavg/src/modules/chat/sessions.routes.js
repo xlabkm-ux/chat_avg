@@ -79,4 +79,26 @@ router.delete('/:id', asyncHandler(async (req, res) => {
   }
 }));
 
+const sessionPatchSchema = z.object({
+  title: z.string().min(1).max(120),
+}).strict();
+
+router.patch('/:id', asyncHandler(async (req, res) => {
+  const parseResult = sessionPatchSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    return res.status(400).json({ detail: 'Некорректный формат данных', errors: parseResult.error.errors });
+  }
+
+  try {
+    const success = await sessionRepository.updateTitle(req.user.username, req.params.id, parseResult.data.title);
+    if (success) {
+      res.json({ status: 'success' });
+    } else {
+      res.status(404).json({ error: 'Сессия не найдена' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Ошибка обновления сессии' });
+  }
+}));
+
 module.exports = router;

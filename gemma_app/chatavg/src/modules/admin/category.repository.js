@@ -1,10 +1,15 @@
 const db = require('../../core/sqlite');
+const crypto = require('../../core/crypto');
 
 class CategoryRepository {
   async findByName(name) {
     const row = db.prepare('SELECT * FROM categories WHERE name = ?').get(name);
     if (!row) return null;
-    return { ...row, extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined };
+    return { 
+      ...row, 
+      api_key: crypto.decrypt(row.api_key),
+      extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined 
+    };
   }
 
   async save(name, category) {
@@ -29,7 +34,7 @@ class CategoryRepository {
       provider: category.provider || null,
       endpoint_url: category.endpoint_url || null,
       model_name: category.model_name || null,
-      api_key: category.api_key || null,
+      api_key: crypto.encrypt(category.api_key) || null,
       temperature: category.temperature !== undefined ? category.temperature : null,
       top_p: category.top_p !== undefined ? category.top_p : null,
       top_k: category.top_k !== undefined ? category.top_k : null,
@@ -45,7 +50,11 @@ class CategoryRepository {
     const rows = db.prepare('SELECT * FROM categories').all();
     const result = {};
     for (const row of rows) {
-      result[row.name] = { ...row, extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined };
+      result[row.name] = { 
+        ...row, 
+        api_key: crypto.decrypt(row.api_key),
+        extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined 
+      };
     }
     return result;
   }
