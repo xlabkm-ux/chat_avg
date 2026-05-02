@@ -74,7 +74,7 @@ export async function loadAdminUsers() {
       el.className = 'user-item';
       el.innerHTML = `
         <div class="user-item-info">
-          <div style="display:flex; align-items:center; gap:10px;">
+          <div class="flex-center-gap">
             <span class="user-item-name">${DOMPurify.sanitize(username)}</span>
             <span class="status-badge ${statusClass}">${statusLabel}</span>
           </div>
@@ -246,9 +246,9 @@ function updateModelDropdown(providerId, selectedModel) {
       sel.appendChild(opt);
     });
 
-    sel.parentElement.style.display = '';
+    sel.parentElement.classList.remove('hidden');
   } else {
-    sel.parentElement.style.display = '';
+    sel.parentElement.classList.remove('hidden');
   }
 
   $('admin-cat-model').value = selectedModel || '';
@@ -257,10 +257,10 @@ function updateModelDropdown(providerId, selectedModel) {
 function updateProviderUI(providerId) {
   const isLlama = providerId === 'llamacpp';
   document.querySelectorAll('.llama-only-param').forEach(el => {
-    el.style.display = isLlama ? '' : 'none';
+    el.classList.toggle('hidden', !isLlama);
   });
-  $('cat-remote-fields').style.display = isLlama ? 'none' : '';
-  $('cat-endpoint-field').style.display = isLlama ? '' : '';
+  $('cat-remote-fields').classList.toggle('hidden', isLlama);
+  $('cat-endpoint-field').classList.toggle('hidden', !isLlama);
 }
 
 async function editAdminCategory(name, data) {
@@ -425,7 +425,7 @@ export async function loadAuditLogs() {
     list.textContent = '';
     
     if (logs.length === 0) {
-      list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Логов не найдено</div>';
+      list.innerHTML = '<div class="audit-log-empty">Логов не найдено</div>';
       return;
     }
 
@@ -437,20 +437,20 @@ export async function loadAuditLogs() {
       if (log.details) {
         try {
           const parsed = JSON.parse(log.details);
-          detailsHtml = `<div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">${DOMPurify.sanitize(JSON.stringify(parsed))}</div>`;
+          detailsHtml = `<div class="audit-log-details">${DOMPurify.sanitize(JSON.stringify(parsed))}</div>`;
         } catch (e) {
-          detailsHtml = `<div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">${DOMPurify.sanitize(log.details)}</div>`;
+          detailsHtml = `<div class="audit-log-details">${DOMPurify.sanitize(log.details)}</div>`;
         }
       }
 
       el.innerHTML = `
-        <div class="user-item-info" style="width: 100%;">
-          <div style="display:flex; justify-content: space-between; align-items:center;">
-            <span class="user-item-name" style="font-size: 0.9em; color: var(--text-secondary);">${DOMPurify.sanitize(date)}</span>
-            <span class="status-badge" style="background: var(--bg-surface-2);">${DOMPurify.sanitize(log.action)}</span>
+        <div class="user-item-info w-full">
+          <div class="audit-log-header">
+            <span class="user-item-name audit-log-name">${DOMPurify.sanitize(date)}</span>
+            <span class="status-badge audit-log-action-badge">${DOMPurify.sanitize(log.action)}</span>
           </div>
-          <div style="margin-top: 4px;">
-            <strong>Пользователь:</strong> ${log.username ? DOMPurify.sanitize(log.username) : '<span style="color:var(--text-secondary)">Система/Аноним</span>'}
+          <div class="audit-log-content">
+            <strong>Пользователь:</strong> ${log.username ? DOMPurify.sanitize(log.username) : `<span class="text-secondary">Система/Аноним</span>`}
             ${log.ip_address ? ` | <strong>IP:</strong> ${DOMPurify.sanitize(log.ip_address)}` : ''}
           </div>
           ${detailsHtml}

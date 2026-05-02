@@ -451,3 +451,45 @@ select.setup-input option {
   border-radius: var(--radius-sm);
   border: 1px solid rgba(248, 113, 113, 0.2);
 }
+
+/* --- Audit Log Classes (replacing inline styles) --- */
+.admin-audit-select {
+  max-width: 200px;
+}
+
+.flex-center-gap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.flex-between-center {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.audit-log-empty {
+  padding: 20px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.audit-log-details {
+  font-size: 0.85em;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+.audit-log-name {
+  font-size: 0.9em;
+  color: var(--muted);
+}
+
+.audit-log-action-badge {
+  background: var(--surface2);
+}
+
+.w-full {
+  width: 100%;
+}
