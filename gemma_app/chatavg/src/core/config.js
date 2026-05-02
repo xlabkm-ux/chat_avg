@@ -16,6 +16,7 @@ require('dotenv').config({ path: envPath });
 const envSchema = z.object({
   CHATAVG_PORT: z.string().transform(Number).default('8080'),
   CHATAVG_SECRET: z.string().min(32, 'CHATAVG_SECRET must be at least 32 characters long'),
+  CHATAVG_TOKEN_EXPIRY: z.string().default('7d'),
   CHATAVG_ADMIN_PASSWORD: z.string().optional(),
   CHATAVG_ALLOWED_ORIGINS: z.string().optional().default(''),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
@@ -33,7 +34,7 @@ const env = parsedEnv.data;
 // 3. Constants & Paths
 const PORT = env.CHATAVG_PORT;
 const SECRET = env.CHATAVG_SECRET;
-const TOKEN_EXPIRY = '7d';
+const TOKEN_EXPIRY = env.CHATAVG_TOKEN_EXPIRY;
 
 const DATA_DIR = env.NODE_ENV === 'test' 
   ? path.join(ROOT_DIR, 'data_test') 

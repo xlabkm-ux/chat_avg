@@ -44,10 +44,10 @@ async function authenticate(req, res, next) {
       throw new AuthError('Пользователь не найден', 'user_not_found');
     }
     
-    // Check if token version matches the user's current token version
+    // Strict check for token version (tv must be present and must match)
     const currentTv = user.token_version || 0;
-    if (payload.tv !== undefined && payload.tv !== currentTv) {
-      throw new AuthError('Сессия недействительна: пароль был изменен', 'password_changed');
+    if (payload.tv === undefined || payload.tv !== currentTv) {
+      throw new AuthError('Сессия недействительна: требуется повторный вход', 'session_invalidated');
     }
     
     if (isExpired(user)) {
