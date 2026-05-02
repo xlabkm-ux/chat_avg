@@ -37,6 +37,7 @@
 ## 🛡 Безопасность и архитектура
 
 ### Архитектурная схема
+
 ```mermaid
 graph TD
     Client[Web UI / API Client] -->|HTTP/REST| Gateway(Node.js API Gateway :8080)
@@ -63,6 +64,7 @@ npm test
 The test runner isolates its environment by automatically targeting an in-memory or alternative SQLite database (`data_test`), ensuring that production data is not modified during testing.
 
 ## 🔐 Security Configurations
+
 - [x] Строгие требования к `CHATAVG_SECRET` (только через `.env`).
 - [x] Никаких дефолтных `admin/admin` (пароль генерируется или задается в `.env`).
 - [x] Хеширование паролей с помощью `bcrypt`.
