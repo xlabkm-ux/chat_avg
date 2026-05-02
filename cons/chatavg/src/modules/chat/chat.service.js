@@ -1,7 +1,7 @@
 const { Readable } = require('node:stream');
 const categoryRepository = require('../admin/category.repository');
 const { getProvider } = require('../providers/provider.factory');
-const { ALLOWED_EXTRA_PARAMS } = require('../../core/config');
+const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT } = require('../../core/config');
 const { validateProviderUrl, sanitizePromptText } = require('../../core/utils');
 
 function pickAllowedExtraParams(input, allowed) {
@@ -82,8 +82,8 @@ class ChatService {
     const reqCloseHandler = () => ac.abort(new Error('Client disconnected'));
     res.req.on('close', reqCloseHandler);
 
-    // 60 seconds timeout
-    const timeoutId = setTimeout(() => ac.abort(new Error('Provider timeout')), 60000);
+    // Configurable timeout
+    const timeoutId = setTimeout(() => ac.abort(new Error('Provider timeout')), PROVIDER_TIMEOUT);
 
     // Options mapping
     const options = {

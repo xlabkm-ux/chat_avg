@@ -16,7 +16,6 @@
     "express": "^4.21.0",
     "express-rate-limit": "^8.4.1",
     "helmet": "^8.1.0",
-    "http-proxy-middleware": "^3.0.0",
     "jsonwebtoken": "^9.0.2",
     "openai": "^6.35.0",
     "zod": "^4.4.2"

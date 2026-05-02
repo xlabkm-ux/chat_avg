@@ -13,6 +13,7 @@ const sessionRepository = require('../chat/session.repository');
 const { getProvider } = require('../providers/provider.factory');
 const AuditService = require('../audit/audit.service');
 const crypto = require('../../core/crypto');
+const { TEST_TIMEOUT } = require('../../core/config');
 
 const router = Router();
 
@@ -215,7 +216,7 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
   if (!provider) return res.status(500).json({ error: 'Провайдер не найден' });
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 5000);
+  const timeout = setTimeout(() => controller.abort(), TEST_TIMEOUT);
 
   const headers = {};
   if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;

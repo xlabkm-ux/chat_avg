@@ -5,10 +5,10 @@ services:
     build: .
     container_name: chatavg-gateway
     ports:
-      - "8080:8080"
+      - "8200:8200"
     environment:
       - NODE_ENV=production
-      - CHATAVG_PORT=8080
+      - CHATAVG_PORT=8200
       # CHATAVG_SECRET will be auto-generated in .env file in the data volume
     volumes:
       - gateway_data:/app/data
@@ -24,7 +24,7 @@ services:
     #   - "8081:8080" # Removed to close external access. Use internal network.
     volumes:
       - ./models_cache:/models
-    command: -m /models/your-model.gguf -c 4096 --host 0.0.0.0 --port 8080
+    command: -m /models/your-model.gguf -c 4096 --host 0.0.0.0 --port 8201
     restart: unless-stopped
 
 volumes:

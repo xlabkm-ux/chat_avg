@@ -36,7 +36,7 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     const originStr = String(origin);
-    const isAllowed = allowedOrigins.some(o => originStr === o || originStr.startsWith(o));
+    const isAllowed = allowedOrigins.includes(originStr);
 
     if (isAllowed) {
       callback(null, true);
@@ -80,6 +80,18 @@ app.use('/api/sessions',   require('./src/modules/chat/sessions.routes'));
 app.use('/api/chat', chatLimiter, require('./src/modules/chat/chat.routes'));
 app.use('/api/providers',  require('./src/modules/providers/providers.routes'));
 
+// ── Health Checks ──────────────────────────────────────
+app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));
+app.get('/ready', (req, res) => {
+  // Simple check for SQLite
+  try {
+    require('./src/core/sqlite');
+    res.status(200).json({ status: 'ready' });
+  } catch (err) {
+    res.status(503).json({ status: 'error', message: 'DB not ready' });
+  }
+});
+
 // 404 for unknown API routes
 app.use('/api', (req, res) => {
   res.status(404).json({ error: { code: 'not_found', message: 'API route not found' } });
@@ -99,7 +111,7 @@ app.use(errorHandler);
 let server;
 if (require.main === module) {
   server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Starting Chat AVG Gateway on http://127.0.0.1:${PORT}`);
+    console.log(`Starting Chat AVG Gateway on http://0.0.0.0:${PORT}`);
   });
 }
 
