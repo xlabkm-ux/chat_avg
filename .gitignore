@@ -19,3 +19,10 @@ data/
 # Windows
 Thumbs.db
 Desktop.ini
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.node
