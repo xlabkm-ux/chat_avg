@@ -1,13 +1,13 @@
+const { Readable } = require('node:stream');
 const categoryRepository = require('../storage/categoryRepository');
 const { getProvider } = require('../providers');
-
-const USER_ALLOWED_EXTRA_PARAMS = ['response_format'];
-const ADMIN_ALLOWED_EXTRA_PARAMS = ['tools', 'tool_choice', 'reasoning', 'response_format', 'metadata'];
+const { ALLOWED_EXTRA_PARAMS } = require('../config');
 
 function pickAllowedExtraParams(input, allowed) {
   const out = {};
+  if (!input || typeof input !== 'object') return out;
   for (const key of allowed) {
-    if (input && Object.prototype.hasOwnProperty.call(input, key)) {
+    if (Object.prototype.hasOwnProperty.call(input, key)) {
       out[key] = input[key];
     }
   }
@@ -23,43 +23,72 @@ class ChatService {
     const provider = getProvider(providerId);
     if (!provider) {
       const err = new Error(`Провайдер "${providerId}" не найден`);
-      err.status = 500;
+      err.status = 502;
       throw err;
     }
 
-    // Build messages with system prompt injection
+    // SSRF Validation
+    if (catSettings.endpoint_url) {
+      const { validateProviderUrl } = require('../lib/utils');
+      try {
+        validateProviderUrl(catSettings.endpoint_url);
+      } catch (err) {
+        throw new Error(`SSRF Blocked: ${err.message}`);
+      }
+    }
+
+    // Security: non-admins cannot send 'system' role messages
     let messages = body.messages || [];
-    if (catSettings.system_prompt && catSettings.system_prompt.trim() !== '') {
+    if (user.category !== 'Администратор') {
+      messages = messages.filter(m => m.role !== 'system');
+    }
+
+    // Optimization: avoid full array copy if not necessary
+    if (catSettings.system_prompt?.trim()) {
       if (messages.length > 0 && messages[0].role === 'system') {
-        messages = [...messages];
-        messages[0] = { ...messages[0], content: catSettings.system_prompt + '\n\n' + messages[0].content };
+        // Concatenate with existing system prompt instead of creating a new entry
+        messages = [{ 
+          ...messages[0], 
+          content: `${catSettings.system_prompt}\n\n${messages[0].content}` 
+        }, ...messages.slice(1)];
       } else {
+        // Prepend system prompt
         messages = [{ role: 'system', content: catSettings.system_prompt }, ...messages];
       }
     }
 
-    // Request options
+    // AbortController for client disconnect and timeout
+    const ac = new AbortController();
+    const reqCloseHandler = () => ac.abort(new Error('Client disconnected'));
+    res.req.on('close', reqCloseHandler);
+
+    // 60 seconds timeout
+    const timeoutId = setTimeout(() => ac.abort(new Error('Provider timeout')), 60000);
+
+    // Options mapping
     const options = {
       stream: !!body.stream,
       max_tokens: parseInt(catSettings.max_tokens) || 1024,
+      signal: ac.signal
     };
 
-    // Merge frontend overrides into category settings
+    // Merged settings & Extra params
     const mergedSettings = { ...catSettings };
     if (body.temperature !== undefined) mergedSettings.temperature = body.temperature;
     if (body.top_p !== undefined) mergedSettings.top_p = body.top_p;
-    if (body.extra_params && typeof body.extra_params === 'object') {
-      const allowedKeys = user.category === 'Администратор' ? ADMIN_ALLOWED_EXTRA_PARAMS : USER_ALLOWED_EXTRA_PARAMS;
+    
+    if (body.extra_params) {
+      const allowedKeys = user.category === 'Администратор' ? ALLOWED_EXTRA_PARAMS.ADMIN : ALLOWED_EXTRA_PARAMS.USER;
       const safeParams = pickAllowedExtraParams(body.extra_params, allowedKeys);
       mergedSettings.extra_params = { ...(mergedSettings.extra_params || {}), ...safeParams };
     }
 
-    console.log(`[Chat] user=${user.username} provider=${providerId} model=${catSettings.model_name || provider.defaultModel}`);
+    console.log(`[Chat] user=${user.username} provider=${providerId} model=${catSettings.model_name || 'default'}`);
 
     try {
       let result;
       
-      // Emulate streaming if requested but not supported by provider
+      // Emulate streaming using Native Streams if provider doesn't support it
       if (options.stream && provider.capabilities && !provider.capabilities.stream) {
         const fallbackOptions = { ...options, stream: false };
         const rawResult = await provider.handleChat(messages, mergedSettings, fallbackOptions);
@@ -67,68 +96,102 @@ class ChatService {
         const data = rawResult.data || {};
         const text = data?.choices?.[0]?.message?.content || '';
         
-        const buildChunk = (content, finishReason) => ({
-          id: data.id || 'chatcmpl-' + Date.now(),
-          object: 'chat.completion.chunk',
-          created: data.created || Math.floor(Date.now() / 1000),
-          model: data.model || 'emulated',
-          choices: [{
-            index: 0,
-            delta: finishReason ? {} : { content },
-            finish_reason: finishReason || null,
-          }],
-        });
-
-        async function* emulateStream() {
-          const chunkSize = 20; // chars per tick
-          for (let i = 0; i < text.length; i += chunkSize) {
-            yield buildChunk(text.slice(i, i + chunkSize), null);
-            await new Promise(r => setTimeout(r, 10));
-          }
-          yield buildChunk('', 'stop');
-        }
-        
-        result = { isStream: true, stream: emulateStream(), isRawSse: false };
+        const stream = this._createEmulatedStream(text, data);
+        result = { isStream: true, stream, isRawSse: false };
       } else {
         result = await provider.handleChat(messages, mergedSettings, options);
       }
 
       if (result.isStream) {
-        res.writeHead(200, {
-          'Content-Type': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
-        });
-
-        for await (const chunk of result.stream) {
-          if (result.isRawSse) {
-            // Chunk is already an SSE-formatted string (e.g. "data: {...}\n\n")
-            res.write(chunk);
-          } else {
-            // Chunk is a raw JS object, needs serialization
-            res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-          }
-        }
-
-        if (!result.isRawSse) {
-          res.write('data: [DONE]\n\n');
-        }
-        res.end();
+        await this._pipeStreamToResponse(result, res);
       } else {
         res.json(result.data);
       }
     } catch (err) {
-      console.error(`[ChatService Error - ${providerId}]`, err.message);
-      if (res.headersSent) {
-        res.write(`data: ${JSON.stringify({ error: err.message, code: err.code || 'provider_error' })}\n\n`);
-        res.write('data: [DONE]\n\n');
-        res.end();
-      } else {
-        res.status(err.status || 502).json({
-          error: `${provider.name || providerId}: ${err.message}`,
-          code: err.code || 'provider_error',
+      if (err.message === 'Client disconnected') return; // Ignore early disconnect
+      this._handleError(err, providerId, provider.name, res);
+    } finally {
+      clearTimeout(timeoutId);
+      res.req.off('close', reqCloseHandler);
+    }
+  }
+
+  _createEmulatedStream(text, metadata) {
+    const chunkSize = 20;
+    let i = 0;
+    
+    return new Readable({
+      objectMode: true,
+      async read() {
+        if (i >= text.length) {
+          this.push({
+            id: metadata.id || `emulated-${Date.now()}`,
+            object: 'chat.completion.chunk',
+            created: metadata.created || Math.floor(Date.now() / 1000),
+            choices: [{ index: 0, delta: {}, finish_reason: 'stop' }]
+          });
+          this.push(null);
+          return;
+        }
+
+        const content = text.slice(i, i + chunkSize);
+        i += chunkSize;
+
+        this.push({
+          id: metadata.id || `emulated-${Date.now()}`,
+          object: 'chat.completion.chunk',
+          created: metadata.created || Math.floor(Date.now() / 1000),
+          choices: [{ index: 0, delta: { content }, finish_reason: null }]
         });
+
+        // Small delay to simulate "typing"
+        await new Promise(r => setTimeout(r, 10));
       }
+    });
+  }
+
+  async _pipeStreamToResponse(result, res) {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    });
+
+    try {
+      for await (const chunk of result.stream) {
+        if (result.isRawSse) {
+          res.write(chunk);
+        } else {
+          res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+        }
+      }
+      if (!result.isRawSse) {
+        res.write('data: [DONE]\n\n');
+      }
+      res.end();
+    } catch (err) {
+      console.error('[Chat Stream Error]', err);
+      res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
+      res.end();
+    }
+  }
+
+  _handleError(err, providerId, providerName, res) {
+    console.error(`[ChatService Error - ${providerId}]`, err.message);
+    const status = err.status || 502;
+    const message = `${providerName || providerId}: ${err.message}`;
+
+    if (res.headersSent) {
+      res.write(`data: ${JSON.stringify({ error: message, code: 'provider_error' })}\n\n`);
+      res.write('data: [DONE]\n\n');
+      res.end();
+    } else {
+      res.status(status).json({
+        error: {
+          code: 'provider_error',
+          message: message
+        }
+      });
     }
   }
 }

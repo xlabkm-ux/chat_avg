@@ -18,44 +18,50 @@ function isExpired(user) {
  * Create a signed JWT for the given user.
  */
 function signToken(user) {
-  const pwPrefix = user.password_hash ? user.password_hash.substring(0, 10) : '';
   return jwt.sign({ 
     sub: user.username, 
     category: user.category,
-    pw: pwPrefix 
+    tv: user.token_version || 0
   }, SECRET, { expiresIn: TOKEN_EXPIRY });
 }
 
 /**
  * Express middleware: validate Bearer token, attach `req.user`.
  */
+const { AppError, AuthError, NotFoundError } = require('./errors');
+
 async function authenticate(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
-    return res.status(401).json({ detail: 'Требуется авторизация' });
+    return next(new AuthError('Требуется заголовок Authorization с типом Bearer'));
   }
 
   try {
-    const payload = jwt.verify(header.split(' ')[1], SECRET);
+    const token = header.split(' ')[1];
+    const payload = jwt.verify(token, SECRET);
     const user = await userRepository.findByUsername(payload.sub);
 
     if (!user) {
-      return res.status(401).json({ detail: 'Пользователь не найден' });
+      throw new AuthError('Пользователь не найден', 'user_not_found');
     }
     
-    const currentPwPrefix = user.password_hash ? user.password_hash.substring(0, 10) : '';
-    if (payload.pw && payload.pw !== currentPwPrefix) {
-      return res.status(401).json({ detail: 'Пароль был изменен. Требуется повторная авторизация.' });
+    // Check if token version matches the user's current token version
+    const currentTv = user.token_version || 0;
+    if (payload.tv !== undefined && payload.tv !== currentTv) {
+      throw new AuthError('Сессия недействительна: пароль был изменен', 'password_changed');
     }
     
     if (isExpired(user)) {
-      return res.status(403).json({ detail: 'Срок действия аккаунта истек' });
+      throw new AuthError('Срок действия аккаунта истек', 'account_expired');
     }
 
     req.user = { ...user, username: payload.sub };
     next();
-  } catch {
-    return res.status(401).json({ detail: 'Неверный токен' });
+  } catch (err) {
+    if (err instanceof AuthError) return next(err);
+    
+    const detail = err.name === 'TokenExpiredError' ? 'Срок действия токена истек' : 'Неверный токен';
+    next(new AuthError(detail, err.name));
   }
 }
 
@@ -64,7 +70,7 @@ async function authenticate(req, res, next) {
  */
 function requireAdmin(req, res, next) {
   if (req.user.category !== 'Администратор') {
-    return res.status(403).json({ detail: 'Требуются права администратора' });
+    return next(new AppError('Требуются права администратора', 403, 'forbidden'));
   }
   next();
 }

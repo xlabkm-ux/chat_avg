@@ -6,7 +6,7 @@ const { Router } = require('express');
 const os = require('os');
 const { authenticate, requireAdmin } = require('../lib/auth');
 const { asyncHandler } = require('../lib/errors');
-const { assertSafeIdentifier, mergeFields } = require('../lib/utils');
+const { assertSafeIdentifier, mergeFields, validateProviderUrl } = require('../lib/utils');
 const userRepository = require('../storage/userRepository');
 const categoryRepository = require('../storage/categoryRepository');
 const sessionRepository = require('../storage/sessionRepository');
@@ -173,17 +173,10 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
   const providerId = data.provider || savedCat.provider || 'llamacpp';
   const endpointUrl = (data.endpoint_url || savedCat.endpoint_url || 'http://127.0.0.1:8081/v1').replace(/\/$/, '');
   
-  if (process.env.ALLOW_CUSTOM_PROVIDER_URLS !== 'true') {
-    try {
-      const urlObj = new URL(endpointUrl);
-      const host = urlObj.hostname;
-      const allowList = ['127.0.0.1', 'localhost', 'api.openai.com', 'api.anthropic.com', 'generativelanguage.googleapis.com', 'api.deepseek.com', 'api.x.ai', 'api.qwen.ai'];
-      if (!allowList.includes(host)) {
-        return res.status(403).json({ error: 'SSRF Protection: Host not in allowlist. Set ALLOW_CUSTOM_PROVIDER_URLS=true to disable.' });
-      }
-    } catch (e) {
-      return res.status(400).json({ error: 'Invalid URL format' });
-    }
+  try {
+    validateProviderUrl(endpointUrl);
+  } catch (err) {
+    return res.status(err.status || 400).json({ error: err.message });
   }
 
   const apiKey = data.api_key || savedCat.api_key || '';

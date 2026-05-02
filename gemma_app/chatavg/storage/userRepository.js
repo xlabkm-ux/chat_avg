@@ -10,8 +10,8 @@ class UserRepository {
 
   async save(username, user) {
     db.prepare(`
-      INSERT INTO users (username, password_hash, category, expiration_date, n_ctx, system_prompt, email, must_change_password)
-      VALUES (@username, @password_hash, @category, @expiration_date, @n_ctx, @system_prompt, @email, @must_change_password)
+      INSERT INTO users (username, password_hash, category, expiration_date, n_ctx, system_prompt, email, must_change_password, token_version)
+      VALUES (@username, @password_hash, @category, @expiration_date, @n_ctx, @system_prompt, @email, @must_change_password, 0)
       ON CONFLICT(username) DO UPDATE SET
         password_hash=excluded.password_hash,
         category=excluded.category,
@@ -19,7 +19,8 @@ class UserRepository {
         n_ctx=excluded.n_ctx,
         system_prompt=excluded.system_prompt,
         email=excluded.email,
-        must_change_password=excluded.must_change_password
+        must_change_password=excluded.must_change_password,
+        token_version = CASE WHEN users.password_hash != excluded.password_hash THEN users.token_version + 1 ELSE users.token_version END
     `).run({
       username,
       password_hash: user.password_hash,
@@ -62,10 +63,6 @@ class UserRepository {
 
   async hashPassword(password) {
     return bcrypt.hash(password, 10);
-  }
-  
-  hashPasswordSync(password) {
-    return bcrypt.hashSync(password, 10);
   }
 }
 
