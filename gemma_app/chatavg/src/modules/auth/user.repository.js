@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const db = require('../lib/sqlite');
+const db = require('../../core/sqlite');
 
 class UserRepository {
   async findByUsername(username) {

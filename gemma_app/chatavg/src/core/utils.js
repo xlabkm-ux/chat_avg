@@ -44,8 +44,16 @@ function validateProviderUrl(endpointUrl) {
   }
 }
 
+function sanitizePromptText(text) {
+  if (typeof text !== 'string') return '';
+  
+  const controlTokens = /<\|im_start\|>|<\|im_end\|>|<\|system\|>|<\|user\|>|<\|assistant\|>|<\|endoftext\|>|\[INST\]|\[\/INST\]|<<SYS>>|<\/SYS>>/gi;
+  return text.replace(controlTokens, '').trim();
+}
+
 module.exports = {
   assertSafeIdentifier,
   mergeFields,
   validateProviderUrl,
+  sanitizePromptText,
 };

@@ -12,7 +12,7 @@ if (!process.env.CHATAVG_SECRET) {
 }
 
 const { app, server } = require('../server');
-const db = require('../lib/sqlite');
+const db = require('../src/core/sqlite');
 
 test('API Integration Tests', async (t) => {
   let adminToken = '';

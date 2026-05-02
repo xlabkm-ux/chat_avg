@@ -5,8 +5,11 @@
 const path = require('path');
 const { z } = require('zod');
 
+// Base directory (root of the project)
+const ROOT_DIR = path.resolve(__dirname, '../../');
+
 // 1. Load Environment Variables
-const envPath = path.join(__dirname, '.env');
+const envPath = path.join(ROOT_DIR, '.env');
 require('dotenv').config({ path: envPath });
 
 // 2. Validate Environment Variables
@@ -33,13 +36,13 @@ const SECRET = env.CHATAVG_SECRET;
 const TOKEN_EXPIRY = '7d';
 
 const DATA_DIR = env.NODE_ENV === 'test' 
-  ? path.join(__dirname, 'data_test') 
-  : path.join(__dirname, 'data');
+  ? path.join(ROOT_DIR, 'data_test') 
+  : path.join(ROOT_DIR, 'data');
 
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const CATEGORIES_FILE = path.join(DATA_DIR, 'categories.json');
 const SESSIONS_ROOT = path.join(DATA_DIR, 'sessions');
-const WEBUI_DIR = path.join(__dirname, 'webui_original');
+const WEBUI_DIR = path.join(ROOT_DIR, 'webui_original');
 
 const LLAMA_DEFAULT_URL = 'http://127.0.0.1:8081/v1';
 

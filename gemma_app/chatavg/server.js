@@ -5,11 +5,11 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
-const { PORT, WEBUI_DIR, allowedOrigins, isDev } = require('./config');
-const { errorHandler } = require('./lib/errors');
+const { PORT, WEBUI_DIR, allowedOrigins, isDev } = require('./src/core/config');
+const { errorHandler } = require('./src/core/errors');
 
 // ── Bootstrap ───────────────────────────────────────────
-require('./lib/sqlite'); // Ensures DB and schema exist
+require('./src/core/sqlite'); // Ensures DB and schema exist
 
 const app = express();
 
@@ -18,7 +18,7 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "https://cdnjs.cloudflare.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       imgSrc: ["'self'", "data:", "blob:"],
@@ -32,9 +32,22 @@ app.use(helmet({
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin) || isDev) {
+    // Development mode or same-origin (no origin header)
+    if (!origin || isDev) return callback(null, true);
+    
+    // Explicitly allow local origins
+    const originStr = String(origin);
+    const isLocal = originStr.includes('127.0.0.1') || 
+                    originStr.includes('localhost') || 
+                    originStr.includes('::1') ||
+                    originStr.includes('0.0.0.0');
+
+    const isAllowed = allowedOrigins.some(o => originStr === o || originStr.startsWith(o));
+
+    if (isLocal || isAllowed) {
       callback(null, true);
     } else {
+      console.warn(`[Security] CORS Blocked origin: ${origin} (isLocal=${isLocal}, isAllowed=${isAllowed})`);
       callback(new Error('CORS policy violation'));
     }
   }
@@ -66,12 +79,12 @@ const chatLimiter = rateLimit({
 });
 
 // ── API Routes ──────────────────────────────────────────
-app.use('/api/auth', authLimiter, require('./routes/auth'));
-app.use('/api/users',      require('./routes/users'));
-app.use('/api/admin',      require('./routes/admin'));
-app.use('/api/sessions',   require('./routes/sessions'));
-app.use('/api/chat', chatLimiter, require('./routes/chat'));
-app.use('/api/providers',  require('./routes/providers'));
+app.use('/api/auth', authLimiter, require('./src/modules/auth/auth.routes'));
+app.use('/api/users',      require('./src/modules/auth/users.routes'));
+app.use('/api/admin',      require('./src/modules/admin/admin.routes'));
+app.use('/api/sessions',   require('./src/modules/chat/sessions.routes'));
+app.use('/api/chat', chatLimiter, require('./src/modules/chat/chat.routes'));
+app.use('/api/providers',  require('./src/modules/providers/providers.routes'));
 
 // ── Static Files (serve Web UI) ─────────────────────────
 app.use(express.static(WEBUI_DIR));

@@ -5,27 +5,39 @@
  */
 const { Router } = require('express');
 const { z } = require('zod');
-const { authenticate } = require('../lib/auth');
-const { asyncHandler } = require('../lib/errors');
-const chatService = require('../services/chatService');
+const { authenticate } = require('../auth/auth.middleware');
+const { asyncHandler } = require('../../core/errors');
+const chatService = require('./chat.service');
 
 const router = Router();
 
 const messageSchema = z.object({
   role: z.enum(['system', 'user', 'assistant', 'tool']),
-  content: z.string().min(0).max(100_000).nullable().optional(),
+  content: z.preprocess((val) => (typeof val === 'string' ? val.trim() : val), 
+    z.string().max(100_000).nullable().optional()
+  ),
   name: z.string().optional(),
   tool_calls: z.array(z.any()).optional(),
   tool_call_id: z.string().optional(),
-});
+}).refine(m => {
+  // Tool messages must have a tool_call_id
+  if (m.role === 'tool' && !m.tool_call_id) return false;
+  // User messages must have some content or be part of a tool flow (unlikely for user but possible in some APIs)
+  if (m.role === 'user' && (!m.content || m.content.length === 0)) return false;
+  return true;
+}, { message: "Invalid message structure for the specified role" });
 
 const chatCompletionSchema = z.object({
   messages: z.array(messageSchema).min(1).max(200),
-  stream: z.boolean().optional(),
+  stream: z.boolean().optional().default(false),
   temperature: z.number().min(0).max(2).optional(),
   top_p: z.number().min(0).max(1).optional(),
   extra_params: z.record(z.any()).optional(),
-});
+}).refine(data => {
+  // Policy: The last message in a request for completion usually should not be 'system'
+  const lastMsg = data.messages[data.messages.length - 1];
+  return lastMsg.role !== 'system';
+}, { message: "The last message cannot be a system message" });
 
 router.post('/completions', authenticate, asyncHandler(async (req, res) => {
   const parseResult = chatCompletionSchema.safeParse(req.body);

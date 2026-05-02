@@ -50,7 +50,15 @@ function bindEvents() {
   document.querySelectorAll('.nav .nav-btn').forEach(btn => btn.addEventListener('click', () => switchView(btn.dataset.view)));
   $('new-chat-btn')?.addEventListener('click', newChat);
   $('save-btn')?.addEventListener('click', () => { saveSettings(); switchView('chat'); });
-  $('login-form')?.addEventListener('submit', handleLogin);
+  const loginForm = $('login-form');
+  if (loginForm) {
+    loginForm.addEventListener('submit', handleLogin);
+  } else {
+    console.error('Login form not found during bindEvents');
+  }
+  $('login-submit-btn')?.addEventListener('click', (e) => {
+    if (!$('login-form')) handleLogin(e);
+  });
 
   document.querySelectorAll('.lang-btn').forEach(btn => btn.addEventListener('click', () => {
     state.lang = btn.dataset.lang;
@@ -145,4 +153,8 @@ function bindEvents() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', init);
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}

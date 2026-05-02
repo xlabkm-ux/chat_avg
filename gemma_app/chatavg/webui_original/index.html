@@ -229,6 +229,7 @@
                 <button class="admin-tab active" data-tab="overview" role="tab" aria-selected="true">Обзор</button>
                 <button class="admin-tab" data-tab="users" role="tab" aria-selected="false">Пользователи</button>
                 <button class="admin-tab" data-tab="categories" role="tab" aria-selected="false">Категории</button>
+                <button class="admin-tab" data-tab="audit" role="tab" aria-selected="false">Аудит</button>
             </div>
 
             <div class="setup-scroll">
@@ -410,6 +411,30 @@
                             <button type="button" class="nav-btn btn-secondary" id="btn-test-cat" aria-label="Проверить соединение">Проверить соединение</button>
                             <button type="button" class="nav-btn btn-cancel" id="btn-cancel-cat" aria-label="Отменить редактирование">Отмена</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Audit -->
+                <div id="admin-tab-audit" class="admin-tab-content">
+                    <div class="admin-toolbar">
+                        <div class="search-wrapper">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="search-icon"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                            <input type="text" id="admin-audit-search" class="setup-input" placeholder="Поиск по пользователю...">
+                        </div>
+                        <select id="admin-audit-action" class="setup-input ml-sm" style="max-width: 200px;">
+                            <option value="">Все действия</option>
+                            <option value="LOGIN">Вход (LOGIN)</option>
+                            <option value="LOGIN_FAILED">Ошибка входа (LOGIN_FAILED)</option>
+                            <option value="USER_CREATE">Создание пользователя (USER_CREATE)</option>
+                            <option value="USER_UPDATE">Обновление пользователя (USER_UPDATE)</option>
+                            <option value="USER_DELETE">Удаление пользователя (USER_DELETE)</option>
+                            <option value="CATEGORY_UPDATE">Обновление категории (CATEGORY_UPDATE)</option>
+                        </select>
+                        <button type="button" class="nav-btn btn-secondary ml-auto" id="btn-refresh-audit" aria-label="Обновить">Обновить</button>
+                    </div>
+
+                    <div class="setup-card">
+                        <div id="admin-audit-list" class="admin-list" role="list" aria-label="Список логов аудита"></div>
                     </div>
                 </div>
             </div>

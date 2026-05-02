@@ -1,4 +1,4 @@
-const db = require('../lib/sqlite');
+const db = require('../../core/sqlite');
 
 class SessionRepository {
   async findById(username, id) {

@@ -5,13 +5,18 @@
  */
 const http = require('http');
 const https = require('https');
+const BaseProvider = require('../base.provider');
 
-module.exports = {
-  id: 'llamacpp',
-  name: 'llama.cpp (Local)',
-  defaultModel: 'local-model',
-  models: [],
-  capabilities: { stream: true, tools: false },
+class LlamaCppProvider extends BaseProvider {
+  constructor() {
+    super({
+      id: 'llamacpp',
+      name: 'llama.cpp (Local)',
+      defaultModel: 'local-model',
+      models: [],
+      capabilities: { stream: true, tools: false },
+    });
+  }
 
   async handleChat(messages, config, options) {
     const endpointUrl = (config.endpoint_url || 'http://127.0.0.1:8081/v1').replace(/\/$/, '');
@@ -80,5 +85,7 @@ module.exports = {
       const data = await r.json();
       return { isStream: false, data };
     }
-  },
-};
+  }
+}
+
+module.exports = new LlamaCppProvider();

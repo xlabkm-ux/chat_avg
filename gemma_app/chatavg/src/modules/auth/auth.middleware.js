@@ -2,8 +2,9 @@
  * Authentication — JWT middleware & helpers
  */
 const jwt = require('jsonwebtoken');
-const { SECRET, TOKEN_EXPIRY } = require('../config');
-const userRepository = require('../storage/userRepository');
+const { SECRET, TOKEN_EXPIRY } = require('../../core/config');
+const userRepository = require('./user.repository');
+const { AppError, AuthError } = require('../../core/errors');
 
 /**
  * Check if user account has expired.
@@ -28,8 +29,6 @@ function signToken(user) {
 /**
  * Express middleware: validate Bearer token, attach `req.user`.
  */
-const { AppError, AuthError, NotFoundError } = require('./errors');
-
 async function authenticate(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {

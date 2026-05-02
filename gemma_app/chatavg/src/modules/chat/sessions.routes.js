@@ -6,9 +6,10 @@
  * DELETE /api/sessions/:id
  */
 const { Router } = require('express');
-const { authenticate } = require('../lib/auth');
-const { asyncHandler } = require('../lib/errors');
-const sessionRepository = require('../storage/sessionRepository');
+const { authenticate } = require('../auth/auth.middleware');
+const { asyncHandler } = require('../../core/errors');
+const sessionRepository = require('./session.repository');
+const { z } = require('zod');
 
 const router = Router();
 
@@ -34,8 +35,6 @@ router.get('/:id', asyncHandler(async (req, res) => {
     res.status(err.status === 400 ? 400 : 500).json({ error: err.message || 'Ошибка чтения файла сессии' });
   }
 }));
-
-const { z } = require('zod');
 
 const sessionSaveSchema = z.object({
   id: z.string().min(1).max(64),

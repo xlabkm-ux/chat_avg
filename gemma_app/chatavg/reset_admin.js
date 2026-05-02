@@ -1,22 +1,21 @@
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
+/**
+ * Admin Reset Utility (SQLite)
+ */
+const bcrypt = require('bcryptjs');
+const db = require('./src/core/sqlite');
 
-const USERS_FILE = path.join(__dirname, 'data', 'users.json');
+async function resetAdmin() {
+  const newPass = 'admin';
+  const hash = bcrypt.hashSync(newPass, 10);
+  
+  const info = db.prepare('UPDATE users SET password_hash = ?, must_change_password = 1 WHERE username = ?')
+    .run(hash, 'admin');
 
-function hashPw(password) {
-  return crypto.createHash('sha256').update(password).digest('hex');
-}
-
-if (fs.existsSync(USERS_FILE)) {
-  const users = JSON.parse(fs.readFileSync(USERS_FILE, 'utf-8'));
-  if (users['admin']) {
-    users['admin'].password_hash = hashPw('admin');
-    fs.writeFileSync(USERS_FILE, JSON.stringify(users, null, 4), 'utf-8');
-    console.log('SUCCESS: Admin password reset to "admin"');
+  if (info.changes > 0) {
+    console.log('SUCCESS: Admin password reset to "admin" (must change on next login)');
   } else {
-    console.log('ERROR: User "admin" not found');
+    console.log('ERROR: User "admin" not found in database');
   }
-} else {
-  console.log('ERROR: users.json not found');
 }
+
+resetAdmin().catch(console.error);

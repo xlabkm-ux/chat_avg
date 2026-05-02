@@ -15,6 +15,7 @@ export function initAdminTabs() {
       if (target === 'overview') loadAdminStats();
       else if (target === 'users') loadAdminUsers();
       else if (target === 'categories') loadAdminCategories();
+      else if (target === 'audit') loadAuditLogs();
     });
   });
 
@@ -409,3 +410,59 @@ $('btn-test-cat')?.addEventListener('click', async (e) => {
     btn.disabled = false;
   }
 });
+
+export async function loadAuditLogs() {
+  const username = $('admin-audit-search')?.value.trim() || '';
+  const action = $('admin-audit-action')?.value || '';
+  let url = '/api/admin/audit?limit=100';
+  if (username) url += '&username=' + encodeURIComponent(username);
+  if (action) url += '&action=' + encodeURIComponent(action);
+
+  const r = await fetch(url, { headers: { 'Authorization': 'Bearer ' + state.authToken }});
+  if (r.ok) {
+    const logs = await r.json();
+    const list = $('admin-audit-list');
+    list.textContent = '';
+    
+    if (logs.length === 0) {
+      list.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">Логов не найдено</div>';
+      return;
+    }
+
+    logs.forEach(log => {
+      const date = new Date(log.created_at).toLocaleString('ru-RU');
+      const el = document.createElement('div');
+      el.className = 'user-item';
+      let detailsHtml = '';
+      if (log.details) {
+        try {
+          const parsed = JSON.parse(log.details);
+          detailsHtml = `<div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">${DOMPurify.sanitize(JSON.stringify(parsed))}</div>`;
+        } catch (e) {
+          detailsHtml = `<div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 4px;">${DOMPurify.sanitize(log.details)}</div>`;
+        }
+      }
+
+      el.innerHTML = `
+        <div class="user-item-info" style="width: 100%;">
+          <div style="display:flex; justify-content: space-between; align-items:center;">
+            <span class="user-item-name" style="font-size: 0.9em; color: var(--text-secondary);">${DOMPurify.sanitize(date)}</span>
+            <span class="status-badge" style="background: var(--bg-surface-2);">${DOMPurify.sanitize(log.action)}</span>
+          </div>
+          <div style="margin-top: 4px;">
+            <strong>Пользователь:</strong> ${log.username ? DOMPurify.sanitize(log.username) : '<span style="color:var(--text-secondary)">Система/Аноним</span>'}
+            ${log.ip_address ? ` | <strong>IP:</strong> ${DOMPurify.sanitize(log.ip_address)}` : ''}
+          </div>
+          ${detailsHtml}
+        </div>
+      `;
+      list.appendChild(el);
+    });
+  }
+}
+
+$('btn-refresh-audit')?.addEventListener('click', loadAuditLogs);
+$('admin-audit-search')?.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') loadAuditLogs();
+});
+$('admin-audit-action')?.addEventListener('change', loadAuditLogs);

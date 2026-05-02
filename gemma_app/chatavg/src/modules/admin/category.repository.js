@@ -1,4 +1,4 @@
-const db = require('../lib/sqlite');
+const db = require('../../core/sqlite');
 
 class CategoryRepository {
   async findByName(name) {

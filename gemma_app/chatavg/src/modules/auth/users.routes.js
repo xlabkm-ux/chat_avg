@@ -4,9 +4,10 @@
  * PATCH /api/users/me
  */
 const { Router } = require('express');
-const userRepository = require('../storage/userRepository');
-const { authenticate } = require('../lib/auth');
-const { asyncHandler } = require('../lib/errors');
+const userRepository = require('./user.repository');
+const { authenticate } = require('./auth.middleware');
+const { asyncHandler } = require('../../core/errors');
+const { z } = require('zod');
 
 const router = Router();
 
@@ -15,8 +16,6 @@ router.get('/me', authenticate, (req, res) => {
   delete u.password_hash;
   res.json(u);
 });
-
-const { z } = require('zod');
 
 const userPatchSchema = z.object({
   email: z.string().email().max(254).optional().or(z.literal('')),

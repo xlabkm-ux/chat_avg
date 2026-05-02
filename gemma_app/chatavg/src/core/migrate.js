@@ -6,9 +6,8 @@
  */
 const fs = require('fs');
 const path = require('path');
-const bcrypt = require('bcryptjs');
-const db = require('../lib/sqlite');
-const { USERS_FILE, CATEGORIES_FILE, SESSIONS_ROOT } = require('../config');
+const db = require('./sqlite');
+const { USERS_FILE, CATEGORIES_FILE, SESSIONS_ROOT } = require('./config');
 
 function migrate() {
   console.log('[Migration] Starting legacy JSON to SQLite migration...');

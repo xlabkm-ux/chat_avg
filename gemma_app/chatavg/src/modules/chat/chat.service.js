@@ -1,7 +1,8 @@
 const { Readable } = require('node:stream');
-const categoryRepository = require('../storage/categoryRepository');
-const { getProvider } = require('../providers');
-const { ALLOWED_EXTRA_PARAMS } = require('../config');
+const categoryRepository = require('../admin/category.repository');
+const { getProvider } = require('../providers/provider.factory');
+const { ALLOWED_EXTRA_PARAMS } = require('../../core/config');
+const { validateProviderUrl, sanitizePromptText } = require('../../core/utils');
 
 function pickAllowedExtraParams(input, allowed) {
   const out = {};
@@ -29,7 +30,6 @@ class ChatService {
 
     // SSRF Validation
     if (catSettings.endpoint_url) {
-      const { validateProviderUrl } = require('../lib/utils');
       try {
         validateProviderUrl(catSettings.endpoint_url);
       } catch (err) {
@@ -37,11 +37,30 @@ class ChatService {
       }
     }
 
-    // Security: non-admins cannot send 'system' role messages
-    let messages = body.messages || [];
+    // Security: non-admins cannot send 'system' role messages.
+    // Also, sanitize all user message content to prevent prompt injection.
+    let injectionDetected = false;
+    let messages = (body.messages || []).map(m => {
+      if (m.role === 'user' && typeof m.content === 'string') {
+        const sanitized = sanitizePromptText(m.content);
+        if (sanitized !== m.content.trim()) {
+          injectionDetected = true;
+        }
+        return { ...m, content: sanitized };
+      }
+      return m;
+    });
+
+    if (injectionDetected) {
+      console.warn(`[Security] Prompt injection attempt detected and sanitized for user: ${user.username}`);
+    }
+    
     if (user.category !== 'Администратор') {
       messages = messages.filter(m => m.role !== 'system');
     }
+
+    // Filter out messages with empty content if they don't have tool calls
+    messages = messages.filter(m => (m.content && m.content.trim().length > 0) || (m.tool_calls && m.tool_calls.length > 0) || m.role === 'assistant');
 
     // Optimization: avoid full array copy if not necessary
     if (catSettings.system_prompt?.trim()) {

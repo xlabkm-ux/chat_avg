@@ -1,0 +1,72 @@
+/**
+ * Base abstract class for LLM Providers
+ * Formalizes the interface for all provider adapters.
+ */
+class BaseProvider {
+  /**
+   * @param {Object} config
+   * @param {string} config.id - Provider unique ID
+   * @param {string} config.name - Provider display name
+   * @param {string[]} config.models - Supported models
+   * @param {string} config.defaultModel - Default model to use
+   * @param {Object} [config.capabilities] - Provider capabilities (stream, tools)
+   */
+  constructor(config) {
+    if (!config.id || !config.name) {
+      throw new Error('Provider must have an id and name');
+    }
+    this.id = config.id;
+    this.name = config.name;
+    this.models = config.models || [];
+    this.defaultModel = config.defaultModel || '';
+    this.capabilities = Object.assign({ stream: true, tools: false }, config.capabilities);
+  }
+
+  /**
+   * Handle chat completion request. Must be implemented by subclasses.
+   * @param {Array} messages - Chat messages [{role, content}]
+   * @param {Object} config  - Category config (api_key, endpoint_url, model_name, etc.)
+   * @param {Object} options - Request options (stream, max_tokens)
+   * @returns {Promise<Object>} ProviderResult { isStream, data, stream, isRawSse }
+   */
+  async handleChat(messages, config, options) {
+    throw new Error(`handleChat() not implemented for provider: ${this.id}`);
+  }
+
+  /**
+   * Utility to build a standard OpenAI-compatible SSE chunk.
+   */
+  buildChunk(model, text, finishReason = null) {
+    return {
+      id: 'chatcmpl-' + this.id + '-' + Date.now(),
+      object: 'chat.completion.chunk',
+      created: Math.floor(Date.now() / 1000),
+      model: model || this.defaultModel,
+      choices: [{
+        index: 0,
+        delta: finishReason ? {} : { content: text },
+        finish_reason: finishReason,
+      }],
+    };
+  }
+
+  /**
+   * Utility to build a standard Chat Completion response object.
+   */
+  buildResponse(model, text, usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }) {
+    return {
+      id: 'chatcmpl-' + this.id + '-' + Date.now(),
+      object: 'chat.completion',
+      created: Math.floor(Date.now() / 1000),
+      model: model || this.defaultModel,
+      choices: [{
+        index: 0,
+        message: { role: 'assistant', content: text },
+        finish_reason: 'stop',
+      }],
+      usage,
+    };
+  }
+}
+
+module.exports = BaseProvider;

@@ -4,13 +4,14 @@
  */
 const { Router } = require('express');
 const os = require('os');
-const { authenticate, requireAdmin } = require('../lib/auth');
-const { asyncHandler } = require('../lib/errors');
-const { assertSafeIdentifier, mergeFields, validateProviderUrl } = require('../lib/utils');
-const userRepository = require('../storage/userRepository');
-const categoryRepository = require('../storage/categoryRepository');
-const sessionRepository = require('../storage/sessionRepository');
-const { getProvider } = require('../providers');
+const { authenticate, requireAdmin } = require('../auth/auth.middleware');
+const { asyncHandler } = require('../../core/errors');
+const { assertSafeIdentifier, mergeFields, validateProviderUrl } = require('../../core/utils');
+const userRepository = require('../auth/user.repository');
+const categoryRepository = require('./category.repository');
+const sessionRepository = require('../chat/session.repository');
+const { getProvider } = require('../providers/provider.factory');
+const AuditService = require('../audit/audit.service');
 
 const router = Router();
 
@@ -18,8 +19,6 @@ const router = Router();
 router.use(authenticate, requireAdmin);
 
 // ── Users ───────────────────────────────────────────────
-
-const USER_FIELDS = ['category', 'expiration_date', 'n_ctx', 'system_prompt'];
 
 router.get('/users', asyncHandler(async (req, res) => {
   const users = await userRepository.listAll();
@@ -57,6 +56,7 @@ router.post('/users/:username', asyncHandler(async (req, res) => {
   
   let user = await userRepository.findByUsername(username);
 
+  const isNew = !user;
   if (!user) {
     if (!data.password) {
       return res.status(400).json({ detail: 'Пароль обязателен для нового пользователя' });
@@ -73,6 +73,14 @@ router.post('/users/:username', asyncHandler(async (req, res) => {
   if (data.system_prompt !== undefined) user.system_prompt = data.system_prompt;
 
   await userRepository.save(username, user);
+  
+  AuditService.log(
+    req.user.username,
+    isNew ? 'USER_CREATE' : 'USER_UPDATE',
+    { target_user: username },
+    req.ip || req.connection.remoteAddress
+  );
+
   res.json({ status: 'success' });
 }));
 
@@ -89,6 +97,14 @@ router.delete('/users/:username', asyncHandler(async (req, res) => {
   }
 
   await userRepository.delete(username);
+  
+  AuditService.log(
+    req.user.username,
+    'USER_DELETE',
+    { target_user: username },
+    req.ip || req.connection.remoteAddress
+  );
+
   res.json({ status: 'success' });
 }));
 
@@ -153,6 +169,14 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
   mergeFields(category, parseResult.data, CATEGORY_FIELDS);
 
   await categoryRepository.save(catName, category);
+  
+  AuditService.log(
+    req.user.username,
+    'CATEGORY_UPDATE',
+    { target_category: catName },
+    req.ip || req.connection.remoteAddress
+  );
+
   res.json({ status: 'success' });
 }));
 
@@ -236,6 +260,18 @@ router.get('/stats', asyncHandler(async (req, res) => {
     },
     categories: totalCategories,
   });
+}));
+
+// ── Audit ───────────────────────────────────────────────
+
+router.get('/audit', asyncHandler(async (req, res) => {
+  const limit = parseInt(req.query.limit, 10) || 50;
+  const offset = parseInt(req.query.offset, 10) || 0;
+  const username = req.query.username || null;
+  const action = req.query.action || null;
+
+  const logs = AuditService.getLogs({ limit, offset, username, action });
+  res.json(logs);
 }));
 
 module.exports = router;

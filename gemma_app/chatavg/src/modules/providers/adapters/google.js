@@ -5,17 +5,22 @@
  * Converts Gemini streaming format → OpenAI SSE format for frontend compatibility
  */
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const BaseProvider = require('../base.provider');
 
-module.exports = {
-  id: 'google',
-  name: 'Google Gemini',
-  defaultModel: 'gemini-2.5-flash',
-  models: [
-    'gemini-2.5-flash',
-    'gemini-2.5-pro',
-    'gemini-2.0-flash',
-  ],
-  capabilities: { stream: true, tools: true },
+class GoogleProvider extends BaseProvider {
+  constructor() {
+    super({
+      id: 'google',
+      name: 'Google Gemini',
+      defaultModel: 'gemini-2.5-flash',
+      models: [
+        'gemini-2.5-flash',
+        'gemini-2.5-pro',
+        'gemini-2.0-flash',
+      ],
+      capabilities: { stream: true, tools: true },
+    });
+  }
 
   /**
    * Convert OpenAI-format messages to Gemini format
@@ -36,24 +41,7 @@ module.exports = {
     }
 
     return { systemInstruction, history };
-  },
-
-  /**
-   * Build an OpenAI-compatible SSE chunk from Gemini text
-   */
-  _buildChunk(text, finishReason) {
-    return {
-      id: 'chatcmpl-gemini-' + Date.now(),
-      object: 'chat.completion.chunk',
-      created: Math.floor(Date.now() / 1000),
-      model: 'gemini',
-      choices: [{
-        index: 0,
-        delta: finishReason ? {} : { content: text },
-        finish_reason: finishReason || null,
-      }],
-    };
-  },
+  }
 
   async handleChat(messages, config, options) {
     const genAI = new GoogleGenerativeAI(config.api_key);
@@ -70,8 +58,9 @@ module.exports = {
     if (config.top_p !== undefined) generationConfig.topP = config.top_p;
     if (config.top_k !== undefined) generationConfig.topK = config.top_k;
 
+    const modelName = config.model_name || this.defaultModel;
     const modelConfig = {
-      model: config.model_name || this.defaultModel,
+      model: modelName,
       generationConfig,
     };
     if (systemInstruction) modelConfig.systemInstruction = systemInstruction;
@@ -92,15 +81,15 @@ module.exports = {
       const chat = model.startChat({ history });
       const result = await chat.sendMessageStream(userText);
       
-      const buildChunk = this._buildChunk.bind(this);
+      const buildChunk = this.buildChunk.bind(this);
       async function* transformStream() {
         for await (const chunk of result.stream) {
           const text = chunk.text();
           if (text) {
-            yield buildChunk(text, null);
+            yield buildChunk(modelName, text, null);
           }
         }
-        yield buildChunk('', 'stop');
+        yield buildChunk(modelName, '', 'stop');
       }
 
       return { isStream: true, stream: transformStream(), isRawSse: false };
@@ -112,23 +101,10 @@ module.exports = {
       // Return OpenAI-compatible response format
       return {
         isStream: false,
-        data: {
-          id: 'chatcmpl-gemini-' + Date.now(),
-          object: 'chat.completion',
-          created: Math.floor(Date.now() / 1000),
-          model: config.model_name || this.defaultModel,
-          choices: [{
-            index: 0,
-            message: { role: 'assistant', content: text },
-            finish_reason: 'stop',
-          }],
-          usage: {
-            prompt_tokens: 0,
-            completion_tokens: 0,
-            total_tokens: 0,
-          },
-        }
+        data: this.buildResponse(modelName, text)
       };
     }
-  },
-};
+  }
+}
+
+module.exports = new GoogleProvider();
