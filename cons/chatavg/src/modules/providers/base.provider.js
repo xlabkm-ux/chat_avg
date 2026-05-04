@@ -67,6 +67,16 @@ class BaseProvider {
       usage,
     };
   }
+
+  /**
+   * Check provider health/availability.
+   * Default implementation tries to list models or similar ping.
+   * @param {Object} config - Category config
+   * @returns {Promise<boolean>}
+   */
+  async checkHealth(config) {
+    return true; // Default to true if not specifically implemented
+  }
 }
 
 module.exports = BaseProvider;

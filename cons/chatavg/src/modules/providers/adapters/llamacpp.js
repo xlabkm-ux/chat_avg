@@ -19,7 +19,7 @@ class LlamaCppProvider extends BaseProvider {
   }
 
   async handleChat(messages, config, options) {
-    const endpointUrl = (config.endpoint_url || 'http://127.0.0.1:8081/v1').replace(/\/$/, '');
+    const endpointUrl = (config.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
 
     // Build request body with llama.cpp-specific params
     const body = {
@@ -29,14 +29,14 @@ class LlamaCppProvider extends BaseProvider {
 
     if (options.max_tokens) body.max_tokens = options.max_tokens;
     if (config.model_name) body.model = config.model_name;
-    if (config.temperature !== undefined) body.temperature = config.temperature;
-    if (config.top_p !== undefined) body.top_p = config.top_p;
+    if (config.temperature !== null && config.temperature !== undefined) body.temperature = config.temperature;
+    if (config.top_p !== null && config.top_p !== undefined) body.top_p = config.top_p;
 
     // llama.cpp-specific parameters
-    if (config.top_k !== undefined) body.top_k = config.top_k;
-    if (config.min_p !== undefined) body.min_p = config.min_p;
-    if (config.repeat_penalty !== undefined) body.repeat_penalty = config.repeat_penalty;
-    if (config.n_predict !== undefined) body.n_predict = config.n_predict;
+    if (config.top_k !== null && config.top_k !== undefined) body.top_k = config.top_k;
+    if (config.min_p !== null && config.min_p !== undefined) body.min_p = config.min_p;
+    if (config.repeat_penalty !== null && config.repeat_penalty !== undefined) body.repeat_penalty = config.repeat_penalty;
+    if (config.n_predict !== null && config.n_predict !== undefined) body.n_predict = config.n_predict;
 
     // Merge extra_params
     if (config.extra_params && typeof config.extra_params === 'object') {
@@ -47,7 +47,7 @@ class LlamaCppProvider extends BaseProvider {
     try {
       targetUrl = new URL(endpointUrl + '/chat/completions');
     } catch (e) {
-      targetUrl = new URL('http://127.0.0.1:8081/v1/chat/completions');
+      targetUrl = new URL('http://127.0.0.1:8201/chat/completions');
     }
 
     const headers = {
@@ -84,6 +84,19 @@ class LlamaCppProvider extends BaseProvider {
     } else {
       const data = await r.json();
       return { isStream: false, data };
+    }
+  }
+
+  async checkHealth(config) {
+    const endpointUrl = (config.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
+    try {
+      const r = await fetch(`${endpointUrl}/health`, { 
+        method: 'GET',
+        signal: AbortSignal.timeout(2000) 
+      });
+      return r.ok;
+    } catch (e) {
+      return false;
     }
   }
 }

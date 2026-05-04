@@ -84,13 +84,19 @@ async function checkServerHealth() {
   const statusDot = $('status-dot');
   const statusText = $('status-text');
   try {
-    const r = await fetch('/api/users/me', {
+    const r = await fetch('/api/providers/health', {
       headers: { 'Authorization': 'Bearer ' + state.authToken },
       signal: AbortSignal.timeout(5000)
     });
     if (r.ok) {
-      if(statusDot) statusDot.className = 'status-dot online';
-      if (statusText) statusText.textContent = state.currentUser ? state.currentUser.username : t('status_online');
+      const data = await r.json();
+      if (data.status === 'online') {
+        if(statusDot) statusDot.className = 'status-dot online';
+        if (statusText) statusText.textContent = state.currentUser ? state.currentUser.username : t('status_online');
+      } else {
+        if(statusDot) statusDot.className = 'status-dot offline';
+        if (statusText) statusText.textContent = t('status_offline');
+      }
     } else {
       if(statusDot) statusDot.className = 'status-dot offline';
       if (statusText) statusText.textContent = t('status_offline');

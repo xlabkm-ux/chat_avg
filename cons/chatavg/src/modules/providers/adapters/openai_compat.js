@@ -53,6 +53,22 @@ class OpenAICompatProvider extends BaseProvider {
       return { isStream: false, data: response };
     }
   }
+
+  async checkHealth(config) {
+    const client = new OpenAI({
+      apiKey: config.api_key || 'dummy',
+      baseURL: config.endpoint_url || this.defaultBaseUrl,
+      timeout: 2000,
+      maxRetries: 0,
+    });
+    try {
+      // List models is a lightweight check for most OpenAI-compatible APIs
+      await client.models.list();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 function createProvider(config) {

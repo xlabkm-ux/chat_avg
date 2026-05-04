@@ -46,7 +46,7 @@ const DATA_DIR = env.NODE_ENV === 'test'
 
 const WEBUI_DIR = path.join(ROOT_DIR, 'webui_original');
 
-const LLAMA_DEFAULT_URL = 'http://127.0.0.1:8201/v1';
+const LLAMA_DEFAULT_URL = 'http://127.0.0.1:8201';
 
 // 4. Chat & Provider Configuration
 const ALLOWED_EXTRA_PARAMS = {

@@ -29,12 +29,15 @@ const messageSchema = z.object({
 
 const chatCompletionSchema = z.object({
   messages: z.array(messageSchema).min(1).max(200),
-  stream: z.boolean().optional().default(false),
-  temperature: z.number().min(0).max(2).optional(),
-  top_p: z.number().min(0).max(1).optional(),
-  extra_params: z.record(z.any()).optional(),
+  stream: z.boolean().optional().nullable().default(false),
+  temperature: z.number().min(0).max(2).optional().nullable(),
+  top_p: z.number().min(0).max(1).optional().nullable(),
+  top_k: z.number().int().min(0).max(100).optional().nullable(),
+  min_p: z.number().min(0).max(1).optional().nullable(),
+  repeat_penalty: z.number().min(0).max(2).optional().nullable(),
+  n_predict: z.number().int().positive().optional().nullable(),
+  extra_params: z.record(z.any()).optional().nullable(),
 }).refine(data => {
-  // Policy: The last message in a request for completion usually should not be 'system'
   const lastMsg = data.messages[data.messages.length - 1];
   return lastMsg.role !== 'system';
 }, { message: "The last message cannot be a system message" });
@@ -42,6 +45,7 @@ const chatCompletionSchema = z.object({
 router.post('/completions', authenticate, asyncHandler(async (req, res) => {
   const parseResult = chatCompletionSchema.safeParse(req.body);
   if (!parseResult.success) {
+    console.error('[Chat] Validation failed:', parseResult.error.format());
     return res.status(400).json({ error: 'Неверный формат запроса', details: parseResult.error.errors });
   }
 

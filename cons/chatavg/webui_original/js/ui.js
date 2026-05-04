@@ -139,3 +139,29 @@ export function renderMarkdown(el, text) {
     }
   });
 }
+
+export function showTypingIndicator(el) {
+  el.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+}
+
+export function renderDocChip(name, tokens, index) {
+  const container = $('attached-docs');
+  if(!container) return;
+  const chip = document.createElement('div');
+  chip.className = 'doc-chip';
+  chip.innerHTML = `<span>📎 ${name} (~${tokens})</span>
+                    <button class="remove-doc-btn" data-index="${index}">×</button>`;
+  container.appendChild(chip);
+  chip.querySelector('.remove-doc-btn').addEventListener('click', () => removeDoc(index));
+}
+
+export function removeDoc(index) {
+  state.attachedDocs.splice(index, 1);
+  const container = $('attached-docs');
+  if(container) {
+    container.textContent = '';
+    state.attachedDocs.forEach((d, i) => renderDocChip(d.name, d.tokens, i));
+  }
+  updateTokenInfo();
+  updateContextBadge();
+}

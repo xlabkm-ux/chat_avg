@@ -131,17 +131,17 @@ router.get('/categories', asyncHandler(async (req, res) => {
 }));
 
 const categorySchema = z.object({
-  provider: z.string().max(64).optional(),
-  endpoint_url: z.string().url().or(z.literal('')).optional(),
-  model_name: z.string().max(128).optional(),
-  api_key: z.string().max(256).optional(),
-  temperature: z.number().min(0).max(2).optional(),
-  top_p: z.number().min(0).max(1).optional(),
-  top_k: z.number().int().min(0).max(100).optional(),
-  min_p: z.number().min(0).max(1).optional(),
-  repeat_penalty: z.number().min(0).max(2).optional(),
-  max_tokens: z.number().int().positive().optional(),
-  system_prompt: z.string().max(4000).optional(),
+  provider: z.string().max(64).optional().nullable(),
+  endpoint_url: z.string().url().or(z.literal('')).optional().nullable(),
+  model_name: z.string().max(128).optional().nullable(),
+  api_key: z.string().max(256).optional().nullable(),
+  temperature: z.number().min(0).max(2).optional().nullable(),
+  top_p: z.number().min(0).max(1).optional().nullable(),
+  top_k: z.number().int().min(0).max(100).optional().nullable(),
+  min_p: z.number().min(0).max(1).optional().nullable(),
+  repeat_penalty: z.number().min(0).max(2).optional().nullable(),
+  max_tokens: z.number().int().positive().optional().nullable(),
+  system_prompt: z.string().max(4000).optional().nullable(),
   extra_params: z.record(z.any()).optional().nullable(),
 }).strict();
 
@@ -159,6 +159,7 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
   
   const parseResult = categorySchema.safeParse(req.body);
   if (!parseResult.success) {
+    console.error('[Admin] Category validation failed:', parseResult.error.format());
     return res.status(400).json({ detail: 'Некорректный формат данных категории', errors: parseResult.error.errors });
   }
 
@@ -198,7 +199,7 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
   const data = req.body || {};
 
   const providerId = data.provider || savedCat.provider || 'llamacpp';
-  const endpointUrl = (data.endpoint_url || savedCat.endpoint_url || 'http://127.0.0.1:8081/v1').replace(/\/$/, '');
+  const endpointUrl = (data.endpoint_url || savedCat.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
   
   const isLocalProvider = ['llamacpp', 'ollama'].includes(providerId);
   try {

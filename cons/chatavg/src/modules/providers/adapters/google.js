@@ -105,6 +105,20 @@ class GoogleProvider extends BaseProvider {
       };
     }
   }
+
+  async checkHealth(config) {
+    if (!config.api_key) return false;
+    const genAI = new GoogleGenerativeAI(config.api_key);
+    try {
+      const modelName = config.model_name || this.defaultModel;
+      const model = genAI.getGenerativeModel({ model: modelName });
+      // Simple call to see if API key is valid
+      await model.getMetadata();
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 module.exports = new GoogleProvider();
