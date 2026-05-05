@@ -6,7 +6,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const { PORT, WEBUI_DIR, allowedOrigins, isDev } = require('./src/core/config');
-const { errorHandler } = require('./src/core/errors');
+const { errorHandler, AppError } = require('./src/core/errors');
 
 // ── Bootstrap ───────────────────────────────────────────
 require('./src/core/sqlite'); // Ensures DB and schema exist
@@ -42,7 +42,7 @@ app.use(cors({
       callback(null, true);
     } else {
       console.warn(`[Security] CORS Blocked origin: ${origin}`);
-      callback(new Error('CORS policy violation'));
+      callback(new AppError('CORS policy violation', 403, 'cors_error'));
     }
   }
 }));

@@ -90,6 +90,25 @@ const migrations = [
         );
       `);
     }
+  },
+  {
+    version: 3,
+    name: 'add_policy_router_fields',
+    up: (txDb) => {
+      txDb.exec(`
+        ALTER TABLE categories ADD COLUMN routing_mode TEXT DEFAULT 'direct';
+        ALTER TABLE categories ADD COLUMN fallback_provider TEXT;
+      `);
+    }
+  },
+  {
+    version: 4,
+    name: 'add_mcp_gateway_field',
+    up: (txDb) => {
+      txDb.exec(`
+        ALTER TABLE categories ADD COLUMN mcp_gateway TEXT;
+      `);
+    }
   }
 ];
 
@@ -136,8 +155,8 @@ function seed() {
   db.transaction(() => {
     // 1. Seed Default Categories
     const insertCat = db.prepare(`
-      INSERT INTO categories (name, provider, endpoint_url, model_name, api_key, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt)
-      VALUES (@name, @provider, @endpoint_url, @model_name, @api_key, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt)
+      INSERT INTO categories (name, provider, model_name, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt)
+      VALUES (@name, @provider, @model_name, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt)
     `);
 
     const defaultCategories = ['Администратор', 'Консультант', 'Эксперт', 'Мудрец'];

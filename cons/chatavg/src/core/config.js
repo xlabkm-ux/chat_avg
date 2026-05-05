@@ -50,15 +50,13 @@ const LLAMA_DEFAULT_URL = 'http://127.0.0.1:8201';
 
 // 4. Chat & Provider Configuration
 const ALLOWED_EXTRA_PARAMS = {
-  USER: ['response_format'],
+  USER: ['response_format', 'tools', 'reasoning'],
   ADMIN: ['tools', 'tool_choice', 'reasoning', 'response_format', 'metadata']
 };
 
 const DEFAULT_CATEGORY_PARAMS = {
   provider: 'llamacpp',
-  endpoint_url: LLAMA_DEFAULT_URL,
-  api_key: '',
-  model_name: '',
+  model_name: 'default',
   temperature: 0.7,
   top_p: 0.9,
   top_k: 40,
@@ -66,6 +64,7 @@ const DEFAULT_CATEGORY_PARAMS = {
   repeat_penalty: 1.1,
   max_tokens: 1024,
   system_prompt: '',
+  mcp_gateway: '',
 };
 
 const DEFAULT_SYSTEM_PROMPT = 'Ты — полезный ИИ-ассистент Gemma 4. Отвечай точно и по существу.';

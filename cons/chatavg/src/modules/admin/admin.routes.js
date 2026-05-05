@@ -34,13 +34,13 @@ router.get('/users', asyncHandler(async (req, res) => {
 const { z } = require('zod');
 
 const adminUserSchema = z.object({
-  password: z.string().min(8).max(128).optional(),
-  email: z.string().email().max(254).optional().or(z.literal('')),
-  category: z.string().max(64).optional(),
-  expiration_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  n_ctx: z.number().int().positive().optional(),
-  system_prompt: z.string().max(4000).optional(),
-}).strict();
+  password: z.string().min(8).max(128).optional().nullable().or(z.literal('')),
+  email: z.string().max(254).optional().nullable().or(z.literal('')),
+  category: z.string().max(64).optional().nullable().or(z.literal('')),
+  expiration_date: z.string().optional().nullable().or(z.literal('')),
+  n_ctx: z.any().optional().nullable(),
+  system_prompt: z.string().max(4000).optional().nullable().or(z.literal('')),
+});
 
 router.post('/users/:username', asyncHandler(async (req, res) => {
   let username;
@@ -52,6 +52,7 @@ router.post('/users/:username', asyncHandler(async (req, res) => {
 
   const parseResult = adminUserSchema.safeParse(req.body);
   if (!parseResult.success) {
+    console.error('[Admin] User validation failed:', JSON.stringify(parseResult.error.format(), null, 2));
     return res.status(400).json({ detail: 'Некорректный формат данных пользователя', errors: parseResult.error.errors });
   }
   const data = parseResult.data;
@@ -113,9 +114,9 @@ router.delete('/users/:username', asyncHandler(async (req, res) => {
 // ── Categories ──────────────────────────────────────────
 
 const CATEGORY_FIELDS = [
-  'provider', 'endpoint_url', 'model_name', 'api_key',
+  'provider', 'model_name',
   'temperature', 'top_p', 'top_k', 'min_p', 'repeat_penalty',
-  'max_tokens', 'system_prompt', 'extra_params',
+  'max_tokens', 'system_prompt', 'routing_mode', 'fallback_provider', 'mcp_gateway'
 ];
 
 router.get('/categories', asyncHandler(async (req, res) => {
@@ -132,9 +133,7 @@ router.get('/categories', asyncHandler(async (req, res) => {
 
 const categorySchema = z.object({
   provider: z.string().max(64).optional().nullable(),
-  endpoint_url: z.string().url().or(z.literal('')).optional().nullable(),
   model_name: z.string().max(128).optional().nullable(),
-  api_key: z.string().max(256).optional().nullable(),
   temperature: z.number().min(0).max(2).optional().nullable(),
   top_p: z.number().min(0).max(1).optional().nullable(),
   top_k: z.number().int().min(0).max(100).optional().nullable(),
@@ -142,7 +141,9 @@ const categorySchema = z.object({
   repeat_penalty: z.number().min(0).max(2).optional().nullable(),
   max_tokens: z.number().int().positive().optional().nullable(),
   system_prompt: z.string().max(4000).optional().nullable(),
-  extra_params: z.record(z.any()).optional().nullable(),
+  routing_mode: z.string().max(32).optional().nullable(),
+  fallback_provider: z.string().max(64).optional().nullable(),
+  mcp_gateway: z.string().max(256).optional().nullable(),
 }).strict();
 
 router.post('/categories/:category_name', asyncHandler(async (req, res) => {
@@ -165,11 +166,6 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
 
   let category = await categoryRepository.findByName(catName) || {};
   
-  // If api_key is masked, don't update it
-  if (parseResult.data.api_key && parseResult.data.api_key.includes('...')) {
-    delete parseResult.data.api_key;
-  }
-  
   mergeFields(category, parseResult.data, CATEGORY_FIELDS);
 
   await categoryRepository.save(catName, category);
@@ -183,6 +179,44 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
 
   res.json({ status: 'success' });
 }));
+
+router.delete('/categories/:category_name', asyncHandler(async (req, res) => {
+  let catName;
+  try {
+    catName = req.params.category_name;
+    if (!catName || catName.includes('..') || catName.includes('/')) {
+      return res.status(400).json({ detail: 'Invalid category_name' });
+    }
+  } catch (err) {
+    return res.status(400).json({ detail: err.message });
+  }
+
+  const existingCat = await categoryRepository.findByName(catName);
+  if (!existingCat) {
+    return res.status(404).json({ detail: 'Категория не найдена' });
+  }
+
+  // Optional: check if users are linked to this category
+  const users = await userRepository.listAll();
+  for (const u of Object.values(users)) {
+    if (u.category === catName) {
+      return res.status(400).json({ detail: 'Нельзя удалить категорию, к которой привязаны пользователи' });
+    }
+  }
+
+  await categoryRepository.delete(catName);
+  
+  AuditService.log(
+    req.user.username,
+    'CATEGORY_DELETE',
+    { target_category: catName },
+    req.ip || req.connection.remoteAddress
+  );
+
+  res.json({ status: 'success' });
+}));
+
+const providersConfig = require('../../core/providers.config');
 
 router.post('/categories/:category_name/test', asyncHandler(async (req, res) => {
   let catName;
@@ -199,22 +233,43 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
   const data = req.body || {};
 
   const providerId = data.provider || savedCat.provider || 'llamacpp';
-  const endpointUrl = (data.endpoint_url || savedCat.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
+  const providerCfg = providersConfig[providerId] || {};
   
-  const isLocalProvider = ['llamacpp', 'ollama'].includes(providerId);
+  let endpointUrl = (providerCfg.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
+  const mcpGateway = data.mcp_gateway || savedCat.mcp_gateway;
+  let isMcpGatewayUsed = false;
+  
+  if (mcpGateway && mcpGateway.trim().length > 0) {
+    endpointUrl = mcpGateway.trim().replace(/\/$/, '');
+    isMcpGatewayUsed = true;
+  }
+  
+  const isLocalProvider = isMcpGatewayUsed || ['llamacpp', 'ollama', 'mcp'].includes(providerCfg.adapter || providerId);
   try {
     validateProviderUrl(endpointUrl, isLocalProvider);
   } catch (err) {
     return res.status(err.status || 400).json({ error: err.message });
   }
 
-  let apiKey = data.api_key || savedCat.api_key || '';
-  if (apiKey.includes('...')) {
-    apiKey = savedCat.api_key || '';
-  }
+  const apiKey = providerCfg.api_key || '';
 
   const provider = getProvider(providerId);
   if (!provider) return res.status(500).json({ error: 'Провайдер не найден' });
+
+  // Use provider-specific health check if available or if testing through MCP Gateway
+  if (isMcpGatewayUsed || provider.checkHealth) {
+    try {
+      const healthChecker = isMcpGatewayUsed ? getProvider('mcp') : provider;
+      const ok = await healthChecker.checkHealth({ endpoint_url: endpointUrl, api_key: apiKey });
+      if (ok) {
+        return res.json({ status: 'success', message: 'Соединение установлено успешно' });
+      } else {
+        return res.status(502).json({ error: 'Не удалось установить соединение через MCP Gateway' });
+      }
+    } catch (e) {
+      return res.status(502).json({ error: `Ошибка тестирования шлюза: ${e.message}` });
+    }
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), TEST_TIMEOUT);

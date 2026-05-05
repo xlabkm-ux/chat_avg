@@ -296,7 +296,7 @@
                             <h3 id="admin-edit-title">Редактировать пользователя</h3>
                         </div>
                         <input type="text" id="admin-username" class="setup-input" placeholder="Имя пользователя" aria-label="Имя пользователя">
-                        <input type="password" id="admin-password" class="setup-input mt-sm" placeholder="Новый пароль (пусто = не менять)" aria-label="Пароль пользователя" autocomplete="new-password">
+                        <input type="password" id="admin-password" class="setup-input mt-sm" placeholder="Пароль (не менее 8 символов, пусто = не менять)" aria-label="Пароль пользователя" autocomplete="new-password">
                         <select id="admin-category" class="setup-input mt-sm" aria-label="Категория обслуживания">
                             <option value="Консультант">Консультант (4K)</option>
                             <option value="Эксперт">Эксперт (8K)</option>
@@ -318,47 +318,40 @@
                 
                 <!-- Tab: Categories -->
                 <div id="admin-tab-categories" class="admin-tab-content">
-                    <div class="setup-card">
-                        <div class="setup-card-header">
+                    <div class="admin-toolbar">
+                        <div class="setup-card-header mb-0">
                             <h3>Справочник: Категории обслуживания</h3>
                         </div>
+                        <button type="button" class="save-btn btn-accent ml-auto" id="btn-create-cat" aria-label="Создать новую категорию">Создать</button>
+                    </div>
+                    <div class="setup-card mt-sm">
                         <div id="admin-category-list" class="admin-list" role="list" aria-label="Список категорий"></div>
                     </div>
 
                     <div id="admin-cat-edit-card" class="setup-card card-accent mt-lg hidden" role="form" aria-label="Форма редактирования категории">
-                        <div class="setup-card-header">
+                        <div class="setup-card-header flex-center-gap">
                             <h3 id="admin-cat-edit-title">Настройка категории</h3>
+                            <button class="nav-btn btn-action-sm--danger ml-auto hidden" id="btn-del-cat" aria-label="Удалить категорию">🗑️ Удалить</button>
                         </div>
+                        
+                        <h4 class="section-subtitle--light">ID Категории (Название)</h4>
+                        <input type="text" id="admin-cat-name" class="setup-input" placeholder="Например: Analyst" aria-label="Имя категории">
 
                         <h4 class="section-subtitle--light">Провайдер</h4>
                         <select id="admin-cat-provider" class="setup-input" aria-label="Провайдер ИИ">
                             <!-- populated by JS from /api/providers -->
                         </select>
 
-                        <h4 class="section-subtitle--light mt-sm">Модель</h4>
-                        <div class="model-select-row">
-                            <select id="admin-cat-model-select" class="setup-input" aria-label="Выбор модели">
-                                <!-- populated by JS based on selected provider -->
-                            </select>
-                            <input type="text" id="admin-cat-model" class="setup-input mt-sm" placeholder="Или введите ID модели вручную..." aria-label="ID модели">
+                        <div id="cat-model-container">
+                            <h4 class="section-subtitle--light mt-sm">Модель</h4>
+                            <select id="admin-cat-model" class="setup-input" aria-label="Выбор модели"></select>
                         </div>
 
-                        <div id="cat-remote-fields">
-                            <h4 class="section-subtitle--light mt-sm">API Ключ</h4>
-                            <input type="password" id="admin-cat-apikey" class="setup-input" placeholder="API Ключ провайдера" aria-label="API ключ">
-                        </div>
+                        <h4 class="section-subtitle--light mt-sm">MCP Шлюз (Gateway) <span class="hint-text">(Опционально. Если указан, запрос пойдет через этот URL)</span></h4>
+                        <input type="text" id="admin-cat-mcp-gateway" class="setup-input" placeholder="Например: http://127.0.0.1:8202/mcp" aria-label="MCP Шлюз">
 
-                        <div id="cat-endpoint-field">
-                            <h4 class="section-subtitle--light mt-sm">Endpoint URL <span class="hint-text">(опционально, для кастомного сервера)</span></h4>
-                            <input type="text" id="admin-cat-endpoint" class="setup-input" placeholder="URL сервера модели (например, http://127.0.0.1:8081/v1)" aria-label="URL эндпоинта">
-                        </div>
-                        
                         <h4 class="section-subtitle--light mt-sm">Системный промпт <span class="hint-text">(добавляется к промпту пользователя)</span></h4>
                         <textarea id="admin-cat-system-prompt" class="setup-textarea admin-textarea" rows="3" placeholder="Опциональный системный промпт для этой категории..." aria-label="Системный промпт категории"></textarea>
-                        
-                        <h4 class="section-subtitle--light mt-sm">Доп. параметры провайдера <span class="hint-text">(JSON)</span></h4>
-                        <textarea id="admin-cat-extra-params" class="setup-textarea admin-textarea code-textarea" rows="5" placeholder='{"reasoning": {}, "tools": [{"type": "file_search", "vector_store_ids": ["vs_..."]}], "store": true}' aria-label="Дополнительные параметры провайдера в формате JSON"></textarea>
-                        <div id="extra-params-error" class="field-error hidden" role="alert"></div>
 
                         <h4 class="section-subtitle--light mt-sm">Параметры генерации</h4>
                         <div class="param-grid mt-sm">

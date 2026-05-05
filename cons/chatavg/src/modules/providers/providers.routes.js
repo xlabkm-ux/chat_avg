@@ -22,11 +22,20 @@ router.get('/health', authenticate, async (req, res) => {
     const providerId = catSettings.provider || 'llamacpp';
     const provider = getProvider(providerId);
 
+    const providersConfig = require('../../core/providers.config');
+    const providerCfg = providersConfig[providerId] || {};
+    const effectiveEndpointUrl = providerCfg.endpoint_url || null;
+    const effectiveApiKey = providerCfg.api_key || null;
+
     if (!provider) {
       return res.status(200).json({ status: 'offline', error: 'Provider not found' });
     }
 
-    const isOnline = await provider.checkHealth(catSettings);
+    const isOnline = await provider.checkHealth({
+      ...catSettings,
+      endpoint_url: effectiveEndpointUrl,
+      api_key: effectiveApiKey
+    });
     res.json({ 
       status: isOnline ? 'online' : 'offline',
       provider: providerId

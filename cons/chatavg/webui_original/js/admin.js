@@ -94,7 +94,25 @@ export async function loadAdminUsers() {
   }
 }
 
-function editAdminUser(username, usersMap) {
+async function editAdminUser(username, usersMap) {
+  // Populate category list for users
+  try {
+    const cr = await fetch('/api/admin/categories', { headers: { 'Authorization': 'Bearer ' + state.authToken }});
+    if (cr.ok) {
+      const cats = await cr.json();
+      const sel = $('admin-category');
+      if (sel) {
+        sel.innerHTML = '';
+        Object.keys(cats).sort().forEach(cname => {
+          const opt = document.createElement('option');
+          opt.value = cname;
+          opt.textContent = cname;
+          sel.appendChild(opt);
+        });
+      }
+    }
+  } catch(e) {}
+
   $('admin-edit-card').classList.remove('hidden');
   $('admin-edit-title').textContent = username ? 'Редактировать ' + username : 'Новый пользователь';
   
@@ -132,6 +150,11 @@ $('btn-save-user')?.addEventListener('click', async (e) => {
   const username = $('admin-username').value.trim();
   if (!username) return showToast('❌ Имя обязательно');
   
+  if (!/^[a-zA-Z0-9_-]{3,64}$/.test(username)) {
+    return showToast('❌ Имя должно быть от 3 до 64 символов (только a-z, A-Z, 0-9, _ и -)');
+  }
+
+  
   const payload = {
     category: $('admin-category').value,
     expiration_date: $('admin-expiration').value || null,
@@ -140,21 +163,38 @@ $('btn-save-user')?.addEventListener('click', async (e) => {
   };
   
   const p = $('admin-password').value;
-  if (p) payload.password = p;
+  if (p) {
+    if (p.length < 8) return showToast('❌ Пароль должен содержать не менее 8 символов');
+    payload.password = p;
+  }
+
   
-  const r = await fetch('/api/admin/users/' + username, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.authToken },
-    body: JSON.stringify(payload)
-  });
-  
-  if (r.ok) {
-    showToast('✅ Пользователь сохранен');
-    $('admin-edit-card').classList.add('hidden');
-    loadAdminUsers();
-  } else {
-    const err = await r.json();
-    showToast('❌ Ошибка: ' + (err.detail || ''));
+  try {
+    const r = await fetch('/api/admin/users/' + username, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.authToken },
+      body: JSON.stringify(payload)
+    });
+    
+    if (r.ok) {
+      showToast('✅ Пользователь сохранен');
+      $('admin-edit-card').classList.add('hidden');
+      loadAdminUsers();
+    } else {
+      const errData = await r.json();
+      console.error('[Admin] Save user failed:', errData);
+      
+      // Extract error message from various possible formats
+      const errorMsg = errData.detail || 
+                       (errData.error && errData.error.message) || 
+                       errData.message || 
+                       JSON.stringify(errData);
+                       
+      showToast('❌ Ошибка: ' + errorMsg);
+    }
+  } catch (err) {
+    console.error('[Admin] Network error during save:', err);
+    showToast('❌ Ошибка сети: ' + err.message);
   }
 });
 
@@ -226,68 +266,45 @@ function populateProviderDropdown(selectedId) {
 }
 
 function updateModelDropdown(providerId, selectedModel) {
-  const sel = $('admin-cat-model-select');
-  sel.textContent = '';
-
   const provider = availableProviders.find(p => p.id === providerId);
   const models = provider?.models || [];
+  const sel = $('admin-cat-model');
+  sel.innerHTML = '';
 
-  if (models.length > 0) {
-    const customOpt = document.createElement('option');
-    customOpt.value = '';
-    customOpt.textContent = '— Ввести вручную —';
-    sel.appendChild(customOpt);
-
-    models.forEach(m => {
-      const opt = document.createElement('option');
-      opt.value = m;
-      opt.textContent = m;
-      if (m === selectedModel) opt.selected = true;
-      sel.appendChild(opt);
-    });
-
-    sel.parentElement.classList.remove('hidden');
-  } else {
-    sel.parentElement.classList.remove('hidden');
-  }
-
-  $('admin-cat-model').value = selectedModel || '';
+  models.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m;
+    opt.textContent = m;
+    if (m === selectedModel) opt.selected = true;
+    sel.appendChild(opt);
+  });
 }
 
 function updateProviderUI(providerId) {
-  const isLlama = providerId === 'llamacpp';
+  const cfg = availableProviders.find(p => p.id === providerId) || {};
+  const isLlama = cfg.adapter === 'llamacpp' || providerId === 'llamacpp';
   document.querySelectorAll('.llama-only-param').forEach(el => {
     el.classList.toggle('hidden', !isLlama);
   });
-  $('cat-remote-fields').classList.toggle('hidden', isLlama);
-  $('cat-endpoint-field').classList.toggle('hidden', !isLlama);
 }
 
 async function editAdminCategory(name, data) {
   await loadProvidersList();
   currentEditCategory = name;
   $('admin-cat-edit-card').classList.remove('hidden');
-  $('admin-cat-edit-title').textContent = 'Категория: ' + name;
+  $('admin-cat-edit-title').textContent = name ? 'Категория: ' + name : 'Новая категория';
+  
+  $('admin-cat-name').value = name || '';
+  $('admin-cat-name').disabled = !!name;
+  $('btn-del-cat').classList.toggle('hidden', !name);
 
   const providerId = data.provider || 'llamacpp';
   populateProviderDropdown(providerId);
   updateModelDropdown(providerId, data.model_name || '');
   updateProviderUI(providerId);
 
-  $('admin-cat-endpoint').value = data.endpoint_url || '';
-  $('admin-cat-apikey').value = data.api_key || '';
   $('admin-cat-system-prompt').value = data.system_prompt || '';
-  
-  const epEl = $('admin-cat-extra-params');
-  const epErr = $('extra-params-error');
-  epEl.disabled = false;
-  epEl.readOnly = false;
-  epErr.classList.add('hidden');
-  if (data.extra_params && typeof data.extra_params === 'object' && Object.keys(data.extra_params).length > 0) {
-    epEl.value = JSON.stringify(data.extra_params, null, 2);
-  } else {
-    epEl.value = '';
-  }
+  $('admin-cat-mcp-gateway').value = data.mcp_gateway || '';
   
   const paramMap = {
     temperature: data.temperature,
@@ -326,40 +343,56 @@ $('btn-cancel-cat')?.addEventListener('click', (e) => {
   $('admin-cat-edit-card').classList.add('hidden');
 });
 
-$('btn-save-cat')?.addEventListener('click', async (e) => {
+$('btn-create-cat')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  editAdminCategory('', {
+    temperature: 0.7, top_p: 0.9, top_k: 40, min_p: 0.05, repeat_penalty: 1.1, max_tokens: 1024
+  });
+});
+
+$('btn-del-cat')?.addEventListener('click', async (e) => {
   e.preventDefault();
   if (!currentEditCategory) return;
+  if (!confirm(`Удалить категорию ${currentEditCategory}?`)) return;
+
+  const r = await fetch('/api/admin/categories/' + encodeURIComponent(currentEditCategory), {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + state.authToken }
+  });
+  if (r.ok) {
+    showToast('🗑️ Категория удалена');
+    $('admin-cat-edit-card').classList.add('hidden');
+    loadAdminCategories();
+  } else {
+    const err = await r.json();
+    showToast('❌ Ошибка: ' + (err.detail || 'Ошибка удаления'));
+  }
+});
+
+$('btn-save-cat')?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const catName = $('admin-cat-name').value.trim();
+  if (!catName) {
+    return showToast('❌ Название категории обязательно');
+  }
+
   const payload = {
     provider: $('admin-cat-provider').value || 'llamacpp',
-    endpoint_url: $('admin-cat-endpoint').value || null,
     model_name: $('admin-cat-model').value || null,
-    api_key: $('admin-cat-apikey').value || null,
+    mcp_gateway: $('admin-cat-mcp-gateway').value.trim() || null,
     system_prompt: $('admin-cat-system-prompt').value || null,
   };
-
-  const epText = $('admin-cat-extra-params').value.trim();
-  const epErr = $('extra-params-error');
-  epErr.classList.add('hidden');
-  if (epText) {
-    try {
-      payload.extra_params = JSON.parse(epText);
-    } catch (e) {
-      epErr.textContent = 'Ошибка JSON: ' + e.message;
-      epErr.classList.remove('hidden');
-      return;
-    }
-  } else {
-    payload.extra_params = null;
-  }
   
   ['temperature','top_p','top_k','min_p','repeat_penalty','max_tokens'].forEach(k => {
     const el = $('param-' + k);
-    if (el) {
-      payload[k] = k === 'top_k' || k === 'max_tokens' ? parseInt(el.value) : parseFloat(el.value);
+    if (el && el.value !== '') {
+      const val = k === 'top_k' || k === 'max_tokens' ? parseInt(el.value) : parseFloat(el.value);
+      if (!isNaN(val)) payload[k] = val;
     }
   });
 
-  const r = await fetch('/api/admin/categories/' + currentEditCategory, {
+  const r = await fetch('/api/admin/categories/' + encodeURIComponent(catName), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + state.authToken },
     body: JSON.stringify(payload)
@@ -376,7 +409,8 @@ $('btn-save-cat')?.addEventListener('click', async (e) => {
 $('btn-test-cat')?.addEventListener('click', async (e) => {
   e.preventDefault();
   e.stopPropagation();
-  if (!currentEditCategory) return;
+  const catName = $('admin-cat-name').value.trim();
+  if (!catName) return showToast('❌ Сначала сохраните категорию');
   const btn = $('btn-test-cat');
   const oldText = btn.textContent;
   btn.textContent = '⏳ Проверка...';
@@ -385,11 +419,10 @@ $('btn-test-cat')?.addEventListener('click', async (e) => {
   try {
     const payload = {
       provider: $('admin-cat-provider').value,
-      endpoint_url: $('admin-cat-endpoint').value,
-      api_key: $('admin-cat-apikey').value
+      mcp_gateway: $('admin-cat-mcp-gateway').value.trim() || null
     };
 
-    const r = await fetch(`/api/admin/categories/${encodeURIComponent(currentEditCategory)}/test`, {
+    const r = await fetch(`/api/admin/categories/${encodeURIComponent(catName)}/test`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',

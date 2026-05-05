@@ -206,7 +206,12 @@ export function finishGeneration() {
 export function buildExtraParams() {
   const params = {};
   if ($('feat-reasoning')?.checked) params.reasoning = {};
-  if ($('feat-websearch')?.checked) params.tools = [{ type: 'web_search' }];
+  if ($('feat-websearch')?.checked) {
+    params.tools = [{ type: 'web_search' }];
+    params.tool_choice = 'auto';
+    // For Qwen/DashScope native grounding
+    params.enable_search = true;
+  }
   return Object.keys(params).length > 0 ? params : null;
 }
 

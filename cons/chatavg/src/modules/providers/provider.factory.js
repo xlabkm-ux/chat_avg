@@ -2,9 +2,11 @@
  * Provider Registry
  * Loads all available LLM providers and provides lookup by ID.
  */
-const providers = {};
+const providersConfig = require('../../core/providers.config');
 
-// Register all built-in providers
+const adapters = {};
+
+// Register all built-in adapters
 const builtins = [
   require('./adapters/llamacpp'),
   require('./adapters/openai'),
@@ -14,32 +16,34 @@ const builtins = [
   require('./adapters/qwen'),
   require('./adapters/grok'),
   require('./adapters/grok_responses'),
+  require('./adapters/mcp'),
 ];
 
 for (const p of builtins) {
-  providers[p.id] = p;
+  adapters[p.id] = p;
 }
 
 /**
- * Get provider by ID
- * @param {string} id - Provider ID (e.g. 'openai', 'llamacpp')
+ * Get provider adapter by provider ID from config
+ * @param {string} configProviderId - Provider ID from providers.config.js
  * @returns {Object|null} Provider adapter or null
  */
-function getProvider(id) {
-  return providers[id] || null;
+function getProvider(configProviderId) {
+  const cfg = providersConfig[configProviderId];
+  if (!cfg) return null;
+  return adapters[cfg.adapter] || null;
 }
 
 /**
- * List all registered providers (for admin UI)
- * @returns {Array} [{id, name, models, defaultModel}]
+ * List all configured providers (for admin UI)
+ * @returns {Array} [{id, name, models: [modelId1, modelId2, ...]}]
  */
 function listProviders() {
-  return Object.values(providers).map(p => ({
-    id: p.id,
-    name: p.name,
-    models: p.models || [],
-    defaultModel: p.defaultModel || '',
+  return Object.entries(providersConfig).map(([id, cfg]) => ({
+    id,
+    name: cfg.name || id,
+    models: Object.keys(cfg.models || {}),
   }));
 }
 
-module.exports = { getProvider, listProviders };
+module.exports = { getProvider, listProviders, adapters };

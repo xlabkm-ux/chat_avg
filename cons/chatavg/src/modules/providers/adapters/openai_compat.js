@@ -22,7 +22,8 @@ class OpenAICompatProvider extends BaseProvider {
    * @param {Object} options - Request options (stream, max_tokens)
    * @returns {Object} ProviderResult
    */
-  async handleChat(messages, config, options) {
+  async *handleChat(messages, config, options) {
+    const ProviderEvents = require('./../providerEvents');
     const client = new OpenAI({
       apiKey: config.api_key,
       baseURL: config.endpoint_url || this.defaultBaseUrl,
@@ -45,12 +46,29 @@ class OpenAICompatProvider extends BaseProvider {
       Object.assign(params, config.extra_params);
     }
 
-    if (params.stream) {
-      const stream = await client.chat.completions.create(params);
-      return { isStream: true, stream, isRawSse: false };
-    } else {
-      const response = await client.chat.completions.create(params);
-      return { isStream: false, data: response };
+    try {
+      if (params.stream) {
+        const stream = await client.chat.completions.create(params);
+        for await (const chunk of stream) {
+          const content = chunk.choices[0]?.delta?.content;
+          if (content) {
+            yield ProviderEvents.delta(content);
+          }
+          if (chunk.choices[0]?.finish_reason) {
+            yield ProviderEvents.done(chunk.choices[0].finish_reason, chunk.usage);
+          }
+        }
+      } else {
+        const response = await client.chat.completions.create(params);
+        const content = response.choices[0]?.message?.content;
+        if (content) {
+          yield ProviderEvents.delta(content);
+        }
+        yield ProviderEvents.done(response.choices[0]?.finish_reason || 'stop', response.usage);
+      }
+    } catch (err) {
+      const { ProviderError } = require('./../providerErrors');
+      throw new ProviderError(err.message, err.status || 502);
     }
   }
 

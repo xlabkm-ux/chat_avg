@@ -34,14 +34,14 @@ if "%MODEL_PATH%"=="" (
     exit /b 1
 )
 
-:: 4. Start Llama Backend (Port 8081)
-echo [INFO] Starting Llama Backend on port 8081...
+:: 4. Start Llama Backend (Port 8201)
+echo [INFO] Starting Llama Backend on port 8201...
 echo.
 echo ========================================
 echo   Llama Backend is LIVE. Press Ctrl+C to stop.
 echo ========================================
 echo.
 
-"llama-server.exe" -m "%MODEL_PATH%" -c 8192 -t %THREADS% -b 512 --mlock --host 127.0.0.1 --port 8081
+"llama-server.exe" -m "%MODEL_PATH%" -c 8192 -t %THREADS% -b 512 --mlock --host 127.0.0.1 --port 8201
 
 pause

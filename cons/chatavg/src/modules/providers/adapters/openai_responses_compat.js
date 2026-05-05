@@ -44,7 +44,8 @@ class OpenAIResponsesProvider extends BaseProvider {
     return { instructions, input };
   }
 
-  async handleChat(messages, config, options) {
+  async *handleChat(messages, config, options) {
+    const ProviderEvents = require('./../providerEvents');
     const client = new OpenAI({
       apiKey: config.api_key,
       baseURL: config.endpoint_url || this.defaultBaseUrl,
@@ -72,13 +73,10 @@ class OpenAIResponsesProvider extends BaseProvider {
       Object.assign(params, config.extra_params);
     }
 
-    if (params.stream) {
-      const stream = await client.responses.create(params);
-      
-      const buildChunk = this.buildChunk.bind(this);
-      const modelName = params.model;
-      
-      async function* transformStream() {
+    try {
+      if (params.stream) {
+        const stream = await client.responses.create(params);
+        
         let inReasoning = false;
         for await (const event of stream) {
           if (event.type === 'response.reasoning_summary_text.delta') {
@@ -87,51 +85,51 @@ class OpenAIResponsesProvider extends BaseProvider {
               text = '<think>\n' + text;
               inReasoning = true;
             }
-            yield buildChunk(modelName, text, null);
+            yield ProviderEvents.delta(text);
           } else if (event.type === 'response.output_text.delta') {
             let text = event.delta;
             if (inReasoning) {
               text = '\n</think>\n\n' + text;
               inReasoning = false;
             }
-            yield buildChunk(modelName, text, null);
+            yield ProviderEvents.delta(text);
           } else if (event.type === 'response.tool_call.created') {
             const toolName = event.tool_call.name;
-            yield buildChunk(modelName, `\n<tool name="${toolName}">\n`, null);
+            yield ProviderEvents.delta(`\n<tool name="${toolName}">\n`);
           } else if (event.type === 'response.tool_call.output') {
-            yield buildChunk(modelName, `\n</tool>\n\n`, null);
+            yield ProviderEvents.delta(`\n</tool>\n\n`);
           }
         }
-        yield buildChunk(modelName, '', 'stop');
-      }
+        yield ProviderEvents.done('stop');
+      } else {
+        const response = await client.responses.create(params);
 
-      return { isStream: true, stream: transformStream(), isRawSse: false };
-    } else {
-      const response = await client.responses.create(params);
-
-      // Extract text from Responses API output
-      let text = '';
-      if (response.output) {
-        for (const item of response.output) {
-          if (item.type === 'message' && item.content) {
-            for (const part of item.content) {
-              if (part.type === 'output_text') text += part.text;
+        // Extract text from Responses API output
+        let text = '';
+        if (response.output) {
+          for (const item of response.output) {
+            if (item.type === 'message' && item.content) {
+              for (const part of item.content) {
+                if (part.type === 'output_text') text += part.text;
+              }
             }
           }
         }
+
+        const usage = response.usage ? {
+          prompt_tokens: response.usage.input_tokens || 0,
+          completion_tokens: response.usage.output_tokens || 0,
+          total_tokens: (response.usage.input_tokens || 0) + (response.usage.output_tokens || 0),
+        } : { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+
+        if (text) {
+          yield ProviderEvents.delta(text);
+        }
+        yield ProviderEvents.done('stop', usage);
       }
-
-      const usage = response.usage ? {
-        prompt_tokens: response.usage.input_tokens || 0,
-        completion_tokens: response.usage.output_tokens || 0,
-        total_tokens: (response.usage.input_tokens || 0) + (response.usage.output_tokens || 0),
-      } : { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
-
-      // Return in Chat Completions format for frontend compatibility
-      return {
-        isStream: false,
-        data: this.buildResponse(params.model, text, usage)
-      };
+    } catch (err) {
+      const { ProviderError } = require('./../providerErrors');
+      throw new ProviderError(err.message, err.status || 502);
     }
   }
 }

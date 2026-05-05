@@ -18,7 +18,8 @@ class LlamaCppProvider extends BaseProvider {
     });
   }
 
-  async handleChat(messages, config, options) {
+  async *handleChat(messages, config, options) {
+    const ProviderEvents = require('./../providerEvents');
     const endpointUrl = (config.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
 
     // Build request body with llama.cpp-specific params
@@ -63,27 +64,53 @@ class LlamaCppProvider extends BaseProvider {
 
     if (!r.ok) {
       const errText = await r.text();
-      const err = new Error(errText);
-      err.status = r.status;
-      err.code = 'backend_error';
-      throw err;
+      const { ProviderError } = require('./../providerErrors');
+      throw new ProviderError(errText, r.status);
     }
 
     if (body.stream) {
-      async function* streamSse() {
-        if (!r.body) return;
-        const reader = r.body.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          yield decoder.decode(value, { stream: true });
+      if (!r.body) return;
+      const reader = r.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        
+        const lines = buffer.split('\n');
+        buffer = lines.pop(); // keep the last incomplete line
+        
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const dataStr = line.slice(6).trim();
+            if (dataStr === '[DONE]') {
+              yield ProviderEvents.done();
+              continue;
+            }
+            try {
+              const data = JSON.parse(dataStr);
+              const content = data.choices?.[0]?.delta?.content;
+              if (content) {
+                yield ProviderEvents.delta(content);
+              }
+              if (data.choices?.[0]?.finish_reason) {
+                yield ProviderEvents.done(data.choices[0].finish_reason, data.usage);
+              }
+            } catch (e) {
+              // ignore parse errors
+            }
+          }
         }
       }
-      return { isStream: true, stream: streamSse(), isRawSse: true };
     } else {
       const data = await r.json();
-      return { isStream: false, data };
+      const content = data.choices?.[0]?.message?.content;
+      if (content) {
+        yield ProviderEvents.delta(content);
+      }
+      yield ProviderEvents.done(data.choices?.[0]?.finish_reason || 'stop', data.usage);
     }
   }
 

@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  mcp-gateway:
+    build: .
+    container_name: mcp-gateway
+    restart: always
+    ports:
+      - "${PORT:-8202}:8202"
+    env_file:
+      - .env
+    environment:
+      - PORT=8202
+      - NODE_ENV=production
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

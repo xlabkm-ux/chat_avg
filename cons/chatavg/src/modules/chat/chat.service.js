@@ -1,6 +1,9 @@
-const { Readable } = require('node:stream');
+
 const categoryRepository = require('../admin/category.repository');
-const { getProvider } = require('../providers/provider.factory');
+const policyRouter = require('./policyRouter');
+const fallbackPolicy = require('./fallbackPolicy');
+const { getProvider, adapters } = require('../providers/provider.factory');
+const providersConfig = require('../../core/providers.config');
 const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT } = require('../../core/config');
 const { validateProviderUrl, sanitizePromptText } = require('../../core/utils');
 
@@ -19,22 +22,39 @@ class ChatService {
   async handleCompletion({ user, body, res }) {
     const catSettings = await categoryRepository.findByName(user.category) || {};
 
-    // Resolve provider
-    const providerId = catSettings.provider || 'llamacpp';
-    const provider = getProvider(providerId);
-    if (!provider) {
-      const err = new Error(`Провайдер "${providerId}" не найден`);
-      err.status = 502;
-      throw err;
-    }
+    // Resolve route and provider via Policy Router
+    const route = policyRouter.resolveRoute(catSettings);
+    
+    // Fetch Provider & Model configuration from static config
+    const providerCfg = providersConfig[route.providerId] || {};
+    const modelCfg = (providerCfg.models && providerCfg.models[catSettings.model_name]) || {};
+    const effectiveEndpointUrl = providerCfg.endpoint_url || null;
+    const effectiveApiKey = providerCfg.api_key || null;
 
     // SSRF Validation
-    const isLocalProvider = ['llamacpp', 'ollama'].includes(providerId);
-    if (catSettings.endpoint_url) {
+    const isLocalProvider = ['llamacpp', 'ollama', 'mcp'].includes(providerCfg.adapter);
+    if (effectiveEndpointUrl) {
       try {
-        validateProviderUrl(catSettings.endpoint_url, isLocalProvider);
+        validateProviderUrl(effectiveEndpointUrl, isLocalProvider);
       } catch (err) {
-        throw new Error(`SSRF Blocked: ${err.message}`);
+        throw new Error(`SSRF Blocked (Provider): ${err.message}`);
+      }
+    }
+
+    if (catSettings.mcp_gateway) {
+      try {
+        // MCP Gateway is trusted, allow local access
+        validateProviderUrl(catSettings.mcp_gateway, true);
+      } catch (err) {
+        throw new Error(`SSRF Blocked (MCP Gateway): ${err.message}`);
+      }
+    }
+
+    const providersToTry = [ { id: route.providerId, provider: route.provider } ];
+    if (route.fallbackProviderId && route.fallbackProviderId !== route.providerId) {
+      const fallbackProvider = getProvider(route.fallbackProviderId);
+      if (fallbackProvider) {
+        providersToTry.push({ id: route.fallbackProviderId, provider: fallbackProvider });
       }
     }
 
@@ -93,107 +113,203 @@ class ChatService {
     };
 
     // Merged settings & Extra params
-    const mergedSettings = { ...catSettings };
+    // Combine base config -> provider config -> model config -> category config
+    const mergedSettings = { 
+      ...catSettings,
+      endpoint_url: effectiveEndpointUrl,
+      api_key: effectiveApiKey,
+      extra_params: {
+        ...(providerCfg.extra_params || {}),
+        ...(modelCfg.extra_params || {}),
+      }
+    };
+
+    // Allow overriding from request
     if (body.temperature !== undefined) mergedSettings.temperature = body.temperature;
     if (body.top_p !== undefined) mergedSettings.top_p = body.top_p;
     
     if (body.extra_params) {
       const allowedKeys = user.category === 'Администратор' ? ALLOWED_EXTRA_PARAMS.ADMIN : ALLOWED_EXTRA_PARAMS.USER;
       const safeParams = pickAllowedExtraParams(body.extra_params, allowedKeys);
-      mergedSettings.extra_params = { ...(mergedSettings.extra_params || {}), ...safeParams };
+      mergedSettings.extra_params = { ...mergedSettings.extra_params, ...safeParams };
     }
 
-    console.log(`[Chat] user=${user.username} provider=${providerId} model=${catSettings.model_name || 'default'}`);
+    console.log(`[Chat] user=${user.username} primary_provider=${route.providerId} model=${catSettings.model_name || 'default'}`);
+
+    let lastError = null;
+    let finalProviderId = route.providerId;
+    let finalProviderName = route.provider?.name;
 
     try {
-      let result;
-      
-      // Emulate streaming using Native Streams if provider doesn't support it
-      if (options.stream && provider.capabilities && !provider.capabilities.stream) {
-        const fallbackOptions = { ...options, stream: false };
-        const rawResult = await provider.handleChat(messages, mergedSettings, fallbackOptions);
+      for (const currentProviderObj of providersToTry) {
+        let currentProviderId = currentProviderObj.id;
+        let currentProvider = currentProviderObj.provider;
+        let providerMergedSettings = { ...mergedSettings };
+
+        // MCP Gateway Logic: If mcp_gateway is set for this category, 
+        // we route the request through the MCP adapter instead of the native one.
+        if (catSettings.mcp_gateway && catSettings.mcp_gateway.trim().length > 0) {
+          const mcpAdapter = adapters.mcp;
+          if (mcpAdapter) {
+            console.log(`[Chat] Routing via MCP Gateway: ${catSettings.mcp_gateway}`);
+            
+            // Format model as "provider:model" for the MCP gateway
+            const originalModel = catSettings.model_name || 'default';
+            let mcpProviderId = currentProviderId;
+            if (mcpProviderId === 'openai_responses') {
+              mcpProviderId = 'openai';
+            }
+            const mcpModel = `${mcpProviderId}:${originalModel}`;
+            
+            providerMergedSettings.endpoint_url = catSettings.mcp_gateway;
+            providerMergedSettings.model_name = mcpModel;
+            currentProvider = mcpAdapter;
+          }
+        }
         
-        const data = rawResult.data || {};
-        const text = data?.choices?.[0]?.message?.content || '';
-        
-        const stream = this._createEmulatedStream(text, data);
-        result = { isStream: true, stream, isRawSse: false };
-      } else {
-        result = await provider.handleChat(messages, mergedSettings, options);
+        if (currentProviderId !== route.providerId) {
+          console.log(`[Chat] Falling back to provider=${currentProviderId} for user=${user.username}`);
+        }
+
+        try {
+          let chatStream;
+          
+          // Emulate streaming if provider doesn't support it natively but client wants it
+          if (options.stream && currentProvider.capabilities && !currentProvider.capabilities.stream) {
+            const fallbackOptions = { ...options, stream: false };
+            const tempStream = currentProvider.handleChat(messages, providerMergedSettings, fallbackOptions);
+            
+            let fullText = '';
+            let finalUsage = null;
+            for await (const event of tempStream) {
+              if (event.type === 'error') {
+                throw Object.assign(new Error(event.message), { status: event.status, code: event.code, isRetryable: event.isRetryable });
+              }
+              if (event.type === 'delta') fullText += event.text;
+              if (event.type === 'done') finalUsage = event.usage;
+            }
+            
+            chatStream = this._createEmulatedAsyncIterable(fullText, finalUsage);
+          } else {
+            chatStream = currentProvider.handleChat(messages, providerMergedSettings, options);
+          }
+
+          // Pull the first chunk to test connection before writing headers
+          const iterator = chatStream[Symbol.asyncIterator]();
+          const firstResult = await iterator.next();
+
+          if (!firstResult.done && firstResult.value && firstResult.value.type === 'error') {
+            const event = firstResult.value;
+            throw Object.assign(new Error(event.message), { status: event.status, code: event.code, isRetryable: event.isRetryable });
+          }
+
+          // Connection is successful, we can commit to this provider
+          finalProviderId = currentProviderId;
+          finalProviderName = currentProvider.name;
+
+          // Reassemble the stream
+          async function* reassembleStream(firstRes, iter) {
+            if (!firstRes.done) yield firstRes.value;
+            for await (const item of iter) {
+              yield item;
+            }
+          }
+          const activeStream = reassembleStream(firstResult, iterator);
+
+          if (options.stream) {
+            res.writeHead(200, {
+              'Content-Type': 'text/event-stream',
+              'Cache-Control': 'no-cache',
+              'Connection': 'keep-alive',
+            });
+
+            for await (const event of activeStream) {
+              if (event.type === 'delta') {
+                const chunk = currentProvider.buildChunk(catSettings.model_name, event.text);
+                res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+              } else if (event.type === 'done') {
+                const chunk = currentProvider.buildChunk(catSettings.model_name, '', event.finishReason || 'stop');
+                res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+                res.write('data: [DONE]\n\n');
+              } else if (event.type === 'error') {
+                res.write(`data: ${JSON.stringify({ error: event.message, code: event.code })}\n\n`);
+                res.write('data: [DONE]\n\n');
+              }
+            }
+            res.end();
+          } else {
+            let fullText = '';
+            let finalUsage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 };
+            let finalFinishReason = 'stop';
+            
+            for await (const event of activeStream) {
+              if (event.type === 'delta') {
+                fullText += event.text;
+              } else if (event.type === 'done') {
+                if (event.usage) finalUsage = event.usage;
+                if (event.finishReason) finalFinishReason = event.finishReason;
+              } else if (event.type === 'error') {
+                throw new Error(event.message);
+              }
+            }
+            
+            const responseData = currentProvider.buildResponse(catSettings.model_name, fullText, finalUsage);
+            responseData.choices[0].finish_reason = finalFinishReason;
+            res.json(responseData);
+          }
+
+          // Successfully completed, break the retry loop
+          lastError = null;
+          break;
+
+        } catch (err) {
+          if (err.message === 'Client disconnected') throw err; // Throw to outer block
+          
+          lastError = err;
+          finalProviderId = currentProviderId;
+          finalProviderName = currentProvider.name;
+
+          if (res.headersSent) {
+            // Cannot fallback if we already started sending the response
+            break;
+          }
+
+          if (fallbackPolicy.shouldFallback(err)) {
+            console.warn(`[Fallback] Provider "${currentProviderId}" failed (${err.message}). Policy allows fallback.`);
+            continue;
+          } else {
+            // Non-retryable error
+            break;
+          }
+        }
       }
 
-      if (result.isStream) {
-        await this._pipeStreamToResponse(result, res);
-      } else {
-        res.json(result.data);
+      if (lastError) {
+        throw lastError;
       }
+
     } catch (err) {
       if (err.message === 'Client disconnected') return; // Ignore early disconnect
-      this._handleError(err, providerId, provider.name, res);
+      this._handleError(err, finalProviderId, finalProviderName, res);
     } finally {
       clearTimeout(timeoutId);
       res.req.off('close', reqCloseHandler);
     }
   }
 
-  _createEmulatedStream(text, metadata) {
+  async *_createEmulatedAsyncIterable(text, usage) {
+    const ProviderEvents = require('../providers/providerEvents');
     const chunkSize = 20;
     let i = 0;
     
-    return new Readable({
-      objectMode: true,
-      async read() {
-        if (i >= text.length) {
-          this.push({
-            id: metadata.id || `emulated-${Date.now()}`,
-            object: 'chat.completion.chunk',
-            created: metadata.created || Math.floor(Date.now() / 1000),
-            choices: [{ index: 0, delta: {}, finish_reason: 'stop' }]
-          });
-          this.push(null);
-          return;
-        }
-
-        const content = text.slice(i, i + chunkSize);
-        i += chunkSize;
-
-        this.push({
-          id: metadata.id || `emulated-${Date.now()}`,
-          object: 'chat.completion.chunk',
-          created: metadata.created || Math.floor(Date.now() / 1000),
-          choices: [{ index: 0, delta: { content }, finish_reason: null }]
-        });
-
-        // Small delay to simulate "typing"
-        await new Promise(r => setTimeout(r, 10));
-      }
-    });
-  }
-
-  async _pipeStreamToResponse(result, res) {
-    res.writeHead(200, {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-    });
-
-    try {
-      for await (const chunk of result.stream) {
-        if (result.isRawSse) {
-          res.write(chunk);
-        } else {
-          res.write(`data: ${JSON.stringify(chunk)}\n\n`);
-        }
-      }
-      if (!result.isRawSse) {
-        res.write('data: [DONE]\n\n');
-      }
-      res.end();
-    } catch (err) {
-      console.error('[Chat Stream Error]', err);
-      res.write(`data: ${JSON.stringify({ error: 'Stream interrupted' })}\n\n`);
-      res.end();
+    while (i < text.length) {
+      const content = text.slice(i, i + chunkSize);
+      i += chunkSize;
+      yield ProviderEvents.delta(content);
+      // Small delay to simulate "typing"
+      await new Promise(r => setTimeout(r, 10));
     }
+    yield ProviderEvents.done('stop', usage);
   }
 
   _handleError(err, providerId, providerName, res) {

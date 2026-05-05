@@ -43,7 +43,8 @@ class GoogleProvider extends BaseProvider {
     return { systemInstruction, history };
   }
 
-  async handleChat(messages, config, options) {
+  async *handleChat(messages, config, options) {
+    const ProviderEvents = require('./../providerEvents');
     const genAI = new GoogleGenerativeAI(config.api_key);
 
     const { systemInstruction, history } = this._convertMessages(messages);
@@ -75,34 +76,33 @@ class GoogleProvider extends BaseProvider {
       Object.assign(modelConfig, rest);
     }
 
-    const model = genAI.getGenerativeModel(modelConfig);
+    try {
+      const model = genAI.getGenerativeModel(modelConfig);
 
-    if (options.stream) {
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessageStream(userText);
-      
-      const buildChunk = this.buildChunk.bind(this);
-      async function* transformStream() {
+      if (options.stream) {
+        const chat = model.startChat({ history });
+        const result = await chat.sendMessageStream(userText);
+        
         for await (const chunk of result.stream) {
           const text = chunk.text();
           if (text) {
-            yield buildChunk(modelName, text, null);
+            yield ProviderEvents.delta(text);
           }
         }
-        yield buildChunk(modelName, '', 'stop');
+        yield ProviderEvents.done('stop');
+      } else {
+        const chat = model.startChat({ history });
+        const result = await chat.sendMessage(userText);
+        const text = result.response.text();
+
+        if (text) {
+          yield ProviderEvents.delta(text);
+        }
+        yield ProviderEvents.done('stop');
       }
-
-      return { isStream: true, stream: transformStream(), isRawSse: false };
-    } else {
-      const chat = model.startChat({ history });
-      const result = await chat.sendMessage(userText);
-      const text = result.response.text();
-
-      // Return OpenAI-compatible response format
-      return {
-        isStream: false,
-        data: this.buildResponse(modelName, text)
-      };
+    } catch (err) {
+      const { ProviderError } = require('./../providerErrors');
+      throw new ProviderError(err.message, err.status || 502);
     }
   }
 

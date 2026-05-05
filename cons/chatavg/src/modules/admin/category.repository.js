@@ -14,8 +14,8 @@ class CategoryRepository {
 
   async save(name, category) {
     db.prepare(`
-      INSERT INTO categories (name, provider, endpoint_url, model_name, api_key, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt, extra_params)
-      VALUES (@name, @provider, @endpoint_url, @model_name, @api_key, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt, @extra_params)
+      INSERT INTO categories (name, provider, endpoint_url, model_name, api_key, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt, extra_params, routing_mode, fallback_provider, mcp_gateway)
+      VALUES (@name, @provider, @endpoint_url, @model_name, @api_key, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt, @extra_params, @routing_mode, @fallback_provider, @mcp_gateway)
       ON CONFLICT(name) DO UPDATE SET
         provider=excluded.provider,
         endpoint_url=excluded.endpoint_url,
@@ -28,7 +28,10 @@ class CategoryRepository {
         repeat_penalty=excluded.repeat_penalty,
         max_tokens=excluded.max_tokens,
         system_prompt=excluded.system_prompt,
-        extra_params=excluded.extra_params
+        extra_params=excluded.extra_params,
+        routing_mode=excluded.routing_mode,
+        fallback_provider=excluded.fallback_provider,
+        mcp_gateway=excluded.mcp_gateway
     `).run({
       name,
       provider: category.provider || null,
@@ -43,6 +46,9 @@ class CategoryRepository {
       max_tokens: category.max_tokens !== undefined ? category.max_tokens : null,
       system_prompt: category.system_prompt || null,
       extra_params: category.extra_params ? JSON.stringify(category.extra_params) : null,
+      routing_mode: category.routing_mode || 'direct',
+      fallback_provider: category.fallback_provider || null,
+      mcp_gateway: category.mcp_gateway || null,
     });
   }
 

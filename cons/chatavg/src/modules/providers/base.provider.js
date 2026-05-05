@@ -24,12 +24,17 @@ class BaseProvider {
 
   /**
    * Handle chat completion request. Must be implemented by subclasses.
+   * Expected to return an AsyncIterable yielding CanonicalChatEvent:
+   * - { type: 'delta', text: string }
+   * - { type: 'done', finishReason: string, usage: object }
+   * - { type: 'error', message: string, code: string }
+   * 
    * @param {Array} messages - Chat messages [{role, content}]
    * @param {Object} config  - Category config (api_key, endpoint_url, model_name, etc.)
    * @param {Object} options - Request options (stream, max_tokens)
-   * @returns {Promise<Object>} ProviderResult { isStream, data, stream, isRawSse }
+   * @returns {AsyncIterable<Object>} Async generator yielding chat events
    */
-  async handleChat(messages, config, options) {
+  async *handleChat(messages, config, options) {
     throw new Error(`handleChat() not implemented for provider: ${this.id}`);
   }
 
