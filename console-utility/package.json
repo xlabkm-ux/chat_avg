@@ -1,0 +1,16 @@
+{
+  "name": "console-utility",
+  "version": "1.0.0",
+  "main": "index.js",
+  "bin": {
+    "console-utility": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Простая консольная утилита на JavaScript"
+}
