@@ -46,25 +46,49 @@ class OpenAICompatProvider extends BaseProvider {
       Object.assign(params, config.extra_params);
     }
 
+    // Log the full request parameters for debugging and sandbox testing
+    console.log(`\n[${this.id}] --- OUTGOING REQUEST PAYLOAD ---`);
+    console.log(JSON.stringify(params, null, 2));
+    console.log(`--------------------------------------\n`);
+
     try {
       if (params.stream) {
         const stream = await client.chat.completions.create(params);
         for await (const chunk of stream) {
-          const content = chunk.choices[0]?.delta?.content;
+          const choice = chunk.choices[0];
+          if (!choice) continue;
+
+          // 1. Content delta
+          const content = choice.delta?.content;
           if (content) {
             yield ProviderEvents.delta(content);
           }
-          if (chunk.choices[0]?.finish_reason) {
-            yield ProviderEvents.done(chunk.choices[0].finish_reason, chunk.usage);
+
+          // 2. Tool calls delta
+          const toolCalls = choice.delta?.tool_calls;
+          if (toolCalls) {
+            yield ProviderEvents.toolCall(toolCalls);
+          }
+
+          // 3. Completion metadata
+          if (choice.finish_reason) {
+            yield ProviderEvents.done(choice.finish_reason, chunk.usage || null);
           }
         }
       } else {
         const response = await client.chat.completions.create(params);
-        const content = response.choices[0]?.message?.content;
+        const choice = response.choices[0];
+        
+        const content = choice?.message?.content;
         if (content) {
           yield ProviderEvents.delta(content);
         }
-        yield ProviderEvents.done(response.choices[0]?.finish_reason || 'stop', response.usage);
+
+        if (choice?.message?.tool_calls) {
+          yield ProviderEvents.toolCall(choice.message.tool_calls);
+        }
+
+        yield ProviderEvents.done(choice?.finish_reason || 'stop', response.usage);
       }
     } catch (err) {
       const { ProviderError } = require('./../providerErrors');

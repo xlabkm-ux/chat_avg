@@ -50,8 +50,8 @@ const LLAMA_DEFAULT_URL = 'http://127.0.0.1:8201';
 
 // 4. Chat & Provider Configuration
 const ALLOWED_EXTRA_PARAMS = {
-  USER: ['response_format', 'tools', 'reasoning'],
-  ADMIN: ['tools', 'tool_choice', 'reasoning', 'response_format', 'metadata']
+  USER: ['response_format', 'tools', 'reasoning', 'collection_ids', 'vector_store_ids', 'enable_search'],
+  ADMIN: ['tools', 'tool_choice', 'reasoning', 'response_format', 'metadata', 'collection_ids', 'vector_store_ids', 'enable_search']
 };
 
 const DEFAULT_CATEGORY_PARAMS = {

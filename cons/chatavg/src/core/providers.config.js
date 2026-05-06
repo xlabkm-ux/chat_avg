@@ -77,8 +77,11 @@ const providersConfig = {
     "adapter": "grok",
     "endpoint_url": process.env.GROK_URL || "https://api.x.ai/v1",
     "api_key": process.env.GROK_API_KEY || "",
-    "extra_params": {},
+    "extra_params": {
+      "collection_ids": ["collection_82226a3f-f5b0-4a74-a818-55f7b3e71fdc"]
+    },
     "models": {
+      "grok-4-1-fast-non-reasoning": { "name": "Grok 4.1 Fast (Non-reasoning)", "extra_params": {} },
       "grok-3": { "name": "Grok 3", "extra_params": {} },
       "grok-2": { "name": "Grok 2", "extra_params": {} }
     }

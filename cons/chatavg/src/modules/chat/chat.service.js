@@ -227,12 +227,15 @@ class ChatService {
               if (event.type === 'delta') {
                 const chunk = currentProvider.buildChunk(catSettings.model_name, event.text);
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+              } else if (event.type === 'tool_call') {
+                const chunk = currentProvider.buildChunk(catSettings.model_name, null, null, event.toolCall);
+                res.write(`data: ${JSON.stringify(chunk)}\n\n`);
               } else if (event.type === 'done') {
                 const chunk = currentProvider.buildChunk(catSettings.model_name, '', event.finishReason || 'stop');
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`);
                 res.write('data: [DONE]\n\n');
               } else if (event.type === 'error') {
-                res.write(`data: ${JSON.stringify({ error: event.message, code: event.code })}\n\n`);
+                res.write(`data: ${JSON.stringify({ error: event.message, code: 'provider_error' })}\n\n`);
                 res.write('data: [DONE]\n\n');
               }
             }

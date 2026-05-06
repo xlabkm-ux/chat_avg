@@ -41,7 +41,16 @@ class BaseProvider {
   /**
    * Utility to build a standard OpenAI-compatible SSE chunk.
    */
-  buildChunk(model, text, finishReason = null) {
+  buildChunk(model, text, finishReason = null, toolCalls = null) {
+    const delta = {};
+    if (finishReason) {
+      // No delta content/tools on final chunk
+    } else if (toolCalls) {
+      delta.tool_calls = toolCalls;
+    } else {
+      delta.content = text;
+    }
+
     return {
       id: 'chatcmpl-' + this.id + '-' + Date.now(),
       object: 'chat.completion.chunk',
@@ -49,7 +58,7 @@ class BaseProvider {
       model: model || this.defaultModel,
       choices: [{
         index: 0,
-        delta: finishReason ? {} : { content: text },
+        delta,
         finish_reason: finishReason,
       }],
     };
@@ -58,7 +67,10 @@ class BaseProvider {
   /**
    * Utility to build a standard Chat Completion response object.
    */
-  buildResponse(model, text, usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }) {
+  buildResponse(model, text, usage = { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 }, toolCalls = null) {
+    const message = { role: 'assistant', content: text };
+    if (toolCalls) message.tool_calls = toolCalls;
+
     return {
       id: 'chatcmpl-' + this.id + '-' + Date.now(),
       object: 'chat.completion',
@@ -66,8 +78,8 @@ class BaseProvider {
       model: model || this.defaultModel,
       choices: [{
         index: 0,
-        message: { role: 'assistant', content: text },
-        finish_reason: 'stop',
+        message,
+        finish_reason: toolCalls ? 'tool_calls' : 'stop',
       }],
       usage,
     };
