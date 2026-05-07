@@ -1,21 +1,16 @@
-/**
- * SemanticProtocol v0 — оркестратор смыслового слоя.
- * Связывает ClaimExtractor, DomainBoundary и ClaimLedger в единый pipeline.
- * @module semantic.protocol
- * @see SPEC-004 SemanticProtocol
- */
 const { ClaimExtractor } = require('./claim.extractor');
-const { DomainBoundary } = require('./domain.boundary');
+const { DomainBoundary, REALITY_LEVELS, STRENGTH_POLICY } = require('./domain.boundary');
 const { ClaimLedger } = require('./claim.ledger');
 const SemanticEvents = require('./semantic.events');
+const semanticRepository = require('./semantic.repository');
 
 const PROTOCOL_VERSION = {
   protocolId: 'semantic-v0',
-  version: '0.1.0',
+  version: '0.2.0',
   glossaryVersion: '1.0',
-  strengthLevels: ['fact', 'strong_inference', 'weak_hypothesis', 'question'],
+  strengthLevels: Object.keys(STRENGTH_POLICY),
   claimTypes: ['observation', 'interpretation', 'hypothesis', 'decision', 'recommendation'],
-  realityLevels: ['text', 'fact', 'model', 'value', 'trajectory', 'system'],
+  realityLevels: REALITY_LEVELS,
   prohibitions: [
     'no_psychodiagnosis',
     'no_hidden_authority',
@@ -39,11 +34,11 @@ class SemanticProtocol {
    * @param {string} sessionId - ID сессии
    * @param {Object} [options]
    * @param {string[]} [options.sourceRefs]
-   * @returns {{ claims: Object[], events: Object[], summary: Object, violations: Object[] }}
+   * @returns {Promise<{ claims: Object[], events: Object[], summary: Object, violations: Object[] }>}
    */
-  analyze(text, sessionId, options = {}) {
+  async analyze(text, sessionId, options = {}) {
     // 1. Extract claims
-    const rawClaims = this.extractor.extractClaims(text, sessionId, options);
+    const rawClaims = await this.extractor.extractClaims(text, sessionId, options);
     const creationEvents = rawClaims.map(c => SemanticEvents.claimCreated(c));
 
     // 2. Enforce domain boundaries (downgrade + block)
@@ -53,12 +48,20 @@ class SemanticProtocol {
     this.ledger.addClaims(processedClaims);
 
     // 4. Collect violations
-    const violations = processedClaims.filter(c => c.violations && c.violations.length > 0);
+    const violations = processedClaims.filter(c => c.requiresUserDecision);
 
     // 5. Summary
-    const summary = this.ledger.getSummary(sessionId);
+    const summary = this.ledger.getSummary(sessionId, options.username);
 
     const allEvents = [...creationEvents, ...boundaryEvents];
+
+    // 6. Persist events
+    semanticRepository.logEvents(allEvents.map(evt => ({
+      ...evt,
+      sessionId,
+      username: options.username || 'system',
+      runId: options.runId || null
+    })));
 
     // Log events for observability
     for (const evt of allEvents) {
@@ -88,19 +91,21 @@ class SemanticProtocol {
   /**
    * Получить ledger summary для сессии.
    * @param {string} sessionId
+   * @param {string} [username]
    * @returns {Object}
    */
-  getSessionSummary(sessionId) {
-    return this.ledger.getSummary(sessionId);
+  getSessionSummary(sessionId, username) {
+    return this.ledger.getSummary(sessionId, username);
   }
 
   /**
    * Получить все violations для сессии.
    * @param {string} sessionId
+   * @param {string} [username]
    * @returns {Object[]}
    */
-  getSessionViolations(sessionId) {
-    return this.ledger.getClaims(sessionId).filter(c => c.violations.length > 0);
+  getSessionViolations(sessionId, username) {
+    return this.ledger.getClaims(sessionId, username).filter(c => c.requiresUserDecision);
   }
 
   /**

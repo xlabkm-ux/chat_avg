@@ -11,102 +11,102 @@ describe('ClaimExtractor', () => {
   const SESSION = 'test-session-1';
 
   describe('extractClaims()', () => {
-    it('should return empty array for empty/null input', () => {
-      assert.deepStrictEqual(extractor.extractClaims('', SESSION), []);
-      assert.deepStrictEqual(extractor.extractClaims(null, SESSION), []);
-      assert.deepStrictEqual(extractor.extractClaims(undefined, SESSION), []);
+    it('should return empty array for empty/null input', async () => {
+      assert.deepStrictEqual(await extractor.extractClaims('', SESSION), []);
+      assert.deepStrictEqual(await extractor.extractClaims(null, SESSION), []);
+      assert.deepStrictEqual(await extractor.extractClaims(undefined, SESSION), []);
     });
 
-    it('should extract observation from data-referenced text', () => {
+    it('should extract observation from data-referenced text', async () => {
       const text = 'Согласно данным исследования, 67% респондентов предпочли первый вариант.';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       assert.ok(claims.length >= 1, 'Should extract at least 1 claim');
       assert.strictEqual(claims[0].type, 'observation');
-      assert.strictEqual(claims[0].strength, 'fact');
+      assert.strictEqual(claims[0].strength, 'strong');
     });
 
-    it('should extract interpretation from conclusive text', () => {
+    it('should extract interpretation from conclusive text', async () => {
       const text = 'Это означает, что компания существенно изменила свою стратегию.';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       assert.ok(claims.length >= 1);
       assert.strictEqual(claims[0].type, 'interpretation');
-      assert.strictEqual(claims[0].strength, 'strong_inference');
+      assert.strictEqual(claims[0].strength, 'moderate');
     });
 
-    it('should extract hypothesis from uncertain text', () => {
+    it('should extract hypothesis from uncertain text', async () => {
       const text = 'Возможно, причина снижения связана с изменением рыночных условий.';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       assert.ok(claims.length >= 1);
       assert.strictEqual(claims[0].type, 'hypothesis');
-      assert.strictEqual(claims[0].strength, 'weak_hypothesis');
+      assert.strictEqual(claims[0].strength, 'weak');
     });
 
-    it('should extract recommendation', () => {
+    it('should extract recommendation', async () => {
       const text = 'Рекомендуется провести дополнительный анализ перед принятием решения.';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       assert.ok(claims.length >= 1);
       assert.strictEqual(claims[0].type, 'recommendation');
     });
 
-    it('should detect questions as hypothesis/question strength', () => {
+    it('should detect questions as hypothesis/question_only strength', async () => {
       const text = 'Может ли это быть связано с изменением конфигурации?';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       assert.ok(claims.length >= 1);
-      assert.strictEqual(claims[0].strength, 'question');
+      assert.strictEqual(claims[0].strength, 'question_only');
     });
 
-    it('should generate unique claimIds', () => {
+    it('should generate unique claimIds', async () => {
       const text = 'Первое утверждение тут. Второе утверждение тут рядом.';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       if (claims.length >= 2) {
         assert.notStrictEqual(claims[0].claimId, claims[1].claimId);
       }
     });
 
-    it('should set sessionId on all claims', () => {
+    it('should set sessionId on all claims', async () => {
       const text = 'По результатам тестирования, система работает стабильно.';
-      const claims = extractor.extractClaims(text, SESSION);
+      const claims = await extractor.extractClaims(text, SESSION);
       for (const c of claims) {
         assert.strictEqual(c.sessionId, SESSION);
       }
     });
 
-    it('should detect reality levels', () => {
+    it('should detect reality levels', async () => {
       const textFact = 'Доказано, что этот метод работает.';
-      const claimsFact = extractor.extractClaims(textFact, SESSION);
+      const claimsFact = await extractor.extractClaims(textFact, SESSION);
       assert.ok(claimsFact.length >= 1);
-      assert.strictEqual(claimsFact[0].level, 'fact');
+      assert.strictEqual(claimsFact[0].level, 'material');
 
       const textModel = 'Согласно теории систем, компоненты взаимосвязаны.';
-      const claimsModel = extractor.extractClaims(textModel, SESSION);
+      const claimsModel = await extractor.extractClaims(textModel, SESSION);
       assert.ok(claimsModel.length >= 1);
-      assert.strictEqual(claimsModel[0].level, 'model');
+      assert.strictEqual(claimsModel[0].level, 'systemic');
     });
   });
 
   describe('downgradeStrength()', () => {
-    it('should downgrade fact → strong_inference (1 step)', () => {
-      assert.strictEqual(ClaimExtractor.downgradeStrength('fact', 1), 'strong_inference');
+    it('should downgrade strong → moderate (1 step)', () => {
+      assert.strictEqual(ClaimExtractor.downgradeStrength('strong', 1), 'moderate');
     });
 
-    it('should downgrade fact → weak_hypothesis (2 steps)', () => {
-      assert.strictEqual(ClaimExtractor.downgradeStrength('fact', 2), 'weak_hypothesis');
+    it('should downgrade strong → weak (2 steps)', () => {
+      assert.strictEqual(ClaimExtractor.downgradeStrength('strong', 2), 'weak');
     });
 
-    it('should not go below question', () => {
-      assert.strictEqual(ClaimExtractor.downgradeStrength('question', 1), 'question');
-      assert.strictEqual(ClaimExtractor.downgradeStrength('weak_hypothesis', 5), 'question');
+    it('should not go below question_only', () => {
+      assert.strictEqual(ClaimExtractor.downgradeStrength('question_only', 1), 'question_only');
+      assert.strictEqual(ClaimExtractor.downgradeStrength('weak', 5), 'question_only');
     });
 
     it('should handle unknown strength', () => {
-      assert.strictEqual(ClaimExtractor.downgradeStrength('unknown', 1), 'question');
+      assert.strictEqual(ClaimExtractor.downgradeStrength('unknown', 1), 'question_only');
     });
   });
 
   describe('getStrengthOrder()', () => {
     it('should return correct order (lower = stronger)', () => {
-      assert.ok(ClaimExtractor.getStrengthOrder('fact') < ClaimExtractor.getStrengthOrder('question'));
-      assert.ok(ClaimExtractor.getStrengthOrder('strong_inference') < ClaimExtractor.getStrengthOrder('weak_hypothesis'));
+      assert.ok(ClaimExtractor.getStrengthOrder('strong') < ClaimExtractor.getStrengthOrder('question_only'));
+      assert.ok(ClaimExtractor.getStrengthOrder('moderate') < ClaimExtractor.getStrengthOrder('weak'));
     });
   });
 });

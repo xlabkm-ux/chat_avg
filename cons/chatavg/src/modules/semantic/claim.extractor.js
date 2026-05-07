@@ -6,7 +6,7 @@
  */
 const crypto = require('crypto');
 
-const STRENGTH_ORDER = ['fact', 'strong_inference', 'weak_hypothesis', 'question'];
+const STRENGTH_ORDER = ['strong', 'moderate', 'weak', 'hypothesis_only', 'question_only'];
 
 const CLAIM_PATTERNS = [
   {
@@ -16,7 +16,7 @@ const CLAIM_PATTERNS = [
       /(?:согласно|по данным|по результатам)\s/i,
     ],
     type: 'observation',
-    defaultStrength: 'fact'
+    defaultStrength: 'strong'
   },
   {
     patterns: [
@@ -25,7 +25,7 @@ const CLAIM_PATTERNS = [
       /(?:таким образом|следовательно|из этого следует)/i,
     ],
     type: 'interpretation',
-    defaultStrength: 'strong_inference'
+    defaultStrength: 'moderate'
   },
   {
     patterns: [
@@ -34,7 +34,7 @@ const CLAIM_PATTERNS = [
       /(?:perhaps|maybe|possibly|probably|might|could be)/i,
     ],
     type: 'hypothesis',
-    defaultStrength: 'weak_hypothesis'
+    defaultStrength: 'weak'
   },
   {
     patterns: [
@@ -42,7 +42,7 @@ const CLAIM_PATTERNS = [
       /(?:should|recommend|suggest|advise|consider)/i,
     ],
     type: 'recommendation',
-    defaultStrength: 'strong_inference'
+    defaultStrength: 'moderate'
   },
   {
     patterns: [
@@ -50,16 +50,18 @@ const CLAIM_PATTERNS = [
       /(?:decided|chosen|approved|selected)/i,
     ],
     type: 'decision',
-    defaultStrength: 'fact'
+    defaultStrength: 'strong'
   }
 ];
 
 const LEVEL_PATTERNS = {
-  fact: [/(?:факт(?:ически)?|доказано|измерено)/i, /(?:fact|proven|measured)/i],
-  model: [/(?:модел[ьи]|теори[яи]|концепци[яи])/i, /(?:model|theory|framework)/i],
-  value: [/(?:ценност[ьи]|важно|приоритет|принцип)/i, /(?:value|important|priority)/i],
-  trajectory: [/(?:направлени[ея]|последстви[яе]|будущ)/i, /(?:direction|consequence|future)/i],
-  system: [/(?:систем[аы]|структур[аы]|взаимосвяз)/i, /(?:system|structure|relationship)/i],
+  material: [/(?:факт(?:ически)?|доказано|измерено|вещ(?:еств)?|материал|физическ|объект)/i, /(?:fact|proven|measured|material|physical|object)/i],
+  psychic: [/(?:чувств|эмоци|переживан|психи|внутр)/i, /(?:feel|emotion|psychic|inner)/i],
+  social: [/(?:обществ|социальн|закон|норм|право)/i, /(?:social|society|law|norm|right)/i],
+  linguistic: [/(?:слов|язык|реч|текст)/i, /(?:word|language|speech|text)/i],
+  systemic: [/(?:систем|структур|взаимосвяз|целост)/i, /(?:system|structure|relationship|integrity)/i],
+  trajectory: [/(?:направлени|последстви|будущ|путь)/i, /(?:direction|consequence|future|trajectory)/i],
+  indirect_depth: [/(?:глубин|скрыт|неявн|подтекст)/i, /(?:depth|hidden|implicit|subtext)/i],
 };
 
 class ClaimExtractor {
@@ -69,25 +71,72 @@ class ClaimExtractor {
    * @param {string} sessionId - ID сессии
    * @param {Object} [options]
    * @param {string[]} [options.sourceRefs] - Ссылки на источники
+   * @param {boolean} [options.useLLM] - Использовать ли LLM для экстракции
    * @returns {Object[]} Массив Claims
    */
-  extractClaims(text, sessionId, options = {}) {
+  async extractClaims(text, sessionId, options = {}) {
     if (!text || typeof text !== 'string' || text.trim().length === 0) return [];
-    const sentences = this._splitIntoSentences(text);
-    const claims = [];
-    for (const sentence of sentences) {
-      const trimmed = sentence.trim();
-      if (trimmed.length < 10) continue;
-      const claim = this._analyzeSentence(trimmed, sessionId, options);
-      if (claim) claims.push(claim);
+
+    const useLLM = options.useLLM || process.env.SEMANTIC_LLM_EXTRACTOR_ENABLED === 'true';
+    
+    if (useLLM) {
+      try {
+        return await this._extractClaimsLLM(text, sessionId, options);
+      } catch (e) {
+        console.warn('[Semantic] LLM Extraction failed, falling back to rule-based', e);
+      }
     }
+
+    return this._extractClaimsRuleBased(text, sessionId, options);
+  }
+
+  /** @private - Rule-based extraction with offset tracking */
+  _extractClaimsRuleBased(text, sessionId, options) {
+    const claims = [];
+    let currentPos = 0;
+    
+    // Simple sentence splitter that also returns offsets
+    const sentenceRegex = /([^.!?;]+[.!? ;]*)/g;
+    let match;
+
+    while ((match = sentenceRegex.exec(text)) !== null) {
+      const sentenceText = match[0];
+      const trimmed = sentenceText.trim();
+      const start = match.index;
+      const end = start + sentenceText.length;
+
+      if (trimmed.length < 10) {
+        currentPos = end;
+        continue;
+      }
+
+      const claim = this._analyzeSentence(trimmed, sessionId, {
+        ...options,
+        sourceSpan: {
+          start,
+          end,
+          confidence: 0.7 // Default rule-based confidence
+        }
+      });
+
+      if (claim) claims.push(claim);
+      currentPos = end;
+    }
+
     return claims;
+  }
+
+  /** @private - Mock/Skeleton for LLM extraction */
+  async _extractClaimsLLM(text, sessionId, options) {
+    // In a real implementation, this would call an LLM with a specific JSON schema prompt.
+    // For now, we simulate success or throw to trigger fallback.
+    throw new Error('LLM Extractor not implemented yet in v0.2 skeleton');
   }
 
   /** @private */
   _analyzeSentence(sentence, sessionId, options) {
     let type = 'observation';
-    let strength = 'strong_inference';
+    let strength = 'moderate';
     let matched = false;
     for (const pattern of CLAIM_PATTERNS) {
       for (const regex of pattern.patterns) {
@@ -102,21 +151,24 @@ class ClaimExtractor {
     }
     if (!matched && /[?？]/.test(sentence)) {
       type = 'hypothesis';
-      strength = 'question';
+      strength = 'question_only';
     }
     const level = this._detectLevel(sentence);
     return {
       claimId: 'claim-' + crypto.randomUUID(),
       sessionId,
+      username: options.username || 'system',
       text: sentence,
       type,
       level,
       strength,
       domainBoundaryId: null,
       sourceRefs: options.sourceRefs || [],
+      sourceSpan: options.sourceSpan || null,
       downgradedFrom: null,
       downgradedReason: null,
       violations: [],
+      requiresUserDecision: false,
       createdBy: 'system',
       createdAt: new Date().toISOString(),
     };
@@ -129,14 +181,7 @@ class ClaimExtractor {
         if (regex.test(sentence)) return level;
       }
     }
-    return 'text';
-  }
-
-  /** @private */
-  _splitIntoSentences(text) {
-    const raw = text.replace(/\n{2,}/g, '\n')
-      .split(/(?<=[.!?;])\s+(?=[A-ZА-ЯЁ])|(?<=\n)(?=[-•*\d])/);
-    return raw.map(s => s.replace(/^[-•*\d.)\s]+/, '').trim()).filter(s => s.length >= 10);
+    return 'unknown';
   }
 
   static getStrengthOrder(strength) {
@@ -146,7 +191,7 @@ class ClaimExtractor {
 
   static downgradeStrength(currentStrength, steps = 1) {
     const idx = STRENGTH_ORDER.indexOf(currentStrength);
-    if (idx === -1) return 'question';
+    if (idx === -1) return 'question_only';
     return STRENGTH_ORDER[Math.min(idx + steps, STRENGTH_ORDER.length - 1)];
   }
 }

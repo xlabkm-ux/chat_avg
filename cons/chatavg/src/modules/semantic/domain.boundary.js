@@ -10,13 +10,41 @@ const SemanticEvents = require('./semantic.events');
 /**
  * Предопределённые Domain Boundaries для PoC.
  */
+/**
+ * Дополнительные уровни реальности v0.2
+ */
+const REALITY_LEVELS = [
+  'material',
+  'psychic',
+  'social',
+  'linguistic',
+  'systemic',
+  'trajectory',
+  'indirect_depth',
+  'unknown'
+];
+
+/**
+ * Новая политика силы утверждений v0.2
+ */
+const STRENGTH_POLICY = {
+  strong: { level: 0, label: 'Strong' },
+  moderate: { level: 1, label: 'Moderate' },
+  weak: { level: 2, label: 'Weak' },
+  hypothesis_only: { level: 3, label: 'Hypothesis Only' },
+  question_only: { level: 4, label: 'Question Only' }
+};
+
+/**
+ * Предопределённые Domain Boundaries v0.2.
+ */
 const DEFAULT_BOUNDARIES = [
   {
     boundaryId: 'medical',
     name: 'Медицинская область',
     description: 'Медицинские диагнозы и рекомендации',
-    level: 'fact',
-    maxAllowedStrength: 'weak_hypothesis',
+    level: 'material',
+    maxAllowedStrength: 'weak',
     rules: [
       {
         ruleId: 'no_medical_diagnosis',
@@ -24,7 +52,7 @@ const DEFAULT_BOUNDARIES = [
         category: 'downgrade',
         keywords: ['диагноз', 'болезн', 'лечени', 'симптом', 'препарат', 'таблетк', 'инъекц', 'операц', 'хирург', 'diagnosis', 'disease', 'treatment', 'symptom', 'medication', 'prescri', 'surgery'],
         patterns: [/(?:у вас|вам (?:следует|нужно) принимать|ваш диагноз)/i, /(?:you (?:have|should take)|your diagnosis)/i],
-        action: { type: 'downgrade', targetStrength: 'weak_hypothesis', message: 'Медицинские утверждения понижены: требуется консультация специалиста' }
+        action: { type: 'downgrade', targetStrength: 'weak', message: 'Медицинские утверждения понижены: требуется консультация специалиста' }
       }
     ]
   },
@@ -32,8 +60,8 @@ const DEFAULT_BOUNDARIES = [
     boundaryId: 'legal',
     name: 'Юридическая область',
     description: 'Юридические заключения и советы',
-    level: 'fact',
-    maxAllowedStrength: 'weak_hypothesis',
+    level: 'social',
+    maxAllowedStrength: 'weak',
     rules: [
       {
         ruleId: 'no_legal_advice',
@@ -41,7 +69,7 @@ const DEFAULT_BOUNDARIES = [
         category: 'downgrade',
         keywords: ['суд', 'закон', 'правов', 'юридическ', 'юридически', 'иск', 'штраф', 'lawsuit', 'legal', 'court', 'statute', 'liability'],
         patterns: [/(?:по закону|юридически|в судебном порядке)/i, /(?:legally|by law|in court)/i],
-        action: { type: 'downgrade', targetStrength: 'weak_hypothesis', message: 'Юридические утверждения понижены: требуется консультация юриста' }
+        action: { type: 'downgrade', targetStrength: 'weak', message: 'Юридические утверждения понижены: требуется консультация юриста' }
       }
     ]
   },
@@ -49,8 +77,8 @@ const DEFAULT_BOUNDARIES = [
     boundaryId: 'psychological',
     name: 'Психологическая область',
     description: 'Психологические оценки и диагнозы',
-    level: 'value',
-    maxAllowedStrength: 'question',
+    level: 'psychic',
+    maxAllowedStrength: 'question_only',
     rules: [
       {
         ruleId: 'no_psychodiagnosis',
@@ -71,8 +99,8 @@ const DEFAULT_BOUNDARIES = [
     boundaryId: 'financial',
     name: 'Финансовая область',
     description: 'Инвестиционные и финансовые советы',
-    level: 'fact',
-    maxAllowedStrength: 'weak_hypothesis',
+    level: 'social',
+    maxAllowedStrength: 'weak',
     rules: [
       {
         ruleId: 'no_financial_advice',
@@ -84,7 +112,7 @@ const DEFAULT_BOUNDARIES = [
           /(?:лучшая стратегия (?:сейчас|для вас))/i,
           /(?:you should (?:invest|buy|sell|transfer|allocate))/i,
         ],
-        action: { type: 'downgrade', targetStrength: 'weak_hypothesis', message: 'Финансовые рекомендации понижены: не является инвестиционным советом' }
+        action: { type: 'downgrade', targetStrength: 'weak', message: 'Финансовые рекомендации понижены: не является инвестиционным советом' }
       }
     ]
   },
@@ -92,8 +120,8 @@ const DEFAULT_BOUNDARIES = [
     boundaryId: 'personal_inner',
     name: 'Внутренний мир человека',
     description: 'Утверждения о чувствах, мотивах, переживаниях',
-    level: 'value',
-    maxAllowedStrength: 'question',
+    level: 'psychic',
+    maxAllowedStrength: 'question_only',
     rules: [
       {
         ruleId: 'no_hidden_authority',
@@ -121,7 +149,6 @@ class DomainBoundary {
 
   /**
    * Проверить массив claims на нарушение domain boundaries.
-   * Возвращает обновлённые claims с downgrade/violation информацией и массив events.
    * @param {Object[]} claims
    * @returns {{ claims: Object[], events: Object[] }}
    */
@@ -132,12 +159,13 @@ class DomainBoundary {
       events.push(...result.events);
       return result.claim;
     });
-    // Additional: check for missing sources
+
     const withSourceCheck = processed.map(claim => {
       const result = this._checkMissingSource({ ...claim });
       events.push(...result.events);
       return result.claim;
     });
+
     return { claims: withSourceCheck, events };
   }
 
@@ -152,12 +180,15 @@ class DomainBoundary {
         claim.domainBoundaryId = boundary.boundaryId;
 
         if (rule.action.type === 'block') {
+          claim.violations = claim.violations || [];
           claim.violations.push(rule.name);
+          claim.requiresUserDecision = true;
           events.push(SemanticEvents.authorityBlocked(claim, rule.name));
           events.push(SemanticEvents.boundaryViolation(claim, boundary.boundaryId, rule.ruleId, 'block'));
         } else if (rule.action.type === 'downgrade') {
-          const currentOrder = ClaimExtractor.getStrengthOrder(claim.strength);
-          const targetOrder = ClaimExtractor.getStrengthOrder(rule.action.targetStrength);
+          const currentOrder = this._getStrengthLevel(claim.strength);
+          const targetOrder = this._getStrengthLevel(rule.action.targetStrength);
+          
           if (currentOrder < targetOrder) {
             const fromStrength = claim.strength;
             claim.downgradedFrom = fromStrength;
@@ -172,37 +203,47 @@ class DomainBoundary {
     return { claim, events };
   }
 
-  /** @private - Check claims with strength=fact but no sources */
+  /** @private - Check claims with strong strength but no sources */
   _checkMissingSource(claim) {
     const events = [];
-    if (claim.strength === 'fact' && (!claim.sourceRefs || claim.sourceRefs.length === 0)) {
+    if (this._getStrengthLevel(claim.strength) <= this._getStrengthLevel('strong') && (!claim.sourceRefs || claim.sourceRefs.length === 0)) {
       const fromStrength = claim.strength;
       claim.downgradedFrom = claim.downgradedFrom || fromStrength;
-      claim.strength = 'strong_inference';
+      claim.strength = 'moderate';
       claim.downgradedReason = claim.downgradedReason || 'missing_source';
-      events.push(SemanticEvents.claimDowngraded(claim, fromStrength, 'strong_inference', 'missing_source'));
+      events.push(SemanticEvents.claimDowngraded(claim, fromStrength, 'moderate', 'missing_source'));
     }
     return { claim, events };
   }
 
   /** @private */
+  _getStrengthLevel(strength) {
+    if (STRENGTH_POLICY[strength]) return STRENGTH_POLICY[strength].level;
+    // Map old strengths to new ones for backward compatibility during transition
+    const oldMap = {
+      'fact': 0,
+      'strong_inference': 1,
+      'weak_hypothesis': 2,
+      'question': 4
+    };
+    return oldMap[strength] !== undefined ? oldMap[strength] : 99;
+  }
+
+  /** @private */
   _isRuleTriggered(text, rule) {
     const lowerText = text.toLowerCase();
-    // Check keywords
     for (const kw of rule.keywords) {
       if (lowerText.includes(kw.toLowerCase())) return true;
     }
-    // Check patterns
     for (const pattern of rule.patterns) {
       if (pattern.test(text)) return true;
     }
     return false;
   }
 
-  /** Get all registered boundaries */
   getBoundaries() {
     return this.boundaries;
   }
 }
 
-module.exports = { DomainBoundary, DEFAULT_BOUNDARIES };
+module.exports = { DomainBoundary, DEFAULT_BOUNDARIES, REALITY_LEVELS, STRENGTH_POLICY };

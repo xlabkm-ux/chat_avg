@@ -5,21 +5,16 @@
  * @see SPEC-005 Claim/DomainBoundary
  */
 
-class ClaimLedger {
-  constructor() {
-    /** @type {Map<string, Object[]>} sessionId → claims */
-    this._store = new Map();
-  }
+const semanticRepository = require('./semantic.repository');
 
+class ClaimLedger {
   /**
    * Добавить claim в реестр.
    * @param {Object} claim
    */
   addClaim(claim) {
     if (!claim || !claim.sessionId) return;
-    const list = this._store.get(claim.sessionId) || [];
-    list.push(claim);
-    this._store.set(claim.sessionId, list);
+    semanticRepository.saveClaim(claim);
   }
 
   /**
@@ -27,18 +22,17 @@ class ClaimLedger {
    * @param {Object[]} claims
    */
   addClaims(claims) {
-    for (const claim of claims) {
-      this.addClaim(claim);
-    }
+    semanticRepository.saveClaims(claims);
   }
 
   /**
    * Получить все claims сессии.
    * @param {string} sessionId
+   * @param {string} [username]
    * @returns {Object[]}
    */
-  getClaims(sessionId) {
-    return this._store.get(sessionId) || [];
+  getClaims(sessionId, username) {
+    return semanticRepository.getClaimsBySession(sessionId, username);
   }
 
   /**
@@ -46,13 +40,15 @@ class ClaimLedger {
    * @returns {Object[]}
    */
   getDowngradedClaims() {
-    const result = [];
-    for (const claims of this._store.values()) {
-      for (const c of claims) {
-        if (c.downgradedFrom) result.push(c);
-      }
-    }
-    return result;
+    // В v0.2 это может быть медленным, если записей много. 
+    // В будущем добавить специальный метод в репозиторий.
+    const rows = require('../../core/sqlite').prepare('SELECT * FROM claims WHERE downgraded_from IS NOT NULL').all();
+    return rows.map(r => ({
+      ...r,
+      sourceRefs: JSON.parse(r.source_refs || '[]'),
+      sourceSpan: JSON.parse(r.source_span || 'null'),
+      distortionRisks: JSON.parse(r.distortion_risks || '[]')
+    }));
   }
 
   /**
@@ -60,42 +56,23 @@ class ClaimLedger {
    * @returns {Object[]}
    */
   getViolations() {
-    const result = [];
-    for (const claims of this._store.values()) {
-      for (const c of claims) {
-        if (c.violations && c.violations.length > 0) result.push(c);
-      }
-    }
-    return result;
+    const rows = require('../../core/sqlite').prepare('SELECT * FROM claims WHERE requires_user_decision = 1').all();
+    return rows.map(r => ({
+      ...r,
+      sourceRefs: JSON.parse(r.source_refs || '[]'),
+      sourceSpan: JSON.parse(r.source_span || 'null'),
+      distortionRisks: JSON.parse(r.distortion_risks || '[]')
+    }));
   }
 
   /**
    * Получить статистику по сессии.
    * @param {string} sessionId
+   * @param {string} [username]
    * @returns {Object}
    */
-  getSummary(sessionId) {
-    const claims = this.getClaims(sessionId);
-    const byType = {};
-    const byStrength = {};
-    let downgradedCount = 0;
-    let violationCount = 0;
-
-    for (const c of claims) {
-      byType[c.type] = (byType[c.type] || 0) + 1;
-      byStrength[c.strength] = (byStrength[c.strength] || 0) + 1;
-      if (c.downgradedFrom) downgradedCount++;
-      if (c.violations && c.violations.length > 0) violationCount++;
-    }
-
-    return {
-      sessionId,
-      total: claims.length,
-      byType,
-      byStrength,
-      downgradedCount,
-      violationCount,
-    };
+  getSummary(sessionId, username) {
+    return semanticRepository.getSummary(sessionId, username);
   }
 
   /**
@@ -103,14 +80,14 @@ class ClaimLedger {
    * @param {string} sessionId
    */
   clearSession(sessionId) {
-    this._store.delete(sessionId);
+    semanticRepository.clearSession(sessionId);
   }
 
   /**
    * Очистить всё.
    */
   clearAll() {
-    this._store.clear();
+    require('../../core/sqlite').exec('DELETE FROM claims; DELETE FROM semantic_events;');
   }
 }
 
