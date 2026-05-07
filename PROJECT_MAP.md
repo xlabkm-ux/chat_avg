@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 05:59:43`
+> Автоматически сгенерировано: `2026-05-07 06:24:27`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -48,18 +48,26 @@ graph TD
     N37["providerErrors"]
     N38["providerEvents"]
     N39["providers.routes"]
-    N40["api.test"]
-    N41["baseline_security.test"]
-    N42["deterministic_provider.test"]
-    N43["errors.test"]
-    N44["health.test"]
-    N45["deterministic_provider"]
-    N46["provider_events.test"]
-    N47["security.test"]
-    N48["setup_fixtures"]
+    N40["claim.extractor"]
+    N41["claim.ledger"]
+    N42["domain.boundary"]
+    N43["semantic.events"]
+    N44["semantic.protocol"]
+    N45["api.test"]
+    N46["baseline_security.test"]
+    N47["deterministic_provider.test"]
+    N48["errors.test"]
+    N49["health.test"]
+    N50["deterministic_provider"]
+    N51["provider_events.test"]
+    N52["security.test"]
+    N53["claim_extraction.test"]
+    N54["domain_boundary.test"]
+    N55["semantic.eval"]
+    N56["setup_fixtures"]
   end
-  subgraph N49["mcp_gateway"]
-    N50["server"]
+  subgraph N57["mcp_gateway"]
+    N58["server"]
   end
   N2 --> N9
   N3 --> N4
@@ -105,6 +113,7 @@ graph TD
   N19 --> N8
   N19 --> N4
   N19 --> N10
+  N19 --> N44
   N19 --> N38
   N20 --> N37
   N21 --> N36
@@ -147,25 +156,37 @@ graph TD
   N39 --> N36
   N39 --> N12
   N39 --> N8
-  N40 --> N3
-  N40 --> N50
-  N40 --> N9
-  N41 --> N3
-  N41 --> N50
-  N41 --> N9
-  N42 --> N45
-  N43 --> N6
-  N44 --> N3
-  N44 --> N50
-  N44 --> N9
-  N45 --> N35
-  N45 --> N38
-  N46 --> N38
-  N47 --> N10
-  N47 --> N3
+  N42 --> N40
+  N42 --> N43
+  N44 --> N40
+  N44 --> N42
+  N44 --> N41
+  N44 --> N43
+  N45 --> N3
+  N45 --> N58
+  N45 --> N9
+  N46 --> N3
+  N46 --> N58
+  N46 --> N9
   N47 --> N50
-  N47 --> N9
-  N48 --> N9
+  N48 --> N6
+  N49 --> N3
+  N49 --> N58
+  N49 --> N9
+  N50 --> N35
+  N50 --> N38
+  N51 --> N38
+  N52 --> N10
+  N52 --> N3
+  N52 --> N58
+  N52 --> N9
+  N53 --> N40
+  N54 --> N42
+  N54 --> N40
+  N54 --> N44
+  N55 --> N44
+  N55 --> N40
+  N56 --> N9
 ```
 
 ## Компонент: `chatavg`
@@ -175,7 +196,7 @@ graph TD
 | `diagnose_mcp.js` | 38 | 1.1 KB | — |
 | `reset_admin.js` | 22 | 0.6 KB | Admin Reset Utility (SQLite) |
 | `server.js` | 157 | 5.4 KB | — |
-| `src/core/config.js` | 117 | 3.8 KB | — |
+| `src/core/config.js` | 123 | 4.0 KB | — |
 | `src/core/crypto.js` | 78 | 1.9 KB | AES-256-GCM encryption/decryption service. |
 | `src/core/errors.js` | 84 | 2.1 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
@@ -190,7 +211,7 @@ graph TD
 | `src/modules/auth/user.repository.js` | 70 | 2.5 KB | Класс: UserRepository |
 | `src/modules/auth/users.routes.js` | 49 | 1.4 KB | Routes: User Profile |
 | `src/modules/chat/chat.routes.js` | 60 | 2.4 KB | Routes: Chat Completions |
-| `src/modules/chat/chat.service.js` | 353 | 14.0 KB | Класс: ChatService |
+| `src/modules/chat/chat.service.js` | 388 | 15.6 KB | Класс: ChatService |
 | `src/modules/chat/fallbackPolicy.js` | 49 | 1.6 KB | Класс: FallbackPolicy |
 | `src/modules/chat/policyRouter.js` | 39 | 1.1 KB | Класс: PolicyRouter |
 | `src/modules/chat/session.repository.js` | 59 | 1.7 KB | Класс: SessionRepository |
@@ -211,6 +232,11 @@ graph TD
 | `src/modules/providers/providerErrors.js` | 13 | 0.3 KB | Класс: ProviderError |
 | `src/modules/providers/providerEvents.js` | 27 | 0.9 KB | — |
 | `src/modules/providers/providers.routes.js` | 103 | 3.1 KB | — |
+| `src/modules/semantic/claim.extractor.js` | 155 | 5.3 KB | ClaimExtractor — pipeline извлечения утверждений из текста. |
+| `src/modules/semantic/claim.ledger.js` | 118 | 2.6 KB | ClaimLedger — реестр всех извлечённых claims per session. |
+| `src/modules/semantic/domain.boundary.js` | 202 | 8.6 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
+| `src/modules/semantic/semantic.events.js` | 53 | 2.1 KB | Semantic Events — канонические типы событий семантического слоя. |
+| `src/modules/semantic/semantic.protocol.js` | 116 | 3.6 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
 | `tests/api.test.js` | 170 | 5.3 KB | — |
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
 | `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
@@ -219,6 +245,9 @@ graph TD
 | `tests/mocks/deterministic_provider.js` | 79 | 2.7 KB | DeterministicProvider — синтетический провайдер для тестов. |
 | `tests/provider_events.test.js` | 60 | 2.0 KB | — |
 | `tests/security.test.js` | 44 | 1.7 KB | — |
+| `tests/semantic/claim_extraction.test.js` | 113 | 5.2 KB | Tests: ClaimExtractor — извлечение утверждений из текста. |
+| `tests/semantic/domain_boundary.test.js` | 174 | 8.2 KB | Tests: DomainBoundary — проверка границ и strength downgrade. |
+| `tests/semantic/semantic.eval.js` | 163 | 6.2 KB | Semantic Eval Runner — запуск golden set тестов. |
 | `tests/setup_fixtures.js` | 101 | 3.2 KB | — |
 
 ### `server.js`
@@ -365,8 +394,9 @@ graph TD
   - `./fallbackPolicy` → fallbackPolicy
   - `../providers/provider.factory` → getProvider, adapters
   - `../../core/providers.config` → providersConfig
-  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT
+  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED
   - `../../core/utils` → validateProviderUrl, sanitizePromptText
+  - `../semantic/semantic.protocol` → SemanticProtocol
   - `../providers/providerEvents` → ProviderEvents
 
 ### `src/modules/chat/fallbackPolicy.js`
@@ -512,12 +542,48 @@ graph TD
   - `../../core/providers.config` → providersConfig
   - `../../core/providers.config` → providersConfig
 
+### `src/modules/semantic/claim.extractor.js`
+- **Класс**: `ClaimExtractor`
+- **Экспорт**: `{ ClaimExtractor, STRENGTH_ORDER }`, `ClaimExtractor`, `STRENGTH_ORDER`
+- **Зависимости**:
+
+### `src/modules/semantic/claim.ledger.js`
+- **Класс**: `ClaimLedger`
+- **Экспорт**: `{ ClaimLedger }`, `ClaimLedger`
+
+### `src/modules/semantic/domain.boundary.js`
+- **Класс**: `DomainBoundary`
+- **Экспорт**: `{ DomainBoundary, DEFAULT_BOUNDARIES }`, `DomainBoundary`, `DEFAULT_BOUNDARIES`
+- **Зависимости**:
+  - `./claim.extractor` → ClaimExtractor
+  - `./semantic.events` → SemanticEvents
+
+### `src/modules/semantic/semantic.events.js`
+- **Экспорт**: `SemanticEvents`
+
+### `src/modules/semantic/semantic.protocol.js`
+- **Класс**: `SemanticProtocol`
+- **Экспорт**: `{ SemanticProtocol, PROTOCOL_VERSION }`, `SemanticProtocol`, `PROTOCOL_VERSION`
+- **Зависимости**:
+  - `./claim.extractor` → ClaimExtractor
+  - `./domain.boundary` → DomainBoundary
+  - `./claim.ledger` → ClaimLedger
+  - `./semantic.events` → SemanticEvents
+
 ### `tests/mocks/deterministic_provider.js`
 - **Класс**: `DeterministicProvider` extends `BaseProvider`
 - **Экспорт**: `{ DeterministicProvider }`, `DeterministicProvider`
 - **Зависимости**:
   - `../../src/modules/providers/base.provider` → BaseProvider
   - `../../src/modules/providers/providerEvents` → ProviderEvents
+
+### `tests/semantic/semantic.eval.js`
+- **Класс**: `SemanticEvalRunner`
+- **Экспорт**: `{ SemanticEvalRunner }`, `SemanticEvalRunner`
+- **Зависимости**:
+  - `../../src/modules/semantic/semantic.protocol` → SemanticProtocol
+  - `../../src/modules/semantic/claim.extractor` → ClaimExtractor
+  - `./golden_set.json` → goldenSet
 
 ### `tests/setup_fixtures.js`
 - **Экспорт**: `{ loadFixtures }`, `loadFixtures`
@@ -609,7 +675,7 @@ auth.routes.js → auth.middleware, user.repository, errors, audit.service
 user.repository.js → sqlite
 users.routes.js → user.repository, auth.middleware, errors
 chat.routes.js → auth.middleware, errors, chat.service
-chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, providerEvents
+chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, semantic.protocol, providerEvents
 fallbackPolicy.js → providerErrors
 policyRouter.js → provider.factory
 session.repository.js → sqlite
@@ -627,6 +693,8 @@ openai_responses_compat.js → base.provider, providerEvents, providerErrors
 qwen.js → openai_compat
 provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp
 providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config, providers.config, providers.config
+domain.boundary.js → claim.extractor, semantic.events
+semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
 api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
 deterministic_provider.test.js → deterministic_provider
@@ -635,6 +703,9 @@ health.test.js → server, sqlite
 deterministic_provider.js → base.provider, providerEvents
 provider_events.test.js → providerEvents
 security.test.js → utils, server, sqlite
+claim_extraction.test.js → claim.extractor
+domain_boundary.test.js → domain.boundary, claim.extractor, semantic.protocol
+semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json
 setup_fixtures.js → sqlite
 ```
 

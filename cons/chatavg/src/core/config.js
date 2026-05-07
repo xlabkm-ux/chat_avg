@@ -36,6 +36,8 @@ const envSchema = z.object({
   GROK_API_KEY: z.string().optional(),
   MCP_GATEWAY_URL: z.string().optional(),
   MCP_API_KEY: z.string().optional(),
+  // Feature Flags
+  SEMANTIC_LAYER_ENABLED: z.string().transform(v => v === 'true').default('false'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -83,6 +85,9 @@ const DEFAULT_CATEGORY_PARAMS = {
 
 const DEFAULT_SYSTEM_PROMPT = 'Ты — полезный ИИ-ассистент Gemma 4. Отвечай точно и по существу.';
 
+// Feature Flags
+const SEMANTIC_LAYER_ENABLED = env.SEMANTIC_LAYER_ENABLED;
+
 module.exports = {
   PORT,
   SECRET,
@@ -95,6 +100,7 @@ module.exports = {
   ALLOWED_EXTRA_PARAMS,
   DEFAULT_CATEGORY_PARAMS,
   DEFAULT_SYSTEM_PROMPT,
+  SEMANTIC_LAYER_ENABLED,
   isDev: env.NODE_ENV === 'development',
   isTest: env.NODE_ENV === 'test',
   allowedOrigins: env.CHATAVG_ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean),

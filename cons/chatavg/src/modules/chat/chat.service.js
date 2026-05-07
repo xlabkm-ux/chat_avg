@@ -4,8 +4,18 @@ const policyRouter = require('./policyRouter');
 const fallbackPolicy = require('./fallbackPolicy');
 const { getProvider, adapters } = require('../providers/provider.factory');
 const providersConfig = require('../../core/providers.config');
-const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT } = require('../../core/config');
+const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED } = require('../../core/config');
 const { validateProviderUrl, sanitizePromptText } = require('../../core/utils');
+
+// Semantic Layer (lazy-loaded, behind feature flag)
+let _semanticProtocol = null;
+function getSemanticProtocol() {
+  if (!_semanticProtocol) {
+    const { SemanticProtocol } = require('../semantic/semantic.protocol');
+    _semanticProtocol = new SemanticProtocol();
+  }
+  return _semanticProtocol;
+}
 
 function pickAllowedExtraParams(input, allowed) {
   const out = {};
@@ -271,6 +281,31 @@ class ChatService {
             
             const responseData = currentProvider.buildResponse(catSettings.model_name, fullText, finalUsage);
             responseData.choices[0].finish_reason = finalFinishReason;
+
+            // Semantic Layer: analyze response (non-streaming only, behind flag)
+            if (SEMANTIC_LAYER_ENABLED && fullText) {
+              try {
+                const sp = getSemanticProtocol();
+                const sessionId = body.session_id || `chat-${Date.now()}`;
+                const result = sp.analyze(fullText, sessionId);
+                if (result.violations.length > 0) {
+                  console.warn(`[Semantic] ${result.violations.length} violation(s) detected in response`);
+                }
+                if (result.summary.downgradedCount > 0) {
+                  console.log(`[Semantic] ${result.summary.downgradedCount} claim(s) downgraded out of ${result.summary.total}`);
+                }
+                // Attach semantic metadata to response
+                responseData._semantic = {
+                  protocolId: sp.getProtocol().protocolId,
+                  claimsTotal: result.summary.total,
+                  downgradedCount: result.summary.downgradedCount,
+                  violationCount: result.summary.violationCount,
+                };
+              } catch (semErr) {
+                console.error('[Semantic] Analysis failed (non-blocking):', semErr.message);
+              }
+            }
+
             res.json(responseData);
           }
 

@@ -44,9 +44,12 @@
       Итог: Развернута конфигурация LiteLLM Proxy, настроена маршрутизация с fallback механизмами и создан стартовый скрипт. Провайдер `litellm` успешно добавлен в ChatAVG.
 
 ### Sprint 5: Semantic Protocol PoC (Critical Gate)
-- [ ] 🔲 Реализовать `Claim Ledger` (извлечение утверждений)
-- [ ] 🔲 Внедрить `Domain Boundary Rules` (границы адекватности)
-- [ ] 🔲 Подготовить `Semantic Eval Golden Set` (набор тестов)
+- [x] ✅ Реализовать `Claim Ledger` (извлечение утверждений) — 2026-05-07
+- [x] ✅ Внедрить `Domain Boundary Rules` (границы адекватности) — 2026-05-07
+- [x] ✅ Подготовить `Semantic Eval Golden Set` (набор тестов) — 2026-05-07
+      Файлы: `src/modules/semantic/semantic.protocol.js`, `claim.extractor.js`, `domain.boundary.js`, `claim.ledger.js`, `semantic.events.js`, `src/core/config.js`, `src/modules/chat/chat.service.js`, `tests/semantic/golden_set.json`, `tests/semantic/semantic.eval.js`, `tests/semantic/claim_extraction.test.js`, `tests/semantic/domain_boundary.test.js`
+      Документация: `ADR-005`, `SPEC-004`, `SPEC-005`, `SEMANTIC_POC_REPORT.md`
+      Итог: Реализован PoC смыслового слоя (ER Meaning Layer). Claim extraction pipeline извлекает утверждения с типом/силой/уровнем. 5 Domain Boundaries с автоматическим strength downgrade. Блокировка психодиагностики и скрытого авторитета. Golden Set: 34 кейса, 100% accuracy. Feature flag SEMANTIC_LAYER_ENABLED. 31 unit test + 21 regression test — все pass.
 
 ### Sprint 6-9: AgentRun, Temporal & MVP Release
 - [ ] 🔲 API долгих миссий (AgentRun API)
