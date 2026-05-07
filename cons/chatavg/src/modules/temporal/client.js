@@ -26,7 +26,15 @@ async function signalApproval(runId, action) {
   await handle.signal('approvalSignal', action);
 }
 
+async function disconnect() {
+  if (client) {
+    await client.connection.close();
+    client = null;
+  }
+}
+
 module.exports = {
   startAgentRun,
-  signalApproval
+  signalApproval,
+  disconnect
 };

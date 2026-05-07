@@ -33,13 +33,14 @@ test('AgentRun & Mission API Tests', async (t) => {
     testServer = app.listen(0, done);
   });
 
-  t.after((done) => {
+  t.after(async () => {
     if (testServer) {
       testServer.closeAllConnections();
-      testServer.close(done);
-    } else {
-      done();
+      await new Promise(r => testServer.close(r));
     }
+    const temporalClient = require('../src/modules/temporal/client');
+    await temporalClient.disconnect();
+    db.close();
   });
 
   await t.test('Setup: Login as admin', async () => {

@@ -39,7 +39,8 @@ router.post('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const mission = missionRepository.findById(req.params.id);
+    const username = req.user?.username || 'admin';
+    const mission = missionRepository.findById(req.params.id, username);
     if (!mission) {
       return res.status(404).json({ error: 'Mission not found' });
     }
@@ -69,7 +70,11 @@ router.get('/session/:sessionId', async (req, res) => {
  */
 router.patch('/:id', async (req, res) => {
   try {
-    const mission = missionRepository.update(req.params.id, req.body);
+    const username = req.user?.username || 'admin';
+    const mission = missionRepository.update(req.params.id, req.body, username);
+    if (!mission) {
+      return res.status(404).json({ error: 'Mission not found or unauthorized' });
+    }
     res.json(mission);
   } catch (error) {
     res.status(400).json({ error: error.message });

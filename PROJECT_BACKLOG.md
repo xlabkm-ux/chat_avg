@@ -308,15 +308,17 @@
 
 ---
 
-### Sprint 17: Release Candidate
+### Sprint 17: Release Candidate — ✅ Завершено
 *Цель: Закрыть architecture/security/performance/semantic/migration gates перед production rollout.*
+План: [`docs/05_delivery/SPRINT_17_PLAN.md`](docs/05_delivery/SPRINT_17_PLAN.md)
 
-- [ ] 🔲 Full regression against V1 baseline
-- [ ] 🔲 Security review: prompt injection, tool escalation, cross-tenant leakage, egress, secrets, approval bypass
-- [ ] 🔲 Full eval: RAG, semantic, role passes, artifacts, tool approvals, refusal/recovery
-- [ ] 🔲 Подготовить MIGRATION-002: feature flags, shadow, canary, rollback
-- [ ] 🔲 Подготовить runbooks для Temporal/LiteLLM/E2B/Knowledge/ToolGateway/cost spike
-- [ ] 🔲 Rollback dry-run and backup/restore drill
+- [x] ✅ Full regression against V1 baseline
+- [x] ✅ Security review: prompt injection, tool escalation, cross-tenant leakage, egress, secrets, approval bypass
+- [x] ✅ Full eval: RAG, semantic, role passes, artifacts, tool approvals, refusal/recovery
+- [x] ✅ Подготовить MIGRATION-002: feature flags, shadow, canary, rollback
+- [x] ✅ Подготовить runbooks для Temporal/LiteLLM/E2B/Knowledge/ToolGateway/cost spike
+- [x] ✅ Rollback dry-run and backup/restore drill
+- [x] ✅ Final RC Sign-off Report: [`docs/05_delivery/RELEASE_CANDIDATE_REPORT_RC.md`](docs/05_delivery/RELEASE_CANDIDATE_REPORT_RC.md)
 - [ ] 🔲 Release sign-off: Architecture, Backend, Frontend, QA/Evals, Security, DevOps, Product
 
 **Deliverables:** Release candidate report, MIGRATION-002, Security sign-off, Full eval report, Production checklist, Post-release backlog.

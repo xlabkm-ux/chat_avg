@@ -11,9 +11,9 @@ class AgentRunService extends EventEmitter {
     this.activeStreams = new Map(); // runId -> Set of res objects
   }
 
-  async createRun(missionId, metadata = {}) {
-    const mission = missionRepository.findById(missionId);
-    if (!mission) throw new Error('Mission not found');
+  async createRun(missionId, metadata = {}, username) {
+    const mission = missionRepository.findById(missionId, username);
+    if (!mission) throw new Error('Mission not found or unauthorized');
 
     const run = runRepository.create({
       missionId,
@@ -43,15 +43,15 @@ class AgentRunService extends EventEmitter {
     await this.updateState(runId, 'completed');
   }
 
-  async getRun(runId) {
-    const run = runRepository.findById(runId);
+  async getRun(runId, username) {
+    const run = runRepository.findById(runId, username);
     if (!run) return null;
     return run;
   }
 
-  async cancelRun(runId, reason = 'User cancelled') {
-    const run = runRepository.findById(runId);
-    if (!run) throw new Error('Run not found');
+  async cancelRun(runId, reason = 'User cancelled', username) {
+    const run = runRepository.findById(runId, username);
+    if (!run) throw new Error('Run not found or unauthorized');
 
     if (['completed', 'failed', 'cancelled', 'expired'].includes(run.state)) {
       return run; // Already in a terminal state
@@ -65,17 +65,17 @@ class AgentRunService extends EventEmitter {
       }
     }
 
-    return this.updateState(runId, 'cancelled', {}, reason);
+    return this.updateState(runId, 'cancelled', {}, reason, username);
   }
 
-  async updateState(runId, newState, metadata = {}, reason = null) {
-    const currentRun = runRepository.findById(runId);
-    if (!currentRun) throw new Error('Run not found');
+  async updateState(runId, newState, metadata = {}, reason = null, username) {
+    const currentRun = runRepository.findById(runId, username);
+    if (!currentRun) throw new Error('Run not found or unauthorized');
 
     const previousState = currentRun.state;
     if (previousState === newState) return currentRun;
 
-    const updatedRun = runRepository.updateState(runId, newState, metadata);
+    const updatedRun = runRepository.updateState(runId, newState, metadata, username);
 
     this.emitEvent(runId, 'run.status_changed', {
       previousState,

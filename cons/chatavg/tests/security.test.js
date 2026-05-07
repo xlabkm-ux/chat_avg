@@ -24,7 +24,6 @@ const db = require('../src/core/sqlite');
 after(() => {
   if (server) server.close();
   db.close();
-  setTimeout(() => process.exit(0), 50).unref();
 });
 
 test('Security API: /api/chat/completions', async (t) => {

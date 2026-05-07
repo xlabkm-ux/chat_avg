@@ -8,7 +8,6 @@ const db = require('../src/core/sqlite');
 after(() => {
   if (server) server.close();
   db.close();
-  setTimeout(() => process.exit(0), 50).unref();
 });
 
 test('Security Baseline: CORS enforcement', async () => {

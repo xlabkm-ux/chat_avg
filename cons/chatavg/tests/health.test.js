@@ -20,7 +20,6 @@ test('Provider Health Endpoint', async (t) => {
   t.after(() => {
     if (server) server.close();
     db.close();
-    setTimeout(() => process.exit(0), 50).unref();
   });
 
   await t.test('Setup: Create user and login', async () => {

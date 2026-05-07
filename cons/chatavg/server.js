@@ -116,26 +116,16 @@ app.get('*', (req, res) => {
 // ── Global Error Handler ────────────────────────────────
 app.use(errorHandler);
 
-// ── Start ───────────────────────────────────────────────
-let server;
-if (require.main === module) {
-  server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Starting Chat AVG Gateway on http://0.0.0.0:${PORT}`);
-  });
-}
-
-module.exports = { app, server };
-
 // ── Graceful Shutdown ───────────────────────────────────
-function gracefulShutdown(signal) {
+function gracefulShutdown(serverInstance, signal) {
   console.log(`\nReceived ${signal}. Shutting down gracefully...`);
   
-  if (server && server.closeAllConnections) {
-    server.closeAllConnections();
+  if (serverInstance && serverInstance.closeAllConnections) {
+    serverInstance.closeAllConnections();
   }
 
-  if (server) {
-    server.close(() => {
+  if (serverInstance) {
+    serverInstance.close(() => {
       console.log('Server closed.');
       process.exit(0);
     });
@@ -149,14 +139,24 @@ function gracefulShutdown(signal) {
   }, 5000);
 }
 
-process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-
-if (process.platform === 'win32') {
-  require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout
-  }).on('SIGINT', () => {
-    process.emit('SIGINT');
+// ── Start ───────────────────────────────────────────────
+let server;
+if (require.main === module) {
+  server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Starting Chat AVG Gateway on http://0.0.0.0:${PORT}`);
   });
+
+  process.on('SIGINT', () => gracefulShutdown(server, 'SIGINT'));
+  process.on('SIGTERM', () => gracefulShutdown(server, 'SIGTERM'));
+
+  if (process.platform === 'win32') {
+    require('readline').createInterface({
+      input: process.stdin,
+      output: process.stdout
+    }).on('SIGINT', () => {
+      process.emit('SIGINT');
+    });
+  }
 }
+
+module.exports = { app, server };

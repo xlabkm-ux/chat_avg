@@ -41,7 +41,6 @@ test('API Integration Tests', async (t) => {
         fs.rmSync(dataTestDir, { recursive: true, force: true });
       } catch (e) {}
     }
-    setTimeout(() => process.exit(0), 50).unref();
   });
 
   await t.test('POST /api/auth/login - should fail with invalid credentials', async () => {
