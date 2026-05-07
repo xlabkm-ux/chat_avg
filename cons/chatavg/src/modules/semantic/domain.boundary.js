@@ -22,7 +22,7 @@ const DEFAULT_BOUNDARIES = [
         ruleId: 'no_medical_diagnosis',
         name: 'no_medical_diagnosis',
         category: 'downgrade',
-        keywords: ['диагноз', 'болезн', 'лечени', 'симптом', 'препарат', 'таблетк', 'diagnosis', 'disease', 'treatment', 'symptom', 'medication', 'prescri'],
+        keywords: ['диагноз', 'болезн', 'лечени', 'симптом', 'препарат', 'таблетк', 'инъекц', 'операц', 'хирург', 'diagnosis', 'disease', 'treatment', 'symptom', 'medication', 'prescri', 'surgery'],
         patterns: [/(?:у вас|вам (?:следует|нужно) принимать|ваш диагноз)/i, /(?:you (?:have|should take)|your diagnosis)/i],
         action: { type: 'downgrade', targetStrength: 'weak_hypothesis', message: 'Медицинские утверждения понижены: требуется консультация специалиста' }
       }
@@ -56,11 +56,12 @@ const DEFAULT_BOUNDARIES = [
         ruleId: 'no_psychodiagnosis',
         name: 'no_psychodiagnosis',
         category: 'prohibition',
-        keywords: ['депресси', 'невроз', 'тревожн', 'расстройств', 'психическ', 'нарцисс', 'depression', 'anxiety', 'disorder', 'narcissis', 'psycholog'],
+        keywords: ['депресси', 'невроз', 'тревожн', 'расстройств', 'психическ', 'нарцисс', 'психоз', 'биполярн', 'социопат', 'выгоран', 'PTSD', 'depression', 'anxiety', 'disorder', 'narcissis', 'psycholog', 'psychosis', 'bipolar', 'sociopath', 'burnout'],
         patterns: [
-          /(?:у вас (?:депрессия|невроз|тревожн|расстройство))/i,
-          /(?:вы (?:проявляете|демонстрируете|страдаете))/i,
-          /(?:you (?:have|suffer from|exhibit|display) (?:depression|anxiety|disorder))/i,
+          /(?:у вас (?:депрессия|невроз|тревожн|расстройство|биполярн|психоз|выгорание))/i,
+          /(?:вы (?:проявляете|демонстрируете|страдаете|находитесь в состоянии))/i,
+          /(?:я (?:вижу|диагностирую) у вас)/i,
+          /(?:you (?:have|suffer from|exhibit|display|are in) (?:depression|anxiety|disorder|psychosis|burnout))/i,
         ],
         action: { type: 'block', targetStrength: null, message: 'ЗАБЛОКИРОВАНО: Психодиагностика пользователя запрещена' }
       }
@@ -77,8 +78,12 @@ const DEFAULT_BOUNDARIES = [
         ruleId: 'no_financial_advice',
         name: 'no_financial_advice',
         category: 'downgrade',
-        keywords: ['инвестиц', 'акци', 'биржа', 'криптовалют', 'вложен', 'invest', 'stock', 'crypto', 'portfolio', 'trading'],
-        patterns: [/(?:вам (?:следует|стоит) (?:инвестировать|купить|продать))/i, /(?:you should (?:invest|buy|sell))/i],
+        keywords: ['инвестиц', 'акци', 'биржа', 'криптовалют', 'вложен', 'портфел', 'трейдинг', 'биткоин', 'золот', 'актив', 'invest', 'stock', 'crypto', 'portfolio', 'trading', 'bitcoin', 'gold', 'asset'],
+        patterns: [
+          /(?:вам (?:следует|стоит|нужно) (?:инвестировать|купить|продать|перевести|вложить))/i,
+          /(?:лучшая стратегия (?:сейчас|для вас))/i,
+          /(?:you should (?:invest|buy|sell|transfer|allocate))/i,
+        ],
         action: { type: 'downgrade', targetStrength: 'weak_hypothesis', message: 'Финансовые рекомендации понижены: не является инвестиционным советом' }
       }
     ]
@@ -97,9 +102,11 @@ const DEFAULT_BOUNDARIES = [
         keywords: [],
         patterns: [
           /(?:на самом деле вы|в глубине души|ваше (?:подсознание|бессознательное))/i,
-          /(?:я (?:понимаю|вижу|чувствую),?\s+что вы)/i,
+          /(?:я (?:понимаю|вижу|чувствую|чую),?\s+что вы)/i,
+          /(?:ваши (?:действия|слова|реакции) (?:продиктованы|указывают|свидетельствуют))/i,
           /(?:you (?:actually|really|truly) (?:feel|think|want|need))/i,
-          /(?:deep down|your subconscious|I (?:understand|see|sense) that you)/i,
+          /(?:deep down|your subconscious|I (?:understand|see|sense|feel) that you)/i,
+          /(?:your (?:actions|words|reactions) (?:are driven|indicate|show))/i,
         ],
         action: { type: 'block', targetStrength: null, message: 'ЗАБЛОКИРОВАНО: Скрытый авторитет — система не может утверждать о внутреннем мире пользователя' }
       }

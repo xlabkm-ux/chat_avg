@@ -15,7 +15,9 @@
     "test:integration:smoke": "node --test tests/health.test.js",
     "test:latency": "node --test tests/latency_baseline.test.js",
     "eval:semantic": "node --test tests/semantic/claim_extraction.test.js tests/semantic/domain_boundary.test.js",
-    "eval:semantic:smoke": "node tests/semantic/semantic.eval.js",
+    "eval:semantic:full": "node tests/semantic/semantic.eval.js",
+    "eval:rag": "node tests/evals/rag.eval.js",
+    "eval:full": "npm run eval:semantic:full && npm run eval:rag",
     "test:pr": "node --test tests/provider_events.test.js tests/errors.test.js tests/deterministic_provider.test.js tests/contract_canonical_event.test.js tests/fast_path_guardrail.test.js tests/security_assertions.test.js tests/health.test.js",
     "test:nightly": "node --test tests/*.test.js tests/semantic/*.test.js",
     "test:release": "node --test tests/*.test.js tests/semantic/*.test.js && node tests/semantic/semantic.eval.js"

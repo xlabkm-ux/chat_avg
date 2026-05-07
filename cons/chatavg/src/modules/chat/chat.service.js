@@ -4,7 +4,7 @@ const policyRouter = require('./policyRouter');
 const fallbackPolicy = require('./fallbackPolicy');
 const { getProvider, adapters } = require('../providers/provider.factory');
 const providersConfig = require('../../core/providers.config');
-const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED } = require('../../core/config');
+const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED, KNOWLEDGE_GATEWAY_ENABLED } = require('../../core/config');
 const { validateProviderUrl, sanitizePromptText } = require('../../core/utils');
 
 // Agent Execution (lazy-loaded)
@@ -24,6 +24,34 @@ function getSemanticProtocol() {
     _semanticProtocol = new SemanticProtocol();
   }
   return _semanticProtocol;
+}
+
+// Knowledge Gateway (lazy-loaded, behind feature flag)
+let _knowledgeGateway = null;
+function getKnowledgeGateway() {
+  if (!_knowledgeGateway) {
+    _knowledgeGateway = require('../knowledge/knowledge.gateway');
+  }
+  return _knowledgeGateway;
+}
+
+// Execution Services (lazy-loaded)
+let _roleRegistry = null;
+function getRoleRegistry() {
+  if (!_roleRegistry) _roleRegistry = require('../execution/role_pass');
+  return _roleRegistry;
+}
+
+let _artifactService = null;
+function getArtifactService() {
+  if (!_artifactService) _artifactService = require('../execution/artifact.service');
+  return _artifactService;
+}
+
+let _missionService = null;
+function getMissionService() {
+  if (!_missionService) _missionService = require('../execution/mission.service');
+  return _missionService;
 }
 
 function pickAllowedExtraParams(input, allowed) {
@@ -89,16 +117,38 @@ class ChatService {
     let messages = (body.messages || []).map(m => {
       if (m.role === 'user' && typeof m.content === 'string') {
         const sanitized = sanitizePromptText(m.content);
-        if (sanitized !== m.content.trim()) {
-          injectionDetected = true;
-        }
+        if (sanitized !== m.content) injectionDetected = true;
         return { ...m, content: sanitized };
       }
       return m;
     });
 
+    // Mission & Adequacy Covenant Initialization
+    const missionId = body.mission_id || body.missionId || `m-${Date.now()}`;
+    const ms = getMissionService();
+    if (!ms.getMission(missionId)) {
+      ms.startMission({ id: missionId, goal: body.goal || 'Analysis' });
+    }
+
+    const adequacyCovenant = `
+### ADEQUACY COVENANT
+1. Do not exceed domain boundaries (Medical/Legal/Financial/Psychological).
+2. Do not mix logical levels (Fact vs Value).
+3. Do not assume hidden authority over the user's inner state.
+4. If retrieval fails or is low-quality, explicitly state your limitations.
+`;
+
+    // Inject Covenant into System Prompt
+    const hasSystem = messages.some(m => m.role === 'system');
+    if (hasSystem) {
+      messages = messages.map(m => m.role === 'system' ? { ...m, content: m.content + adequacyCovenant } : m);
+    } else {
+      messages = [{ role: 'system', content: adequacyCovenant }, ...messages];
+    }
+
     if (injectionDetected) {
       console.warn(`[Security] Prompt injection attempt detected and sanitized for user: ${user.username}`);
+      ms.addConflict(missionId, { type: 'SECURITY_INJECTION', message: 'Prompt injection detected' });
     }
     
     if (user.category !== 'Администратор') {
@@ -165,6 +215,55 @@ class ChatService {
     }
 
     console.log(`[Chat] user=${user.username} primary_provider=${route.providerId} model=${catSettings.model_name || 'default'} runId=${runId || 'none'}`);
+
+    // Knowledge Gateway Retrieval Phase
+    let retrievalResult = null;
+    if (KNOWLEDGE_GATEWAY_ENABLED && catSettings.rag_enabled) {
+      const kgw = getKnowledgeGateway();
+      const lastUserMessage = [...messages].reverse().find(m => m.role === 'user');
+      const query = lastUserMessage?.content || '';
+      
+      retrievalResult = await kgw.retrieve(query, { settings: catSettings, sessionId: body.session_id || body.sessionId });
+      
+      if (runId && AGENT_RUNS_ENABLED) {
+        getAgentRunService().emitEvent(runId, 'retrieval.completed', { 
+          chunkCount: retrievalResult.chunks.length,
+          mode: retrievalResult.mode,
+          latencyMs: retrievalResult.metadata.latencyMs
+        });
+      }
+
+      if (retrievalResult.metadata.shouldRefuse) {
+        const refusalMessage = "I don't have enough information in the provided context to answer this query.";
+        
+        if (runId && AGENT_RUNS_ENABLED) {
+          getAgentRunService().emitEvent(runId, 'model.delta', { content: refusalMessage, role: 'assistant' });
+          await getAgentRunService().updateState(runId, 'completed');
+        }
+
+        return res.json({
+          choices: [{
+            message: { role: 'assistant', content: refusalMessage },
+            finish_reason: 'stop'
+          }],
+          _retrieval: retrievalResult
+        });
+      }
+
+      const contextText = kgw.formatContext(retrievalResult);
+      if (contextText) {
+        // Inject context into the message list. 
+        // We find the last user message and prepend context to it.
+        let injected = false;
+        messages = messages.map(m => {
+          if (!injected && m.role === 'user' && m.content === query) {
+            injected = true;
+            return { ...m, content: `${contextText}\n\nUser Query: ${m.content}` };
+          }
+          return m;
+        });
+      }
+    }
 
     let lastError = null;
     let finalProviderId = route.providerId;
@@ -341,10 +440,29 @@ class ChatService {
                   claimsTotal: result.summary.total,
                   downgradedCount: result.summary.downgradedCount,
                   violationCount: result.summary.violationCount,
+                  missionId
                 };
+
+                // Record conflicts in Mission Room
+                if (result.violations.length > 0) {
+                  result.events.filter(e => e.type.includes('blocked') || e.type.includes('violation')).forEach(ev => {
+                    ms.addConflict(missionId, ev);
+                  });
+                }
+                
+                // Add significant distinctions (simplified: first 3 claims)
+                result.claims.slice(0, 3).forEach(c => {
+                  if (c.strength === 'fact' || c.strength === 'strong_inference') {
+                    ms.addDistinction(missionId, c.text);
+                  }
+                });
               } catch (semErr) {
                 console.error('[Semantic] Analysis failed (non-blocking):', semErr.message);
               }
+            }
+
+            if (retrievalResult) {
+              responseData._retrieval = retrievalResult;
             }
 
             res.json(responseData);
