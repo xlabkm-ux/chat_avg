@@ -1,11 +1,12 @@
 const db = require('../../core/sqlite');
+const { RedactionService } = require('../policy/redaction.service');
 
 class AuditService {
   /**
    * Log an action to the audit log.
    * @param {string} username - The user who performed the action (can be null for system actions or failed logins).
-   * @param {string} action - The action performed (e.g., 'LOGIN', 'LOGIN_FAILED', 'USER_CREATED').
-   * @param {string} details - Additional details (can be JSON stringified).
+   * @param {string} action - The action performed (e.g., 'LOGIN', 'model', 'retrieval', 'tool', 'approval', 'sandbox', 'semantic', 'cost').
+   * @param {any} details - Additional details. Will be redacted and JSON stringified.
    * @param {string} ip_address - The IP address of the request.
    */
   static log(username, action, details = null, ip_address = null) {
@@ -14,10 +15,13 @@ class AuditService {
         INSERT INTO audit_logs (username, action, details, ip_address, created_at)
         VALUES (@username, @action, @details, @ip_address, @created_at)
       `);
+      
+      const redactedDetails = RedactionService.redact(details);
+      
       stmt.run({
         username: username || null,
         action,
-        details: typeof details === 'object' ? JSON.stringify(details) : details,
+        details: redactedDetails ? (typeof redactedDetails === 'object' ? JSON.stringify(redactedDetails) : String(redactedDetails)) : null,
         ip_address: ip_address || null,
         created_at: Date.now()
       });

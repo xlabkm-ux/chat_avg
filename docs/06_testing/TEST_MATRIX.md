@@ -65,7 +65,7 @@
 | Приоритет | Файл | Тип | Область |
 |---|---|---|---|
 | P0 | `config.test.js` | Unit | Валидация Zod-схемы env, defaults, fail-fast |
-| P0 | `errors.test.js` | Unit + Contract | Error classes, errorHandler format, SPEC-014 |
+| P0 | `errors.test.js` | Unit + Contract | Error classes, errorHandler format, SPEC-010 |
 | P0 | `provider_events.test.js` | Unit + Contract | ProviderEvents contract (delta, done, error, tool_call) |
 | P0 | `deterministic_provider.test.js` | Unit | DeterministicProvider (mock) |
 | P1 | `crypto.test.js` | Unit | AES-256-GCM encrypt/decrypt round-trip |

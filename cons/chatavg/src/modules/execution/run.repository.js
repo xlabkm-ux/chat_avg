@@ -24,8 +24,14 @@ class AgentRunRepository {
     return this.findById(id);
   }
 
-  findById(id) {
-    const run = db.prepare('SELECT * FROM agent_runs WHERE id = ?').get(id);
+  findById(id, username) {
+    const query = username 
+      ? `SELECT agent_runs.* FROM agent_runs 
+         JOIN missions ON agent_runs.mission_id = missions.id 
+         WHERE agent_runs.id = ? AND missions.username = ?`
+      : 'SELECT * FROM agent_runs WHERE id = ?';
+    const params = username ? [id, username] : [id];
+    const run = db.prepare(query).get(...params);
     if (!run) return null;
 
     return {
@@ -34,18 +40,24 @@ class AgentRunRepository {
     };
   }
 
-  findByMission(missionId) {
-    const runs = db.prepare('SELECT * FROM agent_runs WHERE mission_id = ? ORDER BY created_at DESC').all(missionId);
+  findByMission(missionId, username) {
+    const query = username
+      ? `SELECT agent_runs.* FROM agent_runs 
+         JOIN missions ON agent_runs.mission_id = missions.id 
+         WHERE agent_runs.mission_id = ? AND missions.username = ? ORDER BY agent_runs.created_at DESC`
+      : 'SELECT * FROM agent_runs WHERE mission_id = ? ORDER BY created_at DESC';
+    const params = username ? [missionId, username] : [missionId];
+    const runs = db.prepare(query).all(...params);
     return runs.map(r => ({
       ...r,
       metadata: JSON.parse(r.metadata)
     }));
   }
 
-  updateState(id, state, metadata = {}) {
+  updateState(id, state, metadata = {}, username) {
     const now = Date.now();
-    const current = this.findById(id);
-    if (!current) throw new Error('Run not found');
+    const current = this.findById(id, username);
+    if (!current) throw new Error('Run not found or unauthorized');
 
     const mergedMetadata = { ...current.metadata, ...metadata };
 

@@ -32,8 +32,13 @@ class MissionRepository {
     return this.findById(id);
   }
 
-  findById(id) {
-    const mission = db.prepare('SELECT * FROM missions WHERE id = ?').get(id);
+  findById(id, username) {
+    const query = username 
+      ? 'SELECT * FROM missions WHERE id = ? AND username = ?'
+      : 'SELECT * FROM missions WHERE id = ?';
+    const params = username ? [id, username] : [id];
+    
+    const mission = db.prepare(query).get(...params);
     if (!mission) return null;
 
     return {
@@ -54,7 +59,7 @@ class MissionRepository {
     }));
   }
 
-  update(id, missionData) {
+  update(id, missionData, username) {
     const now = Date.now();
     const fields = [];
     const values = [];
@@ -65,15 +70,21 @@ class MissionRepository {
     if (missionData.openQuestions !== undefined) { fields.push('open_questions = ?'); values.push(JSON.stringify(missionData.openQuestions)); }
     if (missionData.context !== undefined) { fields.push('context = ?'); values.push(JSON.stringify(missionData.context)); }
 
-    if (fields.length === 0) return this.findById(id);
+    if (fields.length === 0) return this.findById(id, username);
 
     fields.push('updated_at = ?');
     values.push(now);
     values.push(id);
 
-    db.prepare(`UPDATE missions SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    let query = `UPDATE missions SET ${fields.join(', ')} WHERE id = ?`;
+    if (username) {
+      query += ` AND username = ?`;
+      values.push(username);
+    }
 
-    return this.findById(id);
+    db.prepare(query).run(...values);
+
+    return this.findById(id, username);
   }
 }
 

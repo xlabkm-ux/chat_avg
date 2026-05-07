@@ -53,7 +53,7 @@
 
 ### Sprint 8: Policy, Cost, Audit and Approval
 - **Цель:** Контроль рисков и стоимости в рантайме.
-- **Scope:** SPEC-009 (PolicyEngine), SPEC-010 (CostPolicy), ApprovalRequest states, Redaction (секреты).
+- **Scope:** SPEC-011 (PolicyEngine), SPEC-012 (CostPolicy), SPEC-013 (ApprovalRequest), Redaction (секреты).
 - **Exit Criteria:** Юнит-тесты политик, ассерты аудита.
 
 ### Sprint 9: MVP Release Gate

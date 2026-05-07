@@ -136,7 +136,7 @@
 - [x] ✅ Сделать bridge: simple chat → fast path, complex/mission tasks → AgentRun — 2026-05-07
 - [x] ✅ Не смешивать SessionRepository с execution history — 2026-05-07
 
-**Файлы:** `src/modules/mission/mission.repository.js`, `src/modules/mission/mission.routes.js`, `src/modules/execution/run.repository.js`, `src/modules/execution/run.service.js`, `src/modules/execution/execution.routes.js`, `src/modules/chat/chat.service.js`, `docs/04_specs/SPEC-006-AGENT_RUN_STATE_MACHINE.md`, `docs/04_specs/SPEC-007-AGENT_RUN_EVENT_CONTRACT.md`, `docs/04_specs/SPEC-008-MISSION_MODEL.md`, `tests/agent_run.test.js`
+**Файлы:** `src/modules/mission/mission.repository.js`, `src/modules/mission/mission.routes.js`, `src/modules/execution/run.repository.js`, `src/modules/execution/run.service.js`, `src/modules/execution/execution.routes.js`, `src/modules/chat/chat.service.js`, `docs/04_specs/SPEC-006-AGENT_RUN_STATE_MACHINE.md`, `docs/04_specs/SPEC-007-AGENT_RUN_EVENT.md`, `docs/04_specs/SPEC-008-MISSION_MODEL.md`, `tests/agent_run.test.js`
 **Итог:** Реализована архитектура Missions и AgentRuns. Missions служат контейнером контекста, AgentRuns управляют жизненным циклом исполнения (8 состояний). Реализован SSE-стрим событий. Сделан bridge в ChatService: если в запросе передан `runId`, события дублируются в стрим агента и обновляется его стейт.
 **Deliverables:** SPEC-006, SPEC-007, SPEC-008, SSE event stream MVP, AgentRun API MVP, Semantic context attached to run.
 **Testing Gate:** State transition tests (queued->running->completed) — pass, event stream accessibility — pass, cancel run — pass.
@@ -161,18 +161,20 @@
 
 ---
 
-### Sprint 8: Policy, Cost, Audit and Approval Primitives
+### Sprint 8: Policy, Cost, Audit and Approval Primitives — ✅ Завершён 2026-05-07
 *Цель: Сделать control plane частью execution path до расширения tools/sandbox.*
 
-- [ ] 🔲 Опубликовать SPEC-009 PolicyEngine: allow/deny/require_approval/require_step_up_auth/downgrade
-- [ ] 🔲 Опубликовать SPEC-010 CostPolicy and AgentRunEstimate
-- [ ] 🔲 Расширить AuditService v2: model/retrieval/tool/approval/sandbox/semantic/cost events
-- [ ] 🔲 Добавить ApprovalRequest states: pending/approved/rejected/edited/timeout/expired
-- [ ] 🔲 Ввести risk score 0-100 и riskClass
-- [ ] 🔲 Добавить redaction: secrets/sensitive payloads не в prompts и не model-visible
+- [x] ✅ Опубликовать SPEC-011 PolicyEngine: allow/deny/require_approval/require_step_up_auth/downgrade — 2026-05-07
+- [x] ✅ Опубликовать SPEC-012 CostPolicy and AgentRunEstimate — 2026-05-07
+- [x] ✅ Опубликовать SPEC-013 ApprovalRequest states: pending/approved/rejected/edited/timeout/expired — 2026-05-07
+- [x] ✅ Расширить AuditService v2: model/retrieval/tool/approval/sandbox/semantic/cost events — 2026-05-07
+- [x] ✅ Ввести risk score 0-100 и riskClass — 2026-05-07
+- [x] ✅ Добавить redaction: secrets/sensitive payloads не в prompts и не model-visible — 2026-05-07
 
-**Deliverables:** SPEC-009, SPEC-010, SPEC-011 ApprovalRequest, Audit schema v2, Risk scoring matrix.
-**Testing Gate:** Policy unit tests, cost estimate tests, approval states, audit assertions, redaction/security, approval bypass tests.
+**Файлы:** `src/modules/policy/policy.engine.js`, `src/modules/policy/redaction.service.js`, `src/modules/policy/approval.service.js`, `src/modules/execution/cost.service.js`, `src/modules/audit/audit.service.js`, `docs/04_specs/SPEC-011-POLICY_ENGINE.md`, `docs/04_specs/SPEC-012-COST_POLICY.md`, `docs/04_specs/SPEC-013-APPROVAL_REQUEST.md`, `tests/policy/*.test.js`
+**Итог:** Реализованы Policy Engine (Risk scoring and classes), Cost Service, Approval Request state machine (pending/approved/rejected/edited/expired). Обновлен Audit Service с интеграцией RedactionService для автоматического маскирования ключей и токенов. Опубликованы соответствующие спецификации. Тесты политик проходят успешно.
+**Deliverables:** SPEC-011 PolicyEngine, SPEC-012 CostPolicy, SPEC-013 ApprovalRequest, Audit schema v2, Risk scoring matrix.
+**Testing Gate:** Policy unit tests, cost estimate tests, approval states, audit assertions, redaction/security, approval bypass tests — pass.
 
 ---
 
@@ -195,14 +197,14 @@
 ### Sprint 10: Knowledge Gateway and RAG Modes
 *Цель: Вывести retrieval в mode-driven KnowledgeGateway.*
 
-- [ ] 🔲 Опубликовать SPEC-012 KnowledgeGateway: no_retrieval/fast/balanced/max_quality
+- [ ] 🔲 Опубликовать SPEC-014 KnowledgeGateway: no_retrieval/fast/balanced/max_quality
 - [ ] 🔲 Реализовать router: query classification → mode → retriever → citation validation
 - [ ] 🔲 Legacy/custom retrieval как adapter path, не ChatService logic
 - [ ] 🔲 Cost/trace events для RAG generation
 - [ ] 🔲 Answerability policy для empty retrieval
-- [ ] 🔲 RetrievalResult и Citation contract: sourceId, chunkId, score, provenance, boundary notes
+- [ ] 🔲 Опубликовать SPEC-015 RetrievalResult и Citation contract: sourceId, chunkId, score, provenance, boundary notes
 
-**Deliverables:** SPEC-012, SPEC-013 RetrievalResult/Citation, RAG mode router, Answerability policy.
+**Deliverables:** SPEC-014 KnowledgeGateway, SPEC-015 RetrievalResult/Citation, RAG mode router, Answerability policy.
 **Testing Gate:** Retrieval routing, citation schema validation, empty retrieval, latency per mode, RAG smoke.
 
 ---
@@ -227,14 +229,14 @@
 ### Sprint 12: Role Passes, Artifact Workspace and Mission Room UX
 *Цель: Связать ER Meaning Layer с видимыми артефактами и рабочим UX.*
 
-- [ ] 🔲 Опубликовать SPEC-014 RolePass: Observer/Boundary/Language/System/Trajectory/Builder
+- [ ] 🔲 Опубликовать SPEC-016 RolePass: Observer/Boundary/Language/System/Trajectory/Builder
 - [ ] 🔲 Ввести Adequacy Covenant: не превышать область определения, не смешивать уровни
-- [ ] 🔲 Реализовать ArtifactWorkspace: Artifact/ArtifactPatch/version/source claims/decision records/export
+- [ ] 🔲 Опубликовать SPEC-017 ArtifactWorkspace: Artifact/ArtifactPatch/version/source claims/decision records/export
 - [ ] 🔲 Patch/diff viewer
 - [ ] 🔲 Mission Room MVP: goal, context, open questions, 3-5 distinctions, conflict cards
 - [ ] 🔲 Скрыть debug-механику, показывать смысловые итоги
 
-**Deliverables:** SPEC-014, SPEC-015 ArtifactWorkspace, Mission Room MVP, Artifact patch viewer, ConflictCard/DecisionRecord v0.
+**Deliverables:** SPEC-016 RolePass, SPEC-017 ArtifactWorkspace, Mission Room MVP, Artifact patch viewer, ConflictCard/DecisionRecord v0.
 **Testing Gate:** Role contract tests, artifact versioning/diff, patch references claim/decision, semantic UX smoke, no hidden authority regression.
 
 ---
@@ -242,14 +244,14 @@
 ### Sprint 13: MCP Tool Gateway and Versioned Tool Registry
 *Цель: Подключать tools/connectors через безопасный, версионированный MCP boundary.*
 
-- [ ] 🔲 Опубликовать SPEC-016 MCP Tool Gateway: protocol/transport/auth/schema versioning/timeout/retry/error
+- [ ] 🔲 Опубликовать SPEC-018 MCP Tool Gateway: protocol/transport/auth/schema versioning/timeout/retry/error
 - [ ] 🔲 Реализовать Tool Registry cache: providerId + toolName + toolVersion + schemaHash
 - [ ] 🔲 ToolDefinitionVersion: schemas/riskClass/authScope/approvalPolicyId/timeoutMs/retryPolicyId
 - [ ] 🔲 Разделить risk classes: read/write/external_side_effect/code_exec/browser/privileged
 - [ ] 🔲 ToolCall state machine
 - [ ] 🔲 Требовать idempotencyKey для side-effect tools
 
-**Deliverables:** SPEC-016, Tool Registry MVP, ToolCall state machine, Fake MCP tool server, Canary tool rollout guide.
+**Deliverables:** SPEC-018 MCP Tool Gateway, Tool Registry MVP, ToolCall state machine, Fake MCP tool server, Canary tool rollout guide.
 **Testing Gate:** JSON schema contracts, tool timeout/retry, error mapping, idempotency required, canary version, secrets redaction.
 
 ---
@@ -257,14 +259,14 @@
 ### Sprint 14: Hybrid Sandbox / Forge (E2B Primary)
 *Цель: Материализовать code/browser/write/high-risk actions без sandbox-per-chat default.*
 
-- [ ] 🔲 Опубликовать SPEC-017 SandboxManager: assign/run/snapshot/freeze/terminate/cleanup/quarantine
+- [ ] 🔲 Опубликовать SPEC-019 SandboxManager: assign/run/snapshot/freeze/terminate/cleanup/quarantine
 - [ ] 🔲 Интегрировать E2B primary; Daytona/local как dev/alternative
 - [ ] 🔲 Execution classes: low-risk text/retrieval/read → no sandbox; code/browser/write → full sandbox
 - [ ] 🔲 Workspace mount, artifact extraction, TTL, idle timeout, cleanup, snapshots
 - [ ] 🔲 Egress policy: default deny, tenant allowlist, provider endpoints, signed URLs
 - [ ] 🔲 Quarantine for suspicious artifacts
 
-**Deliverables:** SPEC-017, E2B integration MVP, Forge v0, Egress policy, RUNBOOK-002.
+**Deliverables:** SPEC-019 SandboxManager, E2B integration MVP, Forge v0, Egress policy, RUNBOOK-002.
 **Testing Gate:** Sandbox create/run/cleanup, isolation tests, egress deny/allow, artifact extraction/quarantine, crash recovery, cost/TTL enforcement.
 
 ---

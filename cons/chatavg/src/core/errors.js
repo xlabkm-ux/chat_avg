@@ -1,6 +1,7 @@
 /**
  * Centralized Error Handling
  */
+const crypto = require('crypto');
 
 class AppError extends Error {
   constructor(message, status = 500, code = 'server_error', details = null) {
@@ -68,6 +69,8 @@ function errorHandler(err, req, res, _next) {
       code,
       message,
       details: err.details || null,
+      traceId: req.headers['x-trace-id'] || crypto.randomUUID(),
+      runId: err.runId || req.runId || undefined,
       stack: isDev ? err.stack : undefined
     }
   });

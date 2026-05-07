@@ -21,9 +21,13 @@ class GrokProvider extends OpenAICompatProvider {
       retrieval_mode: { type: 'hybrid' }
     };
 
-    console.log(`\n[Grok RAG] --- OUTGOING SEARCH PAYLOAD ---`);
-    console.log(JSON.stringify(requestBody, null, 2));
-    console.log(`-----------------------------------------\n`);
+    const isProd = process.env.NODE_ENV === 'production';
+    const debugPayloads = process.env.DEBUG_PROVIDER_PAYLOADS === 'true';
+    if (!isProd || debugPayloads) {
+      console.log(`\n[Grok RAG] --- OUTGOING SEARCH PAYLOAD ---`);
+      console.log(JSON.stringify(requestBody, null, 2));
+      console.log(`-----------------------------------------\n`);
+    }
     
     try {
       const response = await fetch(url, {

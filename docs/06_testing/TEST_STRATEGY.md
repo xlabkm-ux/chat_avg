@@ -148,4 +148,4 @@ Release → [full regression] → [load test] → [security scan] → [sign-off]
 | QA-11 | TEST_DATA_FIXTURES.md | Active |
 | QA-12 | RELEASE_GATES_AND_DOD.md | Active |
 | DEV-07 | MOCKS_AND_SYNTHETIC_PROVIDERS.md | Active |
-| SPEC-014 | ERROR_CONTRACT.md | Active |
+| SPEC-010 | ERROR_CONTRACT.md | Active |
