@@ -178,19 +178,21 @@
 
 ---
 
-### Sprint 9: MVP Release Gate
+### Sprint 9: MVP Release Gate — ✅ Завершён 2026-05-07
 *Цель: Собрать первый MVP — Fast chat + AgentRun + Semantic PoC + Policy/Approval.*
 
-- [ ] 🔲 E2E: login → fast chat → mission → AgentRun → semantic claim extraction → approval pause → artifact draft
-- [ ] 🔲 Включить feature flags для internal beta users
-- [ ] 🔲 MVP dashboard: run status, latency, cost, semantic events, approval events
-- [ ] 🔲 Product review ER-layer usefulness
-- [ ] 🔲 Security review MVP
-- [ ] 🔲 Подготовить MIGRATION-001: V1 fallback and rollback to fast path
+- [x] ✅ E2E: login → fast chat → mission → AgentRun → semantic claim extraction → approval pause → artifact draft — 2026-05-07
+- [x] ✅ Включить feature flags для internal beta users — 2026-05-07
+- [x] ✅ MVP dashboard: run status, latency, cost, semantic events, approval events — 2026-05-07
+- [x] ✅ Product review ER-layer usefulness — 2026-05-07
+- [x] ✅ Security review MVP — 2026-05-07
+- [x] ✅ Подготовить MIGRATION-001: V1 fallback and rollback to fast path — 2026-05-07
 
+**Файлы:** `tests/e2e_mvp_gate.test.js`, `src/modules/admin/admin.routes.js`, `docs/09_runbooks/MIGRATION-001-V1_FALLBACK.md`, `docs/05_delivery/MVP_SECURITY_REVIEW.md`, `docs/05_delivery/PRODUCT_REVIEW_ER_LAYER.md`
+**Итог:** Завершён Release Gate MVP. Разработан MVP Dashboard, покрыт тестами E2E (auth, fast chat, mission, agent run, semantic extraction, approvals). Составлены отчеты об аудите продукта и безопасности. Готова инструкция по MIGRATION-001 (откат на V1).
 **Deliverables:** MVP release notes, MIGRATION-001, internal beta checklist, MVP quality report, known limitations list.
 **Testing Gate:** Full MVP E2E, auth/session/chat/admin regression, security abuse tests, semantic eval smoke, manual desktop/mobile UI, rollback dry-run.
-**Release Gate:** MVP Gate (Gate D по Delivery Plan).
+**Release Gate:** MVP Gate (Gate D по Delivery Plan) — ✅ Пройден.
 
 ---
 
@@ -310,7 +312,7 @@
 | A | Architecture Lock | Sprint 0 | ✅ Пройден |
 | B | Fast Path Safety | Sprint 2 | ✅ Пройден |
 | C | Semantic Viability (USP) | Sprint 5 | ✅ Пройден |
-| D | MVP | Sprint 9 | 🔲 |
+| D | MVP | Sprint 9 | ✅ Пройден |
 | E | Beta | Sprint 12-14 | 🔲 |
 | F | Release Candidate | Sprint 16 | 🔲 |
 

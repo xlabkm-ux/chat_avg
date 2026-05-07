@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 08:53:32`
+> Автоматически сгенерировано: `2026-05-07 09:25:18`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -71,26 +71,27 @@ graph TD
     N60["baseline_security.test"]
     N61["contract_canonical_event.test"]
     N62["deterministic_provider.test"]
-    N63["errors.test"]
-    N64["fast_path_guardrail.test"]
-    N65["health.test"]
-    N66["latency_baseline.test"]
-    N67["deterministic_provider"]
-    N68["approval.service.test"]
-    N69["cost.service.test"]
-    N70["policy.engine.test"]
-    N71["redaction.service.test"]
-    N72["provider_events.test"]
-    N73["security.test"]
-    N74["security_assertions.test"]
-    N75["claim_extraction.test"]
-    N76["domain_boundary.test"]
-    N77["semantic.eval"]
-    N78["setup_fixtures"]
-    N79["signal"]
+    N63["e2e_mvp_gate.test"]
+    N64["errors.test"]
+    N65["fast_path_guardrail.test"]
+    N66["health.test"]
+    N67["latency_baseline.test"]
+    N68["deterministic_provider"]
+    N69["approval.service.test"]
+    N70["cost.service.test"]
+    N71["policy.engine.test"]
+    N72["redaction.service.test"]
+    N73["provider_events.test"]
+    N74["security.test"]
+    N75["security_assertions.test"]
+    N76["claim_extraction.test"]
+    N77["domain_boundary.test"]
+    N78["semantic.eval"]
+    N79["setup_fixtures"]
+    N80["signal"]
   end
-  subgraph N80["mcp_gateway"]
-    N81["server"]
+  subgraph N81["mcp_gateway"]
+    N82["server"]
   end
   N2 --> N9
   N3 --> N4
@@ -113,6 +114,7 @@ graph TD
   N11 --> N5
   N11 --> N4
   N11 --> N8
+  N11 --> N9
   N12 --> N9
   N12 --> N5
   N13 --> N9
@@ -188,7 +190,7 @@ graph TD
   N45 --> N35
   N45 --> N36
   N45 --> N38
-  N45 --> N67
+  N45 --> N68
   N48 --> N14
   N48 --> N45
   N48 --> N12
@@ -204,43 +206,49 @@ graph TD
   N56 --> N4
   N56 --> N54
   N58 --> N3
-  N58 --> N81
+  N58 --> N82
   N58 --> N9
   N59 --> N3
-  N59 --> N81
+  N59 --> N82
   N59 --> N9
   N60 --> N3
-  N60 --> N81
+  N60 --> N82
   N60 --> N9
-  N61 --> N67
+  N61 --> N68
   N61 --> N47
-  N62 --> N67
-  N63 --> N6
-  N65 --> N3
-  N65 --> N81
-  N65 --> N9
-  N66 --> N67
-  N67 --> N44
-  N67 --> N47
-  N68 --> N30
-  N68 --> N9
-  N69 --> N24
-  N70 --> N31
-  N71 --> N32
-  N72 --> N47
-  N73 --> N10
-  N73 --> N3
-  N73 --> N81
-  N73 --> N9
+  N62 --> N68
+  N63 --> N3
+  N63 --> N82
+  N63 --> N9
+  N63 --> N30
+  N63 --> N49
+  N63 --> N51
+  N64 --> N6
+  N66 --> N3
+  N66 --> N82
+  N66 --> N9
+  N67 --> N68
+  N68 --> N44
+  N68 --> N47
+  N69 --> N30
+  N69 --> N9
+  N70 --> N24
+  N71 --> N31
+  N72 --> N32
+  N73 --> N47
   N74 --> N10
-  N75 --> N49
-  N76 --> N51
+  N74 --> N3
+  N74 --> N82
+  N74 --> N9
+  N75 --> N10
   N76 --> N49
-  N76 --> N53
-  N77 --> N53
+  N77 --> N51
   N77 --> N49
-  N78 --> N9
-  N79 --> N55
+  N77 --> N53
+  N78 --> N53
+  N78 --> N49
+  N79 --> N9
+  N80 --> N55
 ```
 
 ## Компонент: `chatavg`
@@ -257,7 +265,7 @@ graph TD
 | `src/core/providers.config.js` | 129 | 4.7 KB | — |
 | `src/core/sqlite.js` | 273 | 7.8 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
-| `src/modules/admin/admin.routes.js` | 341 | 12.5 KB | — |
+| `src/modules/admin/admin.routes.js` | 377 | 13.9 KB | — |
 | `src/modules/admin/category.repository.js` | 74 | 3.0 KB | Класс: CategoryRepository |
 | `src/modules/audit/audit.service.js` | 70 | 2.2 KB | Log an action to the audit log. |
 | `src/modules/auth/auth.middleware.js` | 78 | 2.4 KB | Authentication — JWT middleware & helpers |
@@ -309,6 +317,7 @@ graph TD
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
 | `tests/contract_canonical_event.test.js` | 164 | 5.9 KB | Contract tests for AsyncIterable semantics of provider adapters. |
 | `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
+| `tests/e2e_mvp_gate.test.js` | 136 | 4.3 KB | — |
 | `tests/errors.test.js` | 53 | 1.8 KB | — |
 | `tests/fast_path_guardrail.test.js` | 131 | 4.7 KB | Fast Path Guardrail Tests |
 | `tests/health.test.js` | 51 | 1.5 KB | — |
@@ -398,6 +407,7 @@ graph TD
   - `POST /categories/:category_name/test`
   - `GET /stats`
   - `GET /audit`
+  - `GET /dashboard/mvp`
 - **Зависимости**:
   - `../auth/auth.middleware` → authenticate, requireAdmin
   - `../../core/errors` → asyncHandler
@@ -410,6 +420,8 @@ graph TD
   - `../../core/crypto` → crypto
   - `../../core/config` → TEST_TIMEOUT
   - `../../core/providers.config` → providersConfig
+  - `../../core/sqlite` → db
+  - `../../core/config` → FEATURE_FLAGS
 
 ### `src/modules/admin/category.repository.js`
 - **Класс**: `CategoryRepository`
@@ -770,9 +782,9 @@ graph TD
 |---|---|
 | `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js |
 | `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js |
-| `CHATAVG_SECRET` | chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `CHATAVG_SECRET` | chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `DEBUG_PROVIDER_PAYLOADS` | chatavg/grok.js, chatavg/openai_compat.js |
-| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `PORT` | mcp_gateway/server.js |
 
 ## API Реестр
@@ -802,6 +814,7 @@ graph TD
 | `POST` | `/categories/:category_name/test` | `chatavg/src/modules/admin/admin.routes.js` |
 | `GET` | `/stats` | `chatavg/src/modules/admin/admin.routes.js` |
 | `GET` | `/audit` | `chatavg/src/modules/admin/admin.routes.js` |
+| `GET` | `/dashboard/mvp` | `chatavg/src/modules/admin/admin.routes.js` |
 | `POST` | `/login` | `chatavg/src/modules/auth/auth.routes.js` |
 | `GET` | `/me` | `chatavg/src/modules/auth/users.routes.js` |
 | `PATCH` | `/me` | `chatavg/src/modules/auth/users.routes.js` |
@@ -837,7 +850,7 @@ crypto.js → config
 migrate.js → sqlite, config
 providers.config.js → config
 sqlite.js → config, config
-admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config
+admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config, sqlite, config
 category.repository.js → sqlite, crypto
 audit.service.js → sqlite, redaction.service
 auth.middleware.js → config, user.repository, errors
@@ -880,6 +893,7 @@ api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
 contract_canonical_event.test.js → deterministic_provider, providerEvents
 deterministic_provider.test.js → deterministic_provider
+e2e_mvp_gate.test.js → server, sqlite, approval.service, claim.extractor, domain.boundary
 errors.test.js → errors
 health.test.js → server, sqlite
 latency_baseline.test.js → deterministic_provider
