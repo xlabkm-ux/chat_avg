@@ -1,6 +1,6 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Sprint 7 — Durable Runtime — Temporal-first**
+Текущая стадия: **Sprint R1 — Production safety hardening**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
 
 ---
@@ -369,3 +369,33 @@
 | Feature flags | 8/8 реализованы |
 | SPEC documents | 5 (001–005) |
 | ADR documents | 5 (001–005) |
+
+---
+
+## 🛠️ Remediation Track (Architecture Alignment)
+
+### Sprint R0: Reality lock and repo hygiene — ✅ Завершён 2026-05-08
+*Цель: Зафиксировать фактическое состояние проекта и убрать расхождение с roadmap.*
+
+**Задачи:**
+- [x] ✅ Пересмотреть `PROJECT_BACKLOG.md` и исправить статусы — 2026-05-08
+- [x] ✅ Создать `CURRENT_REALITY_AUDIT.md` — 2026-05-08
+- [x] ✅ Создать `REMEDIATION_BACKLOG.md` — 2026-05-08
+- [x] ✅ Обновить `.gitignore` (dist/, БД, logs) — 2026-05-08
+- [x] ✅ Очистить Git index от артефактов — 2026-05-08
+- [x] ✅ Перегенерировать `PROJECT_MAP.md` — 2026-05-08
+
+**Итог:** Репозиторий очищен, документация синхронизирована с реальностью.
+
+---
+
+### Sprint R1: Production safety hardening — ✅ Завершён 2026-05-08
+*Цель: Закрыть критические production safety gaps (sandbox, auth, routes).*
+
+**Задачи:**
+- [x] ✅ Sandbox fail-closed: запретить `LocalAdapter` в prod — 2026-05-08
+- [x] ✅ Secure boot: обязательный `CHATAVG_ADMIN_PASSWORD` в prod — 2026-05-08
+- [x] ✅ Route-level security: внедрить `policyGuard` для sensitive routes — 2026-05-08
+- [x] ✅ Audit hardening: логирование всех security-sensitive действий — 2026-05-08
+
+**Итог:** Система защищена от случайного запуска небезопасных песочниц в продакшене. Все критические действия аудитятся и проходят через Policy Engine.

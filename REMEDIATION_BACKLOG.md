@@ -2,21 +2,21 @@
 
 Этот бэклог содержит задачи по устранению несоответствий между текущим состоянием репозитория и целевой архитектурой ChatAVG v2.3.
 
-## Sprint R0: Reality lock and repo hygiene (В процессе)
+## Sprint R0: Reality lock and repo hygiene — ✅ Завершён 2026-05-08
 - [x] Пересмотреть `PROJECT_BACKLOG.md` и исправить статусы.
 - [x] Создать `CURRENT_REALITY_AUDIT.md`.
-- [ ] Создать `REMEDIATION_BACKLOG.md` (этот файл).
-- [ ] Обновить `.gitignore`.
-- [ ] Очистить Git index от `dist/` (если есть).
-- [ ] Перегенерировать `PROJECT_MAP.md`.
-- [ ] Добавить `README_HANDOVER.md`.
-- [ ] Зафиксировать `RELEASE_BLOCKERS.md`.
+- [x] Создать `REMEDIATION_BACKLOG.md` (этот файл).
+- [x] Обновить `.gitignore`.
+- [x] Очистить Git index от `dist/` (если есть).
+- [x] Перегенерировать `PROJECT_MAP.md`.
+- [x] Добавить `README_HANDOVER.md`.
+- [x] Зафиксировать `RELEASE_BLOCKERS.md`.
 
-## Sprint R1: Production safety hardening (P0)
-- [ ] Sandbox fail-closed: запретить `LocalAdapter` в prod.
-- [ ] Secure boot: обязательный `CHATAVG_ADMIN_PASSWORD` в prod.
-- [ ] Route-level security: аудит всех sensitive routes.
-- [ ] Audit hardening: логирование всех security-sensitive действий.
+## Sprint R1: Production safety hardening (P0) — ✅ Завершён 2026-05-08
+- [x] Sandbox fail-closed: запретить `LocalAdapter` в prod.
+- [x] Secure boot: обязательный `CHATAVG_ADMIN_PASSWORD` в prod.
+- [x] Route-level security: аудит всех sensitive routes.
+- [x] Audit hardening: логирование всех security-sensitive действий.
 
 ## Sprint R2: AgentRun durability foundation (P0)
 - [ ] Persisted event log: запись событий в БД.
