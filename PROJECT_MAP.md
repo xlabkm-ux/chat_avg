@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 06:24:27`
+> Автоматически сгенерировано: `2026-05-07 07:02:51`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -55,19 +55,23 @@ graph TD
     N44["semantic.protocol"]
     N45["api.test"]
     N46["baseline_security.test"]
-    N47["deterministic_provider.test"]
-    N48["errors.test"]
-    N49["health.test"]
-    N50["deterministic_provider"]
-    N51["provider_events.test"]
-    N52["security.test"]
-    N53["claim_extraction.test"]
-    N54["domain_boundary.test"]
-    N55["semantic.eval"]
-    N56["setup_fixtures"]
+    N47["contract_canonical_event.test"]
+    N48["deterministic_provider.test"]
+    N49["errors.test"]
+    N50["fast_path_guardrail.test"]
+    N51["health.test"]
+    N52["latency_baseline.test"]
+    N53["deterministic_provider"]
+    N54["provider_events.test"]
+    N55["security.test"]
+    N56["security_assertions.test"]
+    N57["claim_extraction.test"]
+    N58["domain_boundary.test"]
+    N59["semantic.eval"]
+    N60["setup_fixtures"]
   end
-  subgraph N57["mcp_gateway"]
-    N58["server"]
+  subgraph N61["mcp_gateway"]
+    N62["server"]
   end
   N2 --> N9
   N3 --> N4
@@ -163,30 +167,34 @@ graph TD
   N44 --> N41
   N44 --> N43
   N45 --> N3
-  N45 --> N58
+  N45 --> N62
   N45 --> N9
   N46 --> N3
-  N46 --> N58
+  N46 --> N62
   N46 --> N9
-  N47 --> N50
-  N48 --> N6
-  N49 --> N3
-  N49 --> N58
-  N49 --> N9
-  N50 --> N35
-  N50 --> N38
-  N51 --> N38
-  N52 --> N10
-  N52 --> N3
-  N52 --> N58
-  N52 --> N9
-  N53 --> N40
-  N54 --> N42
-  N54 --> N40
-  N54 --> N44
-  N55 --> N44
-  N55 --> N40
-  N56 --> N9
+  N47 --> N53
+  N47 --> N38
+  N48 --> N53
+  N49 --> N6
+  N51 --> N3
+  N51 --> N62
+  N51 --> N9
+  N52 --> N53
+  N53 --> N35
+  N53 --> N38
+  N54 --> N38
+  N55 --> N10
+  N55 --> N3
+  N55 --> N62
+  N55 --> N9
+  N56 --> N10
+  N57 --> N40
+  N58 --> N42
+  N58 --> N40
+  N58 --> N44
+  N59 --> N44
+  N59 --> N40
+  N60 --> N9
 ```
 
 ## Компонент: `chatavg`
@@ -196,7 +204,7 @@ graph TD
 | `diagnose_mcp.js` | 38 | 1.1 KB | — |
 | `reset_admin.js` | 22 | 0.6 KB | Admin Reset Utility (SQLite) |
 | `server.js` | 157 | 5.4 KB | — |
-| `src/core/config.js` | 123 | 4.0 KB | — |
+| `src/core/config.js` | 141 | 5.0 KB | — |
 | `src/core/crypto.js` | 78 | 1.9 KB | AES-256-GCM encryption/decryption service. |
 | `src/core/errors.js` | 84 | 2.1 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
@@ -239,12 +247,16 @@ graph TD
 | `src/modules/semantic/semantic.protocol.js` | 116 | 3.6 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
 | `tests/api.test.js` | 170 | 5.3 KB | — |
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
+| `tests/contract_canonical_event.test.js` | 164 | 5.9 KB | Contract tests for AsyncIterable semantics of provider adapters. |
 | `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
 | `tests/errors.test.js` | 53 | 1.8 KB | — |
+| `tests/fast_path_guardrail.test.js` | 131 | 4.7 KB | Fast Path Guardrail Tests |
 | `tests/health.test.js` | 51 | 1.5 KB | — |
+| `tests/latency_baseline.test.js` | 138 | 5.0 KB | Latency Measurement Utility |
 | `tests/mocks/deterministic_provider.js` | 79 | 2.7 KB | DeterministicProvider — синтетический провайдер для тестов. |
 | `tests/provider_events.test.js` | 60 | 2.0 KB | — |
 | `tests/security.test.js` | 44 | 1.7 KB | — |
+| `tests/security_assertions.test.js` | 187 | 6.0 KB | CORS, SSRF, JSON Limit, and Prompt Sanitization assertion tests. |
 | `tests/semantic/claim_extraction.test.js` | 113 | 5.2 KB | Tests: ClaimExtractor — извлечение утверждений из текста. |
 | `tests/semantic/domain_boundary.test.js` | 174 | 8.2 KB | Tests: DomainBoundary — проверка границ и strength downgrade. |
 | `tests/semantic/semantic.eval.js` | 163 | 6.2 KB | Semantic Eval Runner — запуск golden set тестов. |
@@ -611,8 +623,8 @@ graph TD
 |---|---|
 | `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js |
 | `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js |
-| `CHATAVG_SECRET` | chatavg/api.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/health.test.js, chatavg/provider_events.test.js, chatavg/setup_fixtures.js |
-| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/api.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/health.test.js, chatavg/provider_events.test.js, chatavg/setup_fixtures.js |
+| `CHATAVG_SECRET` | chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `PORT` | mcp_gateway/server.js |
 
 ## API Реестр
@@ -697,12 +709,15 @@ domain.boundary.js → claim.extractor, semantic.events
 semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
 api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
+contract_canonical_event.test.js → deterministic_provider, providerEvents
 deterministic_provider.test.js → deterministic_provider
 errors.test.js → errors
 health.test.js → server, sqlite
+latency_baseline.test.js → deterministic_provider
 deterministic_provider.js → base.provider, providerEvents
 provider_events.test.js → providerEvents
 security.test.js → utils, server, sqlite
+security_assertions.test.js → utils
 claim_extraction.test.js → claim.extractor
 domain_boundary.test.js → domain.boundary, claim.extractor, semantic.protocol
 semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json

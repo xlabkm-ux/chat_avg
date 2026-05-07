@@ -38,6 +38,13 @@ const envSchema = z.object({
   MCP_API_KEY: z.string().optional(),
   // Feature Flags
   SEMANTIC_LAYER_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  AGENT_RUNS_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  MODEL_GATEWAY_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  LITELLM_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  KNOWLEDGE_GATEWAY_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  TOOL_GATEWAY_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  SANDBOX_FORGE_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  TEMPORAL_RUNTIME_ENABLED: z.string().transform(v => v === 'true').default('false'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -86,6 +93,16 @@ const DEFAULT_CATEGORY_PARAMS = {
 const DEFAULT_SYSTEM_PROMPT = 'Ты — полезный ИИ-ассистент Gemma 4. Отвечай точно и по существу.';
 
 // Feature Flags
+const FEATURE_FLAGS = {
+  SEMANTIC_LAYER_ENABLED: env.SEMANTIC_LAYER_ENABLED,
+  AGENT_RUNS_ENABLED: env.AGENT_RUNS_ENABLED,
+  MODEL_GATEWAY_ENABLED: env.MODEL_GATEWAY_ENABLED,
+  LITELLM_ENABLED: env.LITELLM_ENABLED,
+  KNOWLEDGE_GATEWAY_ENABLED: env.KNOWLEDGE_GATEWAY_ENABLED,
+  TOOL_GATEWAY_ENABLED: env.TOOL_GATEWAY_ENABLED,
+  SANDBOX_FORGE_ENABLED: env.SANDBOX_FORGE_ENABLED,
+  TEMPORAL_RUNTIME_ENABLED: env.TEMPORAL_RUNTIME_ENABLED,
+};
 const SEMANTIC_LAYER_ENABLED = env.SEMANTIC_LAYER_ENABLED;
 
 module.exports = {
@@ -101,6 +118,7 @@ module.exports = {
   DEFAULT_CATEGORY_PARAMS,
   DEFAULT_SYSTEM_PROMPT,
   SEMANTIC_LAYER_ENABLED,
+  FEATURE_FLAGS,
   isDev: env.NODE_ENV === 'development',
   isTest: env.NODE_ENV === 'test',
   allowedOrigins: env.CHATAVG_ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean),

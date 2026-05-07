@@ -5,7 +5,19 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "test:unit": "node --test tests/provider_events.test.js tests/errors.test.js tests/deterministic_provider.test.js",
+    "test:contract": "node --test tests/contract_canonical_event.test.js tests/fast_path_guardrail.test.js",
+    "test:security": "node --test tests/security.test.js tests/security_assertions.test.js tests/baseline_security.test.js",
+    "test:security:smoke": "node --test tests/security_assertions.test.js",
+    "test:integration": "node --test tests/api.test.js tests/health.test.js",
+    "test:integration:smoke": "node --test tests/health.test.js",
+    "test:latency": "node --test tests/latency_baseline.test.js",
+    "eval:semantic": "node --test tests/semantic/claim_extraction.test.js tests/semantic/domain_boundary.test.js",
+    "eval:semantic:smoke": "node tests/semantic/semantic.eval.js",
+    "test:pr": "node --test tests/provider_events.test.js tests/errors.test.js tests/deterministic_provider.test.js tests/contract_canonical_event.test.js tests/fast_path_guardrail.test.js tests/security_assertions.test.js tests/health.test.js",
+    "test:nightly": "node --test tests/*.test.js tests/semantic/*.test.js",
+    "test:release": "node --test tests/*.test.js tests/semantic/*.test.js && node tests/semantic/semantic.eval.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

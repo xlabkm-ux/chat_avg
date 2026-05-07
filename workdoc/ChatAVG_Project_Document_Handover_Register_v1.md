@@ -33,7 +33,7 @@
 | SRC-10 | Repo: PROJECT_BACKLOG.md | Центральный живой backlog, roadmap и история решений. | Обновить под v2.3 до kickoff и передавать как active source. |
 | SRC-11 | Repo: PROJECT_MAP.md | Карта текущей архитектуры, зависимостей, API и компонентов. | Обновлять после каждого sprint closure. Передавать backend/QA/SRE. |
 | SRC-12 | Repo: UI_AUDIT.md | UI/security audit: mobile, safe-area, touch targets, XSS, темизация, status-dot. | Передавать UX/frontend/QA. Обновить перед UI sprint. |
-| SRC-13 | Repo: AGENT_INSTRUCTIONS.md | Правила работы AI-агента в репозитории: planning, tests, refresh, commit/push discipline, no Python by default. | Передавать команде как workflow constraints; обновить под человеческий delivery process. |
+| SRC-13 | Repo: AGENT.md | Правила работы AI-агента в репозитории: planning, tests, refresh, commit/push discipline, no Python by default. | Передавать команде как workflow constraints; обновить под человеческий delivery process. |
 
 
 ## Минимальный kickoff-пакет
@@ -240,7 +240,6 @@ docs/
     SPEC-003-AGENT_RUN_STATE_MACHINE.md
     OPENAPI_CORE_API.yaml
   05_delivery/
-    PROJECT_BACKLOG.md
     SPRINT_PLAN_V2_3.md
     RELEASE_GATES_AND_DOD.md
   06_testing/
