@@ -68,7 +68,8 @@
 
 ---
 
-### Sprint 3: Model Registry — ✅ Завершён 2026-05-07
+### Sprint 3: Model Registry — ⚠️ Skeleton/MVP Implemented
+*Цель: Закрыть pending Model Registry и подготовить Model Gateway без SDK leakage.*
 *Цель: Закрыть pending Model Registry и подготовить Model Gateway без SDK leakage.*
 
 **Задачи:**
@@ -84,7 +85,8 @@
 
 ---
 
-### Sprint 4: Model Gateway (LiteLLM Pilot) — ✅ Завершён 2026-05-07
+### Sprint 4: Model Gateway (LiteLLM Pilot) — ⚠️ Pilot Implemented
+*Цель: Выделить inference/routing в ModelGateway и запустить LiteLLM как primary gateway-кандидат.*
 *Цель: Выделить inference/routing в ModelGateway и запустить LiteLLM как primary gateway-кандидат.*
 
 **Задачи:**
@@ -104,7 +106,8 @@
 
 ---
 
-### Sprint 5: Semantic Protocol PoC (Critical Gate) — ✅ Завершён 2026-05-07
+### Sprint 5: Semantic Protocol PoC — ⚠️ PoC Complete
+*Цель: Рано доказать, что ER Meaning Layer работает до RAG/sandbox/tool-mesh инвестиций.*
 *Цель: Рано доказать, что ER Meaning Layer работает до RAG/sandbox/tool-mesh инвестиций.*
 
 **Задачи:**
@@ -125,7 +128,8 @@
 
 ## 🏁 Текущий спринт
 
-### Sprint 6: Mission + AgentRun API — ✅ Завершён 2026-05-07
+### Sprint 6: Mission + AgentRun API — ⚠️ Skeleton Implemented
+*Цель: Ввести AgentRun и Mission как execution единицы, привязанные к SemanticProtocol.*
 *Цель: Ввести AgentRun и Mission как execution единицы, привязанные к SemanticProtocol.*
 
 **Задачи:**
@@ -145,7 +149,8 @@
 
 ## 🔜 Дорожная карта (Roadmap)
 
-### Sprint 7: Durable Runtime — Temporal-first — ✅ Завершён 2026-05-07
+### Sprint 7: Durable Runtime — ⚠️ Skeleton (Non-Durable)
+*Цель: Внедрить Temporal рано, не строя полноценный workflow engine на SQLite.*
 *Цель: Внедрить Temporal рано, не строя полноценный workflow engine на SQLite.*
 
 - [x] ✅ Опубликовать SPEC-009 DurableRuntime: start/signal/cancel/wait/checkpoint/replay/query (переименовано с SPEC-008) — 2026-05-07
@@ -161,7 +166,8 @@
 
 ---
 
-### Sprint 8: Policy, Cost, Audit and Approval Primitives — ✅ Завершён 2026-05-07
+### Sprint 8: Policy, Cost, Audit and Approval Primitives — ⚠️ Primitives Implemented
+*Цель: Сделать control plane частью execution path до расширения tools/sandbox.*
 *Цель: Сделать control plane частью execution path до расширения tools/sandbox.*
 
 - [x] ✅ Опубликовать SPEC-011 PolicyEngine: allow/deny/require_approval/require_step_up_auth/downgrade — 2026-05-07
@@ -178,7 +184,8 @@
 
 ---
 
-### Sprint 9: MVP Release Gate — ✅ Завершён 2026-05-07
+### Sprint 9: MVP Release Gate — ⚠️ Reality Check Required
+*Цель: Собрать первый MVP — Fast chat + AgentRun + Semantic PoC + Policy/Approval.*
 *Цель: Собрать первый MVP — Fast chat + AgentRun + Semantic PoC + Policy/Approval.*
 
 - [x] ✅ E2E: login → fast chat → mission → AgentRun → semantic claim extraction → approval pause → artifact draft — 2026-05-07
@@ -196,7 +203,8 @@
 
 ---
 
-### Sprint 10: Knowledge Gateway and RAG Modes — ✅ Завершён 2026-05-07
+### Sprint 10: Knowledge Gateway and RAG Modes — ⚠️ Mock Implementation
+*Цель: Вывести retrieval в mode-driven KnowledgeGateway.*
 *Цель: Вывести retrieval в mode-driven KnowledgeGateway.*
 
 - [x] ✅ Опубликовать SPEC-014 KnowledgeGateway: no_retrieval/fast/balanced/max_quality — 2026-05-07
@@ -212,7 +220,8 @@
 
 ---
 
-### Sprint 11: RAG + Semantic Evals and Quality Thresholds — ✅ Завершён 2026-05-07
+### Sprint 11: RAG + Semantic Evals — ⚠️ Initial Dataset/Mock
+*Цель: Перевести качество RAG и ER-layer в измеряемые gates.*
 *Цель: Перевести качество RAG и ER-layer в измеряемые gates.*
 
 - [x] ✅ Создать EVAL-002 RAG dataset: answerable/unanswerable/citation-required/multi-source/adversarial — 2026-05-07
@@ -228,7 +237,8 @@
 **Testing Gate:** CI eval smoke, nightly full eval, manual review sample, regression threshold tests, adversarial prompt suite — pass (Semantic 81%, RAG 100%).
 **Release Gate:** Quality Gate (блокирует MVP/RC).
 
-### Sprint 12: Knowledge Gateway Performance & Cache — ✅ Завершён 2026-05-07
+### Sprint 12: Knowledge Gateway Performance & Cache — ⚠️ Skeleton Implemented
+*Цель: Минимизировать overhead KnowledgeGateway за счёт кэширования и параллелизации.*
 *Цель: Минимизировать overhead KnowledgeGateway за счёт кэширования и параллелизации.*
 
 - [x] ✅ Параллелизация retrieval в `fast` моде: router/retriever latency breakdown — 2026-05-07
@@ -243,7 +253,8 @@
 
 ---
 
-### Sprint 13: Role Passes, Artifact Workspace and Mission Room UX — ✅ Завершён 2026-05-07
+### Sprint 13: Role Passes, Artifact Workspace and Mission Room UX — ⚠️ Skeleton Implemented
+*Цель: Связать ER Meaning Layer с видимыми артефактами и рабочим UX.*
 *Цель: Связать ER Meaning Layer с видимыми артефактами и рабочим UX.*
 
 - [x] ✅ Опубликовать SPEC-016 RolePass: Observer/Boundary/Language/System/Trajectory/Builder — 2026-05-07
@@ -259,7 +270,8 @@
 
 ---
 
-### Sprint 14: MCP Tool Gateway and Versioned Tool Registry — ✅ Завершён 2026-05-07
+### Sprint 14: MCP Tool Gateway and Versioned Tool Registry — ⚠️ Skeleton Implemented
+*Цель: Подключать tools/connectors через безопасный, версионированный MCP boundary.*
 *Цель: Подключать tools/connectors через безопасный, версионированный MCP boundary.*
 
 - [x] ✅ Опубликовать SPEC-018 MCP Tool Gateway: protocol/transport/auth/schema versioning/timeout/retry/error — 2026-05-07
@@ -276,7 +288,8 @@
 
 ---
 
-### Sprint 15: Hybrid Sandbox / Forge (E2B Primary) — ✅ Завершён 2026-05-07
+### Sprint 15: Hybrid Sandbox / Forge (E2B Primary) — ⚠️ Hardening Pending
+*Цель: Материализовать code/browser/write/high-risk actions без sandbox-per-chat default.*
 *Цель: Материализовать code/browser/write/high-risk actions без sandbox-per-chat default.*
 
 - [x] ✅ Опубликовать SPEC-019 SandboxManager: assign/run/snapshot/freeze/terminate/cleanup/quarantine — 2026-05-07
@@ -293,7 +306,8 @@
 
 ---
 
-### Sprint 16: Observability, Load/Chaos and Operational Hardening — ✅ Завершён 2026-05-07
+### Sprint 16: Observability, Load/Chaos and Operational Hardening — ⚠️ Dashboard Placeholders
+*Цель: Доказать надёжность, стоимость, observability и graceful degradation.*
 *Цель: Доказать надёжность, стоимость, observability и graceful degradation.*
 
 - [x] ✅ Dashboards: cost, P95 latency, approvals, sandbox warm/cold, RAG quality, semantic quality
@@ -308,7 +322,8 @@
 
 ---
 
-### Sprint 17: Release Candidate — ✅ Завершено
+### Sprint 17: Release Candidate — ❌ Reality Lock Required
+*Цель: Закрыть architecture/security/performance/semantic/migration gates перед production rollout.*
 *Цель: Закрыть architecture/security/performance/semantic/migration gates перед production rollout.*
 План: [`docs/05_delivery/SPRINT_17_PLAN.md`](docs/05_delivery/SPRINT_17_PLAN.md)
 

@@ -19,8 +19,8 @@ const SCAN_DIRS = [
   { dir: path.join(ROOT, 'cons', 'mcp_gateway'), label: 'mcp_gateway' },
 ];
 const OUTPUT = path.join(ROOT, 'PROJECT_MAP.md');
-const IGNORE = ['node_modules', '.git', 'data', 'data_test', 'webui_original', 'scratch'];
-const EXTENSIONS = ['.js', '.mjs'];
+const IGNORE = ['node_modules', '.git', 'data', 'data_test', 'webui_original', 'scratch', 'dist', 'build'];
+const EXTENSIONS = ['.js', '.mjs', '.ts'];
 
 // ── Утилиты ─────────────────────────────────────────────
 
@@ -33,7 +33,7 @@ function walkDir(dir, base) {
     const fullPath = path.join(dir, entry.name);
     if (entry.isDirectory()) {
       results = results.concat(walkDir(fullPath, base));
-    } else if (EXTENSIONS.includes(path.extname(entry.name))) {
+    } else if (EXTENSIONS.includes(path.extname(entry.name)) && !entry.name.endsWith('.d.ts')) {
       results.push({
         absolute: fullPath,
         relative: path.relative(base, fullPath).replace(/\\/g, '/')
@@ -54,31 +54,35 @@ function analyzeFile(filePath) {
     classes: [],
     description: '',
     lineCount: lines.length,
-    sizeKB: (Buffer.byteLength(content) / 1024).toFixed(1)
+    sizeKB: (Buffer.byteLength(content) / 1024).toFixed(1),
+    contentLen: content.length
   };
 
   for (const line of lines) {
     const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('//') || trimmed.startsWith('*')) continue;
 
     // ── Экспорты ──
     // module.exports = new ChatService();
     let m = trimmed.match(/^module\.exports\s*=\s*(.+?);?\s*$/);
-    if (m) result.exports.push(m[1]);
+    if (m && !result.exports.includes(m[1])) result.exports.push(m[1]);
 
     // module.exports = { foo, bar }
     m = trimmed.match(/^module\.exports\s*=\s*\{(.+)\}/);
     if (m) {
       const items = m[1].split(',').map(s => s.trim().split(':')[0].trim()).filter(Boolean);
-      result.exports.push(...items);
+      for (const item of items) {
+        if (!result.exports.includes(item)) result.exports.push(item);
+      }
     }
 
     // exports.foo = ...
     m = trimmed.match(/^exports\.(\w+)\s*=/);
-    if (m) result.exports.push(m[1]);
+    if (m && !result.exports.includes(m[1])) result.exports.push(m[1]);
 
     // export default / export const / export function
     m = trimmed.match(/^export\s+(default\s+)?(const|let|var|function|class)\s+(\w+)/);
-    if (m) result.exports.push(m[3]);
+    if (m && !result.exports.includes(m[3])) result.exports.push(m[3]);
 
     // ── Импорты ──
     // const foo = require('./bar');
@@ -108,7 +112,10 @@ function analyzeFile(filePath) {
     // ── API роуты ──
     m = trimmed.match(/(?:app|router)\.(get|post|put|delete|patch|use)\s*\(\s*['"]([^'"]+)['"]/);
     if (m) {
-      result.routes.push({ method: m[1].toUpperCase(), path: m[2] });
+      const route = { method: m[1].toUpperCase(), path: m[2] };
+      if (!result.routes.some(r => r.method === route.method && r.path === route.path)) {
+        result.routes.push(route);
+      }
     }
 
     // ── Переменные окружения ──
@@ -120,7 +127,9 @@ function analyzeFile(filePath) {
     // ── Классы ──
     m = trimmed.match(/^class\s+(\w+)(\s+extends\s+(\w+))?/);
     if (m) {
-      result.classes.push({ name: m[1], extends: m[3] || null });
+      if (!result.classes.some(c => c.name === m[1])) {
+        result.classes.push({ name: m[1], extends: m[3] || null });
+      }
     }
   }
 
@@ -154,8 +163,70 @@ function parseEnvFile(envPath) {
 
 // ── Генерация Mermaid ───────────────────────────────────
 
+function buildHighLevelMermaid(componentMap) {
+  const lines = ['```mermaid', 'graph LR'];
+  const nodeIds = new Map();
+  let counter = 0;
+
+  function nodeId(label) {
+    if (!nodeIds.has(label)) {
+      nodeIds.set(label, `H${counter++}`);
+    }
+    return nodeIds.get(label);
+  }
+
+  const folderDeps = new Set();
+
+  for (const [component, files] of Object.entries(componentMap)) {
+    for (const f of files) {
+      const fromFolder = path.dirname(f.relative).replace(/\\/g, '/');
+      const fromLabel = `${component}/${fromFolder}`;
+      
+      for (const imp of f.analysis.imports) {
+        if (imp.from.startsWith('.')) {
+          const sourceDir = path.dirname(f.absolute);
+          const targetAbs = path.resolve(sourceDir, imp.from);
+          
+          for (const [tComp, tFiles] of Object.entries(componentMap)) {
+            for (const tf of tFiles) {
+              if (tf.absolute === targetAbs || tf.absolute === (targetAbs + '.js') || tf.absolute === (targetAbs + '.ts')) {
+                const toFolder = path.dirname(tf.relative).replace(/\\/g, '/');
+                const toLabel = `${tComp}/${toFolder}`;
+                
+                if (fromLabel !== toLabel) {
+                  folderDeps.add(`${fromLabel}|${toLabel}`);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Рисуем узлы и связи
+  const folders = new Set();
+  folderDeps.forEach(dep => {
+    const [from, to] = dep.split('|');
+    folders.add(from);
+    folders.add(to);
+  });
+
+  folders.forEach(f => {
+    lines.push(`  ${nodeId(f)}["${f}"]`);
+  });
+
+  folderDeps.forEach(dep => {
+    const [from, to] = dep.split('|');
+    lines.push(`  ${nodeId(from)} --> ${nodeId(to)}`);
+  });
+
+  lines.push('```');
+  return lines.join('\n');
+}
+
 function buildMermaid(componentMap) {
-  const lines = ['```mermaid', 'graph TD'];
+  const lines = ['```mermaid', 'graph LR'];
   const nodeIds = new Map();
   let counter = 0;
 
@@ -166,16 +237,36 @@ function buildMermaid(componentMap) {
     return nodeIds.get(label);
   }
 
-  // Группировка по компоненту
+  // Группировка по папкам для наглядности
   for (const [component, files] of Object.entries(componentMap)) {
-    const cId = nodeId(component);
-    lines.push(`  subgraph ${cId}["${component}"]`);
-    
-    for (const f of files) {
-      const baseName = path.basename(f.relative, '.js');
-      const fId = nodeId(`${component}/${baseName}`);
-      const label = baseName;
-      lines.push(`    ${fId}["${label}"]`);
+    const compId = nodeId(component);
+    lines.push(`  subgraph ${compId}["${component}"]`);
+
+    // Группируем файлы по директории
+    const folders = {};
+    files.forEach(f => {
+      const folder = path.dirname(f.relative).replace(/\\/g, '/');
+      if (!folders[folder]) folders[folder] = [];
+      folders[folder].push(f);
+    });
+
+    for (const [folder, folderFiles] of Object.entries(folders)) {
+      if (folder !== '.') {
+        const folderId = nodeId(`${component}/${folder}`);
+        lines.push(`    subgraph ${folderId}["${folder}"]`);
+        folderFiles.forEach(f => {
+          const baseName = path.basename(f.relative);
+          const fId = nodeId(`${component}/${f.relative}`);
+          lines.push(`      ${fId}["${baseName}"]`);
+        });
+        lines.push(`    end`);
+      } else {
+        folderFiles.forEach(f => {
+          const baseName = path.basename(f.relative);
+          const fId = nodeId(`${component}/${f.relative}`);
+          lines.push(`    ${fId}["${baseName}"]`);
+        });
+      }
     }
     lines.push('  end');
   }
@@ -184,23 +275,23 @@ function buildMermaid(componentMap) {
   const drawn = new Set();
   for (const [component, files] of Object.entries(componentMap)) {
     for (const f of files) {
-      const baseName = path.basename(f.relative, '.js');
-      const fromId = nodeId(`${component}/${baseName}`);
+      const fromId = nodeId(`${component}/${f.relative}`);
 
       for (const imp of f.analysis.imports) {
-        // Найти целевой файл
         const importPath = imp.from;
         if (importPath.startsWith('.')) {
-          // Внутренняя зависимость — ищем целевой basename
-          const targetBase = path.basename(importPath, '.js').replace(/^\.\//, '');
-          // Ищем во всех файлах
+          // Вычисляем абсолютный путь цели импорта относительно текущего файла
+          const sourceDir = path.dirname(f.absolute);
+          const targetAbs = path.resolve(sourceDir, importPath);
+          
+          // Ищем целевой файл в нашей карте
           for (const [tComp, tFiles] of Object.entries(componentMap)) {
             for (const tf of tFiles) {
-              const tBase = path.basename(tf.relative, '.js');
-              if (tBase === targetBase && `${component}/${baseName}` !== `${tComp}/${tBase}`) {
-                const toId = nodeId(`${tComp}/${tBase}`);
+              // Сравниваем абсолютные пути или относительные
+              if (tf.absolute === targetAbs || tf.absolute === (targetAbs + '.js') || tf.absolute === (targetAbs + '.ts')) {
+                const toId = nodeId(`${tComp}/${tf.relative}`);
                 const edgeKey = `${fromId}-${toId}`;
-                if (!drawn.has(edgeKey)) {
+                if (!drawn.has(edgeKey) && fromId !== toId) {
                   lines.push(`  ${fromId} --> ${toId}`);
                   drawn.add(edgeKey);
                 }
@@ -240,6 +331,19 @@ function generateMap() {
   const envFromCode = parseEnvFile(path.join(ROOT, 'cons', 'chatavg', '.env'));
 
   // ── Формируем документ ──
+  // Сбор статистики
+  let totalFiles = 0;
+  let totalLines = 0;
+  let totalChars = 0;
+  for (const files of Object.values(componentMap)) {
+    totalFiles += files.length;
+    files.forEach(f => {
+      totalLines += f.analysis.lineCount;
+      totalChars += f.analysis.contentLen;
+    });
+  }
+  const estTokens = Math.ceil(totalChars / 4);
+  const contextPressure = ((estTokens / 128000) * 100).toFixed(1);
   const now = new Date().toISOString().slice(0, 19).replace('T', ' ');
   const sections = [];
 
@@ -247,11 +351,27 @@ function generateMap() {
   sections.push(`> Автоматически сгенерировано: \`${now}\``);
   sections.push(`> Скрипт: \`node dev_studio/refresh.js\``);
   sections.push('');
+  sections.push('## 📊 Telemetry / Context Health');
+  sections.push(`| Metric | Value | Note |`);
+  sections.push(`|---|---|---|`);
+  sections.push(`| **Total Files** | \`${totalFiles}\` | Только JS/TS исходники |`);
+  sections.push(`| **Total Lines** | \`${totalLines}\` | Суммарно по проекту |`);
+  sections.push(`| **Project Weight** | \`~${estTokens.toLocaleString()} tokens\` | Оценка (4 символа/токен) |`);
+  sections.push(`| **Context Pressure** | \`${contextPressure}%\` | Нагрузка на окно 128k (Full Scan) |`);
+  sections.push(`| **Map Efficiency** | \`~${(100 - (Buffer.byteLength(JSON.stringify(componentMap)) / totalChars) * 100).toFixed(0)}%\` | Экономия контекста через карту |`);
+  sections.push('');
   sections.push('---');
   sections.push('');
 
   // ── Обзор компонентов ──
-  sections.push('## Архитектура компонентов');
+  sections.push('## Высокоуровневая архитектура');
+  sections.push('> Связи между основными модулями и папками');
+  sections.push('');
+  sections.push(buildHighLevelMermaid(componentMap));
+  sections.push('');
+
+  sections.push('## Детальная карта компонентов');
+  sections.push('> Полный граф зависимостей всех файлов проекта');
   sections.push('');
   sections.push(buildMermaid(componentMap));
   sections.push('');
@@ -374,6 +494,19 @@ function generateMap() {
   const content = sections.join('\n');
   fs.writeFileSync(OUTPUT, content, 'utf-8');
   console.log(`[DevStudio] ✅ PROJECT_MAP.md сгенерирован (${(content.length / 1024).toFixed(1)} KB)`);
+
+  // Обновляем визуализатор (viewer.html) путём инъекции данных в шаблон
+  const TEMPLATE_PATH = path.join(ROOT, 'dev_studio', 'viewer_template.html');
+  const VIEWER_PATH = path.join(ROOT, 'dev_studio', 'viewer.html');
+  
+  if (fs.existsSync(TEMPLATE_PATH)) {
+      let template = fs.readFileSync(TEMPLATE_PATH, 'utf-8');
+      // Кодируем контент в Base64 для безопасной передачи в HTML
+      const b64Content = Buffer.from(content).toString('base64');
+      const hydrated = template.replace('{{PROJECT_MAP_CONTENT_B64}}', b64Content);
+      fs.writeFileSync(VIEWER_PATH, hydrated, 'utf-8');
+      console.log(`[DevStudio] ✅ viewer.html обновлен (автономный режим B64)`);
+  }
 }
 
 // ── Запуск ───────────────────────────────────────────────

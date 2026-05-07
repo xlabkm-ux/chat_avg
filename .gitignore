@@ -2,6 +2,12 @@
 node_modules/
 .npm/
 
+# Build Artifacts
+dist/
+coverage/
+.nyc_output/
+*.tsbuildinfo
+
 # Models (too large for GitHub)
 *.gguf
 models_cache/

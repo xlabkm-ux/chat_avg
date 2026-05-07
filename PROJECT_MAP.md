@@ -1,462 +1,514 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 14:01:12`
+> Автоматически сгенерировано: `2026-05-07 18:36:41`
 > Скрипт: `node dev_studio/refresh.js`
+
+## 📊 Telemetry / Context Health
+| Metric | Value | Note |
+|---|---|---|
+| **Total Files** | `113` | Только JS/TS исходники |
+| **Total Lines** | `11841` | Суммарно по проекту |
+| **Project Weight** | `~97 333 tokens` | Оценка (4 символа/токен) |
+| **Context Pressure** | `76.0%` | Нагрузка на окно 128k (Full Scan) |
+| **Map Efficiency** | `~84%` | Экономия контекста через карту |
 
 ---
 
-## Архитектура компонентов
+## Высокоуровневая архитектура
+> Связи между основными модулями и папками
 
 ```mermaid
-graph TD
+graph LR
+  H0["chatavg/."]
+  H1["chatavg/src/core"]
+  H2["chatavg/src/modules/auth"]
+  H3["chatavg/src/modules/sandbox"]
+  H4["chatavg/src/modules/admin"]
+  H5["chatavg/src/modules/chat"]
+  H6["chatavg/src/modules/providers"]
+  H7["chatavg/src/modules/audit"]
+  H8["chatavg/src/modules/observability"]
+  H9["chatavg/src/modules/policy"]
+  H10["chatavg/src/modules/semantic"]
+  H11["chatavg/src/modules/execution"]
+  H12["chatavg/src/modules/mission"]
+  H13["chatavg/src/modules/temporal"]
+  H14["chatavg/src/modules/knowledge"]
+  H15["chatavg/src/modules/providers/adapters"]
+  H16["chatavg/tests/mocks"]
+  H17["chatavg/src/modules/sandbox/adapters"]
+  H18["chatavg/src/modules/tools"]
+  H19["chatavg/tests"]
+  H20["chatavg/tests/chaos"]
+  H21["chatavg/tests/evals"]
+  H22["chatavg/tests/execution"]
+  H23["chatavg/tests/knowledge"]
+  H24["chatavg/tests/load"]
+  H25["chatavg/tests/policy"]
+  H26["chatavg/tests/sandbox"]
+  H27["chatavg/tests/semantic"]
+  H28["chatavg/tests/tools"]
+  H0 --> H1
+  H0 --> H2
+  H0 --> H3
+  H4 --> H2
+  H4 --> H1
+  H4 --> H5
+  H4 --> H6
+  H4 --> H7
+  H4 --> H8
+  H7 --> H1
+  H7 --> H9
+  H2 --> H1
+  H2 --> H7
+  H5 --> H2
+  H5 --> H1
+  H5 --> H4
+  H5 --> H6
+  H5 --> H10
+  H5 --> H8
+  H11 --> H1
+  H11 --> H12
+  H11 --> H13
+  H14 --> H1
+  H12 --> H1
+  H9 --> H1
+  H15 --> H6
+  H6 --> H1
+  H6 --> H15
+  H6 --> H16
+  H6 --> H2
+  H6 --> H4
+  H17 --> H3
+  H3 --> H17
+  H3 --> H2
+  H3 --> H1
+  H3 --> H7
+  H13 --> H11
+  H13 --> H1
+  H18 --> H6
+  H19 --> H0
+  H19 --> H1
+  H19 --> H13
+  H20 --> H5
+  H19 --> H16
+  H19 --> H6
+  H19 --> H9
+  H19 --> H10
+  H21 --> H5
+  H21 --> H14
+  H21 --> H4
+  H21 --> H6
+  H22 --> H11
+  H22 --> H5
+  H22 --> H4
+  H23 --> H14
+  H23 --> H5
+  H23 --> H4
+  H24 --> H5
+  H24 --> H8
+  H16 --> H6
+  H25 --> H9
+  H25 --> H1
+  H25 --> H11
+  H26 --> H3
+  H19 --> H3
+  H19 --> H18
+  H19 --> H12
+  H27 --> H10
+  H28 --> H18
+  H28 --> H6
+```
+
+## Детальная карта компонентов
+> Полный граф зависимостей всех файлов проекта
+
+```mermaid
+graph LR
   subgraph N0["chatavg"]
-    N1["diagnose_mcp"]
-    N2["env"]
-    N3["config"]
-    N4["crypto"]
-    N5["errors"]
-    N6["migrate"]
-    N7["providers.config"]
-    N8["sqlite"]
-    N9["utils"]
-    N10["admin.routes"]
-    N11["category.repository"]
-    N12["audit.service"]
-    N13["auth.middleware"]
-    N14["auth.routes"]
-    N15["user.repository"]
-    N16["users.routes"]
-    N17["chat.routes"]
-    N18["chat.service"]
-    N19["fallbackPolicy"]
-    N20["policyRouter"]
-    N21["session.repository"]
-    N22["sessions.routes"]
-    N23["artifact.service"]
-    N24["cost.service"]
-    N25["execution.routes"]
-    N26["mission.service"]
-    N27["role_pass"]
-    N28["run.repository"]
-    N29["run.service"]
-    N30["knowledge.cache"]
-    N31["knowledge.gateway"]
-    N32["knowledge.router"]
-    N33["knowledge.types"]
-    N34["mission.repository"]
-    N35["mission.routes"]
-    N36["approval.service"]
-    N37["policy.engine"]
-    N38["redaction.service"]
-    N39["deepseek"]
-    N40["google"]
-    N41["grok"]
-    N42["grok_responses"]
-    N43["llamacpp"]
-    N44["mcp"]
-    N45["openai"]
-    N46["openai_compat"]
-    N47["openai_responses"]
-    N48["openai_responses_compat"]
-    N49["qwen"]
-    N50["base.provider"]
-    N51["provider.factory"]
-    N52["providerErrors"]
-    N53["providerEvents"]
-    N54["providers.routes"]
-    N55["claim.extractor"]
-    N56["claim.ledger"]
-    N57["domain.boundary"]
-    N58["semantic.events"]
-    N59["semantic.protocol"]
-    N60["activities"]
-    N61["client"]
-    N62["worker"]
-    N63["workflows"]
-    N64["base"]
-    N65["openai-responses.provider"]
-    N2["env"]
-    N3["config"]
-    N4["crypto"]
-    N5["errors"]
-    N6["migrate"]
-    N7["providers.config"]
-    N8["sqlite"]
-    N9["utils"]
-    N10["admin.routes"]
-    N11["category.repository"]
-    N12["audit.service"]
-    N13["auth.middleware"]
-    N14["auth.routes"]
-    N15["user.repository"]
-    N16["users.routes"]
-    N17["chat.routes"]
-    N18["chat.service"]
-    N19["fallbackPolicy"]
-    N20["policyRouter"]
-    N21["session.repository"]
-    N22["sessions.routes"]
-    N23["artifact.service"]
-    N24["cost.service"]
-    N25["execution.routes"]
-    N26["mission.service"]
-    N27["role_pass"]
-    N28["run.repository"]
-    N29["run.service"]
-    N30["knowledge.cache"]
-    N31["knowledge.gateway"]
-    N32["knowledge.router"]
-    N33["knowledge.types"]
-    N34["mission.repository"]
-    N35["mission.routes"]
-    N36["approval.service"]
-    N37["policy.engine"]
-    N38["redaction.service"]
-    N39["deepseek"]
-    N40["google"]
-    N41["grok"]
-    N42["grok_responses"]
-    N43["llamacpp"]
-    N44["mcp"]
-    N45["openai"]
-    N46["openai_compat"]
-    N47["openai_responses"]
-    N48["openai_responses_compat"]
-    N49["qwen"]
-    N50["base.provider"]
-    N51["provider.factory"]
-    N52["providerErrors"]
-    N53["providerEvents"]
-    N54["providers.routes"]
-    N55["claim.extractor"]
-    N56["claim.ledger"]
-    N57["domain.boundary"]
-    N58["semantic.events"]
-    N59["semantic.protocol"]
-    N60["activities"]
-    N61["client"]
-    N62["worker"]
-    N63["workflows"]
-    N64["base"]
-    N65["openai-responses.provider"]
-    N66["chat"]
-    N66["chat"]
-    N67["reset_admin"]
-    N68["server"]
-    N3["config"]
-    N4["crypto"]
-    N5["errors"]
-    N6["migrate"]
-    N7["providers.config"]
-    N8["sqlite"]
-    N9["utils"]
-    N10["admin.routes"]
-    N11["category.repository"]
-    N12["audit.service"]
-    N13["auth.middleware"]
-    N14["auth.routes"]
-    N15["user.repository"]
-    N16["users.routes"]
-    N17["chat.routes"]
-    N18["chat.service"]
-    N19["fallbackPolicy"]
-    N20["policyRouter"]
-    N21["session.repository"]
-    N22["sessions.routes"]
-    N23["artifact.service"]
-    N24["cost.service"]
-    N25["execution.routes"]
-    N26["mission.service"]
-    N27["role_pass"]
-    N28["run.repository"]
-    N29["run.service"]
-    N30["knowledge.cache"]
-    N31["knowledge.gateway"]
-    N32["knowledge.router"]
-    N33["knowledge.types"]
-    N34["mission.repository"]
-    N35["mission.routes"]
-    N69["trace.bus"]
-    N36["approval.service"]
-    N37["policy.engine"]
-    N38["redaction.service"]
-    N39["deepseek"]
-    N40["google"]
-    N41["grok"]
-    N42["grok_responses"]
-    N43["llamacpp"]
-    N44["mcp"]
-    N45["openai"]
-    N46["openai_compat"]
-    N47["openai_responses"]
-    N48["openai_responses_compat"]
-    N49["qwen"]
-    N50["base.provider"]
-    N51["provider.factory"]
-    N52["providerErrors"]
-    N53["providerEvents"]
-    N54["providers.routes"]
-    N70["e2b.adapter"]
-    N71["local.adapter"]
-    N72["egress.policy"]
-    N73["sandbox.manager"]
-    N74["sandbox.routes"]
-    N75["sandbox.types"]
-    N76["sandbox.utils"]
-    N55["claim.extractor"]
-    N56["claim.ledger"]
-    N57["domain.boundary"]
-    N58["semantic.events"]
-    N59["semantic.protocol"]
-    N60["activities"]
-    N61["client"]
-    N62["worker"]
-    N63["workflows"]
-    N77["tool.gateway"]
-    N78["tool.registry"]
-    N79["agent_run.test"]
-    N80["api.test"]
-    N81["baseline_security.test"]
-    N82["chaos.test"]
-    N83["contract_canonical_event.test"]
-    N84["deterministic_provider.test"]
-    N85["e2e_mvp_gate.test"]
-    N86["errors.test"]
-    N87["rag.eval"]
-    N88["mission_artifacts.test"]
-    N89["fast_path_guardrail.test"]
-    N90["health.test"]
-    N91["knowledge_gateway.test"]
-    N92["performance.test"]
-    N93["rag_integration.test"]
-    N94["latency_baseline.test"]
-    N95["load_harness.test"]
-    N96["deterministic_provider"]
-    N97["approval.service.test"]
-    N98["cost.service.test"]
-    N99["policy.engine.test"]
-    N100["redaction.service.test"]
-    N101["provider_events.test"]
-    N102["sandbox_manager.test"]
-    N103["security.test"]
-    N104["security_assertions.test"]
-    N105["claim_extraction.test"]
-    N106["domain_boundary.test"]
-    N107["expand_golden_set"]
-    N108["semantic.eval"]
-    N109["setup_fixtures"]
-    N110["signal"]
-    N111["tool_gateway.test"]
+    N1["diagnose_mcp.js"]
+    N2["reset_admin.js"]
+    N3["server.js"]
+    subgraph N4["src/config"]
+      N5["env.ts"]
+    end
+    subgraph N6["src/core"]
+      N7["config.js"]
+      N8["crypto.js"]
+      N9["errors.js"]
+      N10["migrate.js"]
+      N11["providers.config.js"]
+      N12["sqlite.js"]
+      N13["utils.js"]
+    end
+    subgraph N14["src/modules/admin"]
+      N15["admin.routes.js"]
+      N16["category.repository.js"]
+    end
+    subgraph N17["src/modules/audit"]
+      N18["audit.service.js"]
+    end
+    subgraph N19["src/modules/auth"]
+      N20["auth.middleware.js"]
+      N21["auth.routes.js"]
+      N22["user.repository.js"]
+      N23["users.routes.js"]
+    end
+    subgraph N24["src/modules/chat"]
+      N25["chat.routes.js"]
+      N26["chat.service.js"]
+      N27["fallbackPolicy.js"]
+      N28["policyRouter.js"]
+      N29["session.repository.js"]
+      N30["sessions.routes.js"]
+    end
+    subgraph N31["src/modules/execution"]
+      N32["artifact.service.js"]
+      N33["cost.service.js"]
+      N34["execution.routes.js"]
+      N35["mission.service.js"]
+      N36["role_pass.js"]
+      N37["run.repository.js"]
+      N38["run.service.js"]
+    end
+    subgraph N39["src/modules/knowledge"]
+      N40["knowledge.cache.js"]
+      N41["knowledge.gateway.js"]
+      N42["knowledge.router.js"]
+      N43["knowledge.types.js"]
+    end
+    subgraph N44["src/modules/mission"]
+      N45["mission.repository.js"]
+      N46["mission.routes.js"]
+    end
+    subgraph N47["src/modules/observability"]
+      N48["trace.bus.js"]
+    end
+    subgraph N49["src/modules/policy"]
+      N50["approval.service.js"]
+      N51["policy.engine.js"]
+      N52["redaction.service.js"]
+    end
+    subgraph N53["src/modules/providers/adapters"]
+      N54["deepseek.js"]
+      N55["google.js"]
+      N56["grok.js"]
+      N57["grok_responses.js"]
+      N58["llamacpp.js"]
+      N59["mcp.js"]
+      N60["openai.js"]
+      N61["openai_compat.js"]
+      N62["openai_responses.js"]
+      N63["openai_responses_compat.js"]
+      N64["qwen.js"]
+    end
+    subgraph N65["src/modules/providers"]
+      N66["base.provider.js"]
+      N67["provider.factory.js"]
+      N68["providerErrors.js"]
+      N69["providerEvents.js"]
+      N70["providers.routes.js"]
+    end
+    subgraph N71["src/modules/sandbox/adapters"]
+      N72["e2b.adapter.js"]
+      N73["local.adapter.js"]
+    end
+    subgraph N74["src/modules/sandbox"]
+      N75["egress.policy.js"]
+      N76["sandbox.manager.js"]
+      N77["sandbox.routes.js"]
+      N78["sandbox.types.js"]
+      N79["sandbox.utils.js"]
+    end
+    subgraph N80["src/modules/semantic"]
+      N81["claim.extractor.js"]
+      N82["claim.ledger.js"]
+      N83["domain.boundary.js"]
+      N84["semantic.events.js"]
+      N85["semantic.protocol.js"]
+    end
+    subgraph N86["src/modules/temporal"]
+      N87["activities.js"]
+      N88["client.js"]
+      N89["worker.js"]
+      N90["workflows.js"]
+    end
+    subgraph N91["src/modules/tools"]
+      N92["tool.gateway.js"]
+      N93["tool.registry.js"]
+    end
+    subgraph N94["src/providers"]
+      N95["base.ts"]
+      N96["openai-responses.provider.ts"]
+    end
+    subgraph N97["src/types"]
+      N98["chat.ts"]
+    end
+    subgraph N99["tests"]
+      N100["agent_run.test.js"]
+      N101["api.test.js"]
+      N102["baseline_security.test.js"]
+      N103["contract_canonical_event.test.js"]
+      N104["deterministic_provider.test.js"]
+      N105["e2e_mvp_gate.test.js"]
+      N106["errors.test.js"]
+      N107["fast_path_guardrail.test.js"]
+      N108["health.test.js"]
+      N109["latency_baseline.test.js"]
+      N110["provider_events.test.js"]
+      N111["security.test.js"]
+      N112["security_assertions.test.js"]
+      N113["security_red_team.test.js"]
+      N114["setup_fixtures.js"]
+      N115["signal.js"]
+    end
+    subgraph N116["tests/chaos"]
+      N117["chaos.test.js"]
+    end
+    subgraph N118["tests/evals"]
+      N119["rag.eval.js"]
+    end
+    subgraph N120["tests/execution"]
+      N121["mission_artifacts.test.js"]
+    end
+    subgraph N122["tests/knowledge"]
+      N123["knowledge_gateway.test.js"]
+      N124["performance.test.js"]
+      N125["rag_integration.test.js"]
+    end
+    subgraph N126["tests/load"]
+      N127["load_harness.test.js"]
+    end
+    subgraph N128["tests/mocks"]
+      N129["deterministic_provider.js"]
+    end
+    subgraph N130["tests/policy"]
+      N131["approval.service.test.js"]
+      N132["cost.service.test.js"]
+      N133["policy.engine.test.js"]
+      N134["redaction.service.test.js"]
+    end
+    subgraph N135["tests/sandbox"]
+      N136["sandbox_manager.test.js"]
+    end
+    subgraph N137["tests/semantic"]
+      N138["claim_extraction.test.js"]
+      N139["domain_boundary.test.js"]
+      N140["expand_golden_set.js"]
+      N141["semantic.eval.js"]
+    end
+    subgraph N142["tests/tools"]
+      N143["tool_gateway.test.js"]
+    end
   end
-  subgraph N112["mcp_gateway"]
-    N113["server"]
+  subgraph N144["mcp_gateway"]
+    N145["server.js"]
   end
-  N4 --> N3
-  N6 --> N8
-  N6 --> N3
-  N7 --> N3
-  N8 --> N3
-  N10 --> N13
-  N10 --> N5
-  N10 --> N9
-  N10 --> N15
-  N10 --> N11
-  N10 --> N21
-  N10 --> N51
+  N2 --> N12
+  N3 --> N7
+  N3 --> N9
+  N3 --> N12
+  N3 --> N20
+  N3 --> N77
+  N8 --> N7
   N10 --> N12
-  N10 --> N4
-  N10 --> N3
   N10 --> N7
-  N10 --> N8
-  N11 --> N8
-  N11 --> N4
-  N12 --> N8
-  N12 --> N38
-  N13 --> N3
-  N13 --> N15
-  N13 --> N5
-  N14 --> N13
-  N14 --> N15
-  N14 --> N5
-  N14 --> N12
+  N11 --> N7
+  N12 --> N7
+  N15 --> N20
+  N15 --> N9
+  N15 --> N13
+  N15 --> N22
+  N15 --> N16
+  N15 --> N29
+  N15 --> N67
+  N15 --> N18
   N15 --> N8
-  N16 --> N15
-  N16 --> N13
-  N16 --> N5
-  N17 --> N13
-  N17 --> N5
-  N17 --> N18
-  N18 --> N11
-  N18 --> N20
-  N18 --> N19
-  N18 --> N51
-  N18 --> N7
-  N18 --> N3
-  N18 --> N9
-  N18 --> N59
-  N18 --> N53
-  N19 --> N52
-  N20 --> N51
-  N21 --> N8
-  N22 --> N13
-  N22 --> N5
-  N22 --> N21
-  N23 --> N27
-  N25 --> N29
-  N25 --> N3
-  N28 --> N8
-  N29 --> N28
-  N29 --> N34
-  N29 --> N61
-  N29 --> N3
-  N31 --> N32
-  N31 --> N33
-  N31 --> N30
-  N31 --> N3
-  N34 --> N8
-  N35 --> N34
-  N36 --> N8
-  N37 --> N38
-  N39 --> N46
-  N40 --> N50
-  N40 --> N53
-  N40 --> N52
-  N41 --> N46
-  N42 --> N48
-  N43 --> N50
-  N43 --> N53
-  N43 --> N52
-  N44 --> N50
-  N44 --> N53
-  N44 --> N52
-  N45 --> N46
-  N46 --> N50
-  N46 --> N53
-  N46 --> N52
-  N47 --> N48
-  N48 --> N50
-  N48 --> N53
-  N48 --> N52
-  N49 --> N46
-  N51 --> N7
-  N51 --> N43
-  N51 --> N45
-  N51 --> N47
-  N51 --> N39
-  N51 --> N40
-  N51 --> N49
-  N51 --> N41
-  N51 --> N42
-  N51 --> N44
-  N51 --> N96
-  N54 --> N13
-  N54 --> N51
-  N54 --> N11
-  N54 --> N7
-  N57 --> N55
-  N57 --> N58
-  N59 --> N55
-  N59 --> N57
-  N59 --> N56
-  N59 --> N58
-  N60 --> N28
-  N61 --> N3
-  N62 --> N3
-  N62 --> N60
-  N65 --> N64
-  N67 --> N8
-  N68 --> N3
-  N68 --> N5
-  N68 --> N8
-  N68 --> N13
-  N68 --> N74
-  N10 --> N69
-  N18 --> N69
-  N70 --> N75
-  N71 --> N75
-  N73 --> N72
-  N73 --> N70
-  N73 --> N71
-  N73 --> N76
-  N74 --> N13
-  N74 --> N5
-  N74 --> N3
-  N74 --> N73
-  N74 --> N12
-  N77 --> N52
-  N77 --> N78
-  N79 --> N68
-  N79 --> N113
-  N79 --> N8
-  N80 --> N68
-  N80 --> N113
-  N80 --> N8
-  N81 --> N68
-  N81 --> N113
-  N81 --> N8
-  N82 --> N18
-  N82 --> N19
-  N83 --> N96
-  N83 --> N53
-  N84 --> N96
-  N85 --> N68
-  N85 --> N113
-  N85 --> N8
-  N85 --> N36
-  N85 --> N55
-  N85 --> N57
-  N86 --> N5
-  N87 --> N18
-  N87 --> N31
-  N87 --> N11
-  N87 --> N51
-  N88 --> N27
-  N88 --> N23
-  N88 --> N26
-  N88 --> N18
-  N88 --> N11
-  N90 --> N68
-  N90 --> N113
-  N90 --> N8
-  N91 --> N31
-  N91 --> N32
-  N91 --> N33
-  N92 --> N31
-  N92 --> N30
-  N93 --> N18
-  N93 --> N31
-  N93 --> N11
-  N94 --> N96
-  N95 --> N18
-  N95 --> N19
-  N95 --> N69
-  N96 --> N50
-  N96 --> N53
-  N97 --> N36
-  N97 --> N8
-  N98 --> N24
-  N99 --> N37
-  N100 --> N38
-  N101 --> N53
-  N102 --> N73
-  N102 --> N75
-  N102 --> N72
-  N102 --> N76
-  N103 --> N9
-  N103 --> N68
-  N103 --> N113
-  N103 --> N8
-  N104 --> N9
-  N105 --> N55
-  N106 --> N57
-  N106 --> N55
-  N106 --> N59
-  N108 --> N59
-  N108 --> N55
-  N109 --> N8
-  N110 --> N61
-  N111 --> N78
-  N111 --> N77
-  N111 --> N52
+  N15 --> N7
+  N15 --> N11
+  N15 --> N12
+  N15 --> N48
+  N16 --> N12
+  N16 --> N8
+  N18 --> N12
+  N18 --> N52
+  N20 --> N7
+  N20 --> N22
+  N20 --> N9
+  N21 --> N20
+  N21 --> N22
+  N21 --> N9
+  N21 --> N18
+  N22 --> N12
+  N23 --> N22
+  N23 --> N20
+  N23 --> N9
+  N25 --> N20
+  N25 --> N9
+  N25 --> N26
+  N26 --> N16
+  N26 --> N28
+  N26 --> N27
+  N26 --> N67
+  N26 --> N11
+  N26 --> N7
+  N26 --> N13
+  N26 --> N85
+  N26 --> N48
+  N26 --> N69
+  N27 --> N68
+  N28 --> N67
+  N29 --> N12
+  N30 --> N20
+  N30 --> N9
+  N30 --> N29
+  N32 --> N36
+  N34 --> N38
+  N34 --> N7
+  N37 --> N12
+  N38 --> N37
+  N38 --> N45
+  N38 --> N88
+  N38 --> N7
+  N41 --> N42
+  N41 --> N43
+  N41 --> N40
+  N41 --> N7
+  N45 --> N12
+  N46 --> N45
+  N50 --> N12
+  N51 --> N52
+  N54 --> N61
+  N55 --> N66
+  N55 --> N69
+  N55 --> N68
+  N56 --> N61
+  N57 --> N63
+  N58 --> N66
+  N58 --> N69
+  N58 --> N68
+  N59 --> N66
+  N59 --> N69
+  N59 --> N68
+  N60 --> N61
+  N61 --> N66
+  N61 --> N69
+  N61 --> N68
+  N62 --> N63
+  N63 --> N66
+  N63 --> N69
+  N63 --> N68
+  N64 --> N61
+  N67 --> N11
+  N67 --> N58
+  N67 --> N60
+  N67 --> N62
+  N67 --> N54
+  N67 --> N55
+  N67 --> N64
+  N67 --> N56
+  N67 --> N57
+  N67 --> N59
+  N67 --> N129
+  N70 --> N20
+  N70 --> N67
+  N70 --> N16
+  N70 --> N11
+  N72 --> N78
+  N73 --> N78
+  N76 --> N75
+  N76 --> N72
+  N76 --> N73
+  N76 --> N79
+  N77 --> N20
+  N77 --> N9
+  N77 --> N7
+  N77 --> N76
+  N77 --> N18
+  N83 --> N81
+  N83 --> N84
+  N85 --> N81
+  N85 --> N83
+  N85 --> N82
+  N85 --> N84
+  N87 --> N37
+  N88 --> N7
+  N89 --> N7
+  N89 --> N87
+  N92 --> N68
+  N92 --> N93
+  N100 --> N3
+  N100 --> N12
+  N100 --> N88
+  N101 --> N3
+  N101 --> N12
+  N102 --> N3
+  N102 --> N12
+  N117 --> N26
+  N117 --> N27
+  N103 --> N129
+  N103 --> N69
+  N104 --> N129
+  N105 --> N3
+  N105 --> N12
+  N105 --> N50
+  N105 --> N81
+  N105 --> N83
+  N106 --> N9
+  N119 --> N26
+  N119 --> N41
+  N119 --> N16
+  N119 --> N67
+  N121 --> N36
+  N121 --> N32
+  N121 --> N35
+  N121 --> N26
+  N121 --> N16
+  N108 --> N3
+  N108 --> N12
+  N123 --> N41
+  N123 --> N42
+  N123 --> N43
+  N124 --> N41
+  N124 --> N40
+  N125 --> N26
+  N125 --> N41
+  N125 --> N16
+  N109 --> N129
+  N127 --> N26
+  N127 --> N27
+  N127 --> N48
+  N129 --> N66
+  N129 --> N69
+  N131 --> N50
+  N131 --> N12
+  N132 --> N33
+  N133 --> N51
+  N134 --> N52
+  N110 --> N69
+  N136 --> N76
+  N136 --> N78
+  N136 --> N75
+  N136 --> N79
+  N111 --> N13
+  N111 --> N3
+  N111 --> N12
+  N112 --> N13
+  N113 --> N75
+  N113 --> N92
+  N113 --> N93
+  N113 --> N45
+  N113 --> N12
+  N138 --> N81
+  N139 --> N83
+  N139 --> N81
+  N139 --> N85
+  N141 --> N85
+  N141 --> N81
+  N114 --> N12
+  N115 --> N88
+  N143 --> N93
+  N143 --> N92
+  N143 --> N68
 ```
 
 ## Компонент: `chatavg`
@@ -464,138 +516,9 @@ graph TD
 | Файл | Строк | Размер | Описание |
 |---|---|---|---|
 | `diagnose_mcp.js` | 38 | 1.1 KB | — |
-| `dist/config/env.js` | 46 | 2.2 KB | — |
-| `dist/core/config.js` | 136 | 5.6 KB | Application Configuration |
-| `dist/core/crypto.js` | 68 | 2.1 KB | AES-256-GCM encryption/decryption service. |
-| `dist/core/errors.js` | 79 | 2.4 KB | Centralized Error Handling |
-| `dist/core/migrate.js` | 100 | 4.8 KB | Chat AVG — JSON to SQLite Migration Utility |
-| `dist/core/providers.config.js` | 128 | 5.1 KB | Конфигурация провайдеров и моделей. |
-| `dist/core/sqlite.js` | 252 | 8.1 KB | Database Initialization |
-| `dist/core/utils.js` | 87 | 2.9 KB | Helper Utilities |
-| `dist/modules/admin/admin.routes.js` | 312 | 14.2 KB | Routes: Admin Panel |
-| `dist/modules/admin/category.repository.js` | 71 | 3.3 KB | Класс: CategoryRepository |
-| `dist/modules/audit/audit.service.js` | 62 | 2.5 KB | Log an action to the audit log. |
-| `dist/modules/auth/auth.middleware.js` | 71 | 2.6 KB | Authentication — JWT middleware & helpers |
-| `dist/modules/auth/auth.routes.js` | 59 | 2.5 KB | Routes: Authentication |
-| `dist/modules/auth/user.repository.js` | 63 | 2.7 KB | Класс: UserRepository |
-| `dist/modules/auth/users.routes.js` | 42 | 1.5 KB | Routes: User Profile |
-| `dist/modules/chat/chat.routes.js` | 57 | 2.6 KB | Routes: Chat Completions |
-| `dist/modules/chat/chat.service.js` | 508 | 25.7 KB | Класс: ChatService |
-| `dist/modules/chat/fallbackPolicy.js` | 45 | 1.7 KB | Determines if the given error allows for a fallback to another provider. |
-| `dist/modules/chat/policyRouter.js` | 34 | 1.2 KB | Resolves the primary route and routing policies based on category settings. |
-| `dist/modules/chat/session.repository.js` | 54 | 1.9 KB | Класс: SessionRepository |
-| `dist/modules/chat/sessions.routes.js` | 99 | 3.6 KB | Routes: Sessions CRUD |
-| `dist/modules/execution/artifact.service.js` | 74 | 2.2 KB | ArtifactService — manages versioned artifacts and patches. |
-| `dist/modules/execution/cost.service.js` | 35 | 1.2 KB | Calculate cost for a model call. |
-| `dist/modules/execution/execution.routes.js` | 93 | 2.6 KB | POST /api/runs |
-| `dist/modules/execution/mission.service.js` | 58 | 1.7 KB | MissionService — tracks goals, distinctions, and conflicts. |
-| `dist/modules/execution/role_pass.js` | 75 | 2.0 KB | RolePass — capability-based authorization system. |
-| `dist/modules/execution/run.repository.js` | 59 | 2.3 KB | Класс: AgentRunRepository |
-| `dist/modules/execution/run.service.js` | 112 | 3.9 KB | Класс: AgentRunService |
-| `dist/modules/knowledge/knowledge.cache.js` | 60 | 1.5 KB | KnowledgeCache — simple in-memory cache for RetrievalResults. |
-| `dist/modules/knowledge/knowledge.gateway.js` | 138 | 5.5 KB | Main retrieval entry point. |
-| `dist/modules/knowledge/knowledge.router.js` | 65 | 2.4 KB | KnowledgeRouter |
-| `dist/modules/knowledge/knowledge.types.js` | 54 | 1.8 KB | Canonical types for the Knowledge Module. |
-| `dist/modules/mission/mission.repository.js` | 81 | 3.3 KB | Класс: MissionRepository |
-| `dist/modules/mission/mission.routes.js` | 77 | 2.1 KB | POST /api/missions |
-| `dist/modules/policy/approval.service.js` | 71 | 2.5 KB | Класс: ApprovalService |
-| `dist/modules/policy/policy.engine.js` | 85 | 3.2 KB | Evaluates an action and returns a PolicyDecision. |
-| `dist/modules/policy/redaction.service.js` | 32 | 1.3 KB | Redacts sensitive information from a string or object payload. |
-| `dist/modules/providers/adapters/deepseek.js` | 19 | 0.5 KB | Provider: DeepSeek |
-| `dist/modules/providers/adapters/google.js` | 120 | 4.5 KB | Provider: Google Gemini |
-| `dist/modules/providers/adapters/grok.js` | 216 | 10.1 KB | Provider: Grok (xAI) |
-| `dist/modules/providers/adapters/grok_responses.js` | 21 | 0.6 KB | Provider: Grok Responses API (xAI) |
-| `dist/modules/providers/adapters/llamacpp.js` | 156 | 5.9 KB | Provider: llama.cpp (Local) |
-| `dist/modules/providers/adapters/mcp.js` | 151 | 5.7 KB | Класс: MCPProvider |
-| `dist/modules/providers/adapters/openai.js` | 22 | 0.5 KB | Provider: OpenAI |
-| `dist/modules/providers/adapters/openai_compat.js` | 136 | 5.3 KB | OpenAI-Compatible Provider Factory |
-| `dist/modules/providers/adapters/openai_responses.js` | 23 | 0.7 KB | Provider: OpenAI Responses API |
-| `dist/modules/providers/adapters/openai_responses_compat.js` | 172 | 6.7 KB | OpenAI Responses API Provider Factory |
-| `dist/modules/providers/adapters/qwen.js` | 20 | 0.5 KB | Provider: Qwen (Alibaba Cloud / DashScope) |
-| `dist/modules/providers/base.provider.js` | 106 | 3.8 KB | Base abstract class for LLM Providers |
-| `dist/modules/providers/provider.factory.js` | 58 | 1.8 KB | Provider Registry |
-| `dist/modules/providers/providerErrors.js` | 13 | 0.4 KB | Класс: ProviderError |
-| `dist/modules/providers/providerEvents.js` | 23 | 1.0 KB | @typedef {Object} CanonicalChatEvent |
-| `dist/modules/providers/providers.routes.js` | 89 | 3.3 KB | Routes: Provider Listing |
-| `dist/modules/semantic/claim.extractor.js` | 152 | 6.0 KB | ClaimExtractor — pipeline извлечения утверждений из текста. |
-| `dist/modules/semantic/claim.ledger.js` | 112 | 3.1 KB | ClaimLedger — реестр всех извлечённых claims per session. |
-| `dist/modules/semantic/domain.boundary.js` | 204 | 10.6 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
-| `dist/modules/semantic/semantic.events.js` | 49 | 2.2 KB | Semantic Events — канонические типы событий семантического слоя. |
-| `dist/modules/semantic/semantic.protocol.js` | 103 | 3.9 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
-| `dist/modules/temporal/activities.js` | 21 | 0.7 KB | — |
-| `dist/modules/temporal/client.js` | 30 | 0.9 KB | — |
-| `dist/modules/temporal/worker.js` | 21 | 0.6 KB | — |
-| `dist/modules/temporal/workflows.js` | 34 | 1.4 KB | — |
-| `dist/providers/base.js` | 69 | 2.1 KB | Класс: BaseProvider |
-| `dist/providers/openai-responses.provider.js` | 127 | 5.1 KB | Класс: OpenAIResponsesProvider |
-| `dist/src/config/env.js` | 46 | 2.2 KB | — |
-| `dist/src/core/config.js` | 136 | 5.6 KB | Application Configuration |
-| `dist/src/core/crypto.js` | 68 | 2.1 KB | AES-256-GCM encryption/decryption service. |
-| `dist/src/core/errors.js` | 79 | 2.4 KB | Centralized Error Handling |
-| `dist/src/core/migrate.js` | 100 | 4.8 KB | Chat AVG — JSON to SQLite Migration Utility |
-| `dist/src/core/providers.config.js` | 128 | 5.1 KB | Конфигурация провайдеров и моделей. |
-| `dist/src/core/sqlite.js` | 252 | 8.1 KB | Database Initialization |
-| `dist/src/core/utils.js` | 87 | 2.9 KB | Helper Utilities |
-| `dist/src/modules/admin/admin.routes.js` | 312 | 14.2 KB | Routes: Admin Panel |
-| `dist/src/modules/admin/category.repository.js` | 71 | 3.3 KB | Класс: CategoryRepository |
-| `dist/src/modules/audit/audit.service.js` | 62 | 2.5 KB | Log an action to the audit log. |
-| `dist/src/modules/auth/auth.middleware.js` | 71 | 2.6 KB | Authentication — JWT middleware & helpers |
-| `dist/src/modules/auth/auth.routes.js` | 59 | 2.5 KB | Routes: Authentication |
-| `dist/src/modules/auth/user.repository.js` | 63 | 2.7 KB | Класс: UserRepository |
-| `dist/src/modules/auth/users.routes.js` | 42 | 1.5 KB | Routes: User Profile |
-| `dist/src/modules/chat/chat.routes.js` | 57 | 2.6 KB | Routes: Chat Completions |
-| `dist/src/modules/chat/chat.service.js` | 508 | 25.7 KB | Класс: ChatService |
-| `dist/src/modules/chat/fallbackPolicy.js` | 45 | 1.7 KB | Determines if the given error allows for a fallback to another provider. |
-| `dist/src/modules/chat/policyRouter.js` | 34 | 1.2 KB | Resolves the primary route and routing policies based on category settings. |
-| `dist/src/modules/chat/session.repository.js` | 54 | 1.9 KB | Класс: SessionRepository |
-| `dist/src/modules/chat/sessions.routes.js` | 99 | 3.6 KB | Routes: Sessions CRUD |
-| `dist/src/modules/execution/artifact.service.js` | 74 | 2.2 KB | ArtifactService — manages versioned artifacts and patches. |
-| `dist/src/modules/execution/cost.service.js` | 35 | 1.2 KB | Calculate cost for a model call. |
-| `dist/src/modules/execution/execution.routes.js` | 93 | 2.6 KB | POST /api/runs |
-| `dist/src/modules/execution/mission.service.js` | 58 | 1.7 KB | MissionService — tracks goals, distinctions, and conflicts. |
-| `dist/src/modules/execution/role_pass.js` | 75 | 2.0 KB | RolePass — capability-based authorization system. |
-| `dist/src/modules/execution/run.repository.js` | 59 | 2.3 KB | Класс: AgentRunRepository |
-| `dist/src/modules/execution/run.service.js` | 112 | 3.9 KB | Класс: AgentRunService |
-| `dist/src/modules/knowledge/knowledge.cache.js` | 60 | 1.5 KB | KnowledgeCache — simple in-memory cache for RetrievalResults. |
-| `dist/src/modules/knowledge/knowledge.gateway.js` | 138 | 5.5 KB | Main retrieval entry point. |
-| `dist/src/modules/knowledge/knowledge.router.js` | 65 | 2.4 KB | KnowledgeRouter |
-| `dist/src/modules/knowledge/knowledge.types.js` | 54 | 1.8 KB | Canonical types for the Knowledge Module. |
-| `dist/src/modules/mission/mission.repository.js` | 81 | 3.3 KB | Класс: MissionRepository |
-| `dist/src/modules/mission/mission.routes.js` | 77 | 2.1 KB | POST /api/missions |
-| `dist/src/modules/policy/approval.service.js` | 71 | 2.5 KB | Класс: ApprovalService |
-| `dist/src/modules/policy/policy.engine.js` | 85 | 3.2 KB | Evaluates an action and returns a PolicyDecision. |
-| `dist/src/modules/policy/redaction.service.js` | 32 | 1.3 KB | Redacts sensitive information from a string or object payload. |
-| `dist/src/modules/providers/adapters/deepseek.js` | 19 | 0.5 KB | Provider: DeepSeek |
-| `dist/src/modules/providers/adapters/google.js` | 120 | 4.5 KB | Provider: Google Gemini |
-| `dist/src/modules/providers/adapters/grok.js` | 216 | 10.1 KB | Provider: Grok (xAI) |
-| `dist/src/modules/providers/adapters/grok_responses.js` | 21 | 0.6 KB | Provider: Grok Responses API (xAI) |
-| `dist/src/modules/providers/adapters/llamacpp.js` | 156 | 5.9 KB | Provider: llama.cpp (Local) |
-| `dist/src/modules/providers/adapters/mcp.js` | 151 | 5.7 KB | Класс: MCPProvider |
-| `dist/src/modules/providers/adapters/openai.js` | 22 | 0.5 KB | Provider: OpenAI |
-| `dist/src/modules/providers/adapters/openai_compat.js` | 136 | 5.3 KB | OpenAI-Compatible Provider Factory |
-| `dist/src/modules/providers/adapters/openai_responses.js` | 23 | 0.7 KB | Provider: OpenAI Responses API |
-| `dist/src/modules/providers/adapters/openai_responses_compat.js` | 172 | 6.7 KB | OpenAI Responses API Provider Factory |
-| `dist/src/modules/providers/adapters/qwen.js` | 20 | 0.5 KB | Provider: Qwen (Alibaba Cloud / DashScope) |
-| `dist/src/modules/providers/base.provider.js` | 106 | 3.8 KB | Base abstract class for LLM Providers |
-| `dist/src/modules/providers/provider.factory.js` | 58 | 1.8 KB | Provider Registry |
-| `dist/src/modules/providers/providerErrors.js` | 13 | 0.4 KB | Класс: ProviderError |
-| `dist/src/modules/providers/providerEvents.js` | 23 | 1.0 KB | @typedef {Object} CanonicalChatEvent |
-| `dist/src/modules/providers/providers.routes.js` | 89 | 3.3 KB | Routes: Provider Listing |
-| `dist/src/modules/semantic/claim.extractor.js` | 152 | 6.0 KB | ClaimExtractor — pipeline извлечения утверждений из текста. |
-| `dist/src/modules/semantic/claim.ledger.js` | 112 | 3.1 KB | ClaimLedger — реестр всех извлечённых claims per session. |
-| `dist/src/modules/semantic/domain.boundary.js` | 204 | 10.6 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
-| `dist/src/modules/semantic/semantic.events.js` | 49 | 2.2 KB | Semantic Events — канонические типы событий семантического слоя. |
-| `dist/src/modules/semantic/semantic.protocol.js` | 103 | 3.9 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
-| `dist/src/modules/temporal/activities.js` | 21 | 0.7 KB | — |
-| `dist/src/modules/temporal/client.js` | 30 | 0.9 KB | — |
-| `dist/src/modules/temporal/worker.js` | 21 | 0.6 KB | — |
-| `dist/src/modules/temporal/workflows.js` | 34 | 1.4 KB | — |
-| `dist/src/providers/base.js` | 69 | 2.1 KB | Класс: BaseProvider |
-| `dist/src/providers/openai-responses.provider.js` | 127 | 5.1 KB | Класс: OpenAIResponsesProvider |
-| `dist/src/types/chat.js` | 3 | 0.1 KB | — |
-| `dist/types/chat.js` | 3 | 0.1 KB | — |
 | `reset_admin.js` | 22 | 0.6 KB | Admin Reset Utility (SQLite) |
-| `server.js` | 163 | 5.8 KB | — |
+| `server.js` | 163 | 5.7 KB | Chat AVG Gateway — Entry Point |
+| `src/config/env.ts` | 47 | 1.7 KB | — |
 | `src/core/config.js` | 159 | 5.5 KB | — |
 | `src/core/crypto.js` | 78 | 1.9 KB | AES-256-GCM encryption/decryption service. |
 | `src/core/errors.js` | 87 | 2.2 KB | Centralized Error Handling |
@@ -618,17 +541,17 @@ graph TD
 | `src/modules/chat/sessions.routes.js` | 105 | 3.3 KB | Routes: Sessions CRUD |
 | `src/modules/execution/artifact.service.js` | 85 | 1.9 KB | ArtifactService — manages versioned artifacts and patches. |
 | `src/modules/execution/cost.service.js` | 36 | 1.0 KB | Calculate cost for a model call. |
-| `src/modules/execution/execution.routes.js` | 100 | 2.4 KB | POST /api/runs |
+| `src/modules/execution/execution.routes.js` | 103 | 2.6 KB | POST /api/runs |
 | `src/modules/execution/mission.service.js` | 64 | 1.4 KB | MissionService — tracks goals, distinctions, and conflicts. |
 | `src/modules/execution/role_pass.js` | 82 | 1.7 KB | RolePass — capability-based authorization system. |
 | `src/modules/execution/run.repository.js` | 75 | 2.1 KB | Класс: AgentRunRepository |
-| `src/modules/execution/run.service.js` | 128 | 3.4 KB | Класс: AgentRunService |
+| `src/modules/execution/run.service.js` | 128 | 3.6 KB | Класс: AgentRunService |
 | `src/modules/knowledge/knowledge.cache.js` | 68 | 1.3 KB | KnowledgeCache — simple in-memory cache for RetrievalResults. |
 | `src/modules/knowledge/knowledge.gateway.js` | 161 | 4.9 KB | Main retrieval entry point. |
 | `src/modules/knowledge/knowledge.router.js` | 74 | 2.1 KB | KnowledgeRouter |
 | `src/modules/knowledge/knowledge.types.js` | 55 | 1.6 KB | Canonical types for the Knowledge Module. |
 | `src/modules/mission/mission.repository.js` | 92 | 2.9 KB | Класс: MissionRepository |
-| `src/modules/mission/mission.routes.js` | 80 | 1.9 KB | POST /api/missions |
+| `src/modules/mission/mission.routes.js` | 85 | 2.1 KB | POST /api/missions |
 | `src/modules/observability/trace.bus.js` | 47 | 1.0 KB | Emit a trace event. |
 | `src/modules/policy/approval.service.js` | 83 | 2.2 KB | Класс: ApprovalService |
 | `src/modules/policy/policy.engine.js` | 83 | 2.7 KB | Evaluates an action and returns a PolicyDecision. |
@@ -662,14 +585,17 @@ graph TD
 | `src/modules/semantic/semantic.events.js` | 53 | 2.1 KB | Semantic Events — канонические типы событий семантического слоя. |
 | `src/modules/semantic/semantic.protocol.js` | 116 | 3.6 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
 | `src/modules/temporal/activities.js` | 24 | 0.7 KB | — |
-| `src/modules/temporal/client.js` | 33 | 0.8 KB | — |
+| `src/modules/temporal/client.js` | 41 | 1.0 KB | — |
 | `src/modules/temporal/worker.js` | 23 | 0.6 KB | — |
 | `src/modules/temporal/workflows.js` | 43 | 1.3 KB | — |
 | `src/modules/tools/tool.gateway.js` | 121 | 3.6 KB | ToolCall states for the state machine. |
 | `src/modules/tools/tool.registry.js` | 106 | 2.4 KB | Risk classes for Tool executions. |
-| `tests/agent_run.test.js` | 139 | 4.0 KB | — |
-| `tests/api.test.js` | 170 | 5.3 KB | — |
-| `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
+| `src/providers/base.ts` | 95 | 2.3 KB | — |
+| `src/providers/openai-responses.provider.ts` | 128 | 4.1 KB | — |
+| `src/types/chat.ts` | 37 | 0.7 KB | — |
+| `tests/agent_run.test.js` | 140 | 4.1 KB | — |
+| `tests/api.test.js` | 169 | 5.2 KB | — |
+| `tests/baseline_security.test.js` | 52 | 2.0 KB | — |
 | `tests/chaos/chaos.test.js` | 58 | 2.1 KB | — |
 | `tests/contract_canonical_event.test.js` | 164 | 5.9 KB | Contract tests for AsyncIterable semantics of provider adapters. |
 | `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
@@ -678,7 +604,7 @@ graph TD
 | `tests/evals/rag.eval.js` | 139 | 4.7 KB | Класс: RAGEvalRunner |
 | `tests/execution/mission_artifacts.test.js` | 75 | 3.0 KB | — |
 | `tests/fast_path_guardrail.test.js` | 131 | 4.7 KB | Fast Path Guardrail Tests |
-| `tests/health.test.js` | 51 | 1.5 KB | — |
+| `tests/health.test.js` | 50 | 1.4 KB | — |
 | `tests/knowledge/knowledge_gateway.test.js` | 72 | 2.7 KB | — |
 | `tests/knowledge/performance.test.js` | 53 | 2.1 KB | — |
 | `tests/knowledge/rag_integration.test.js` | 70 | 2.3 KB | — |
@@ -691,8 +617,9 @@ graph TD
 | `tests/policy/redaction.service.test.js` | 29 | 1.0 KB | — |
 | `tests/provider_events.test.js` | 60 | 2.0 KB | — |
 | `tests/sandbox/sandbox_manager.test.js` | 384 | 13.5 KB | SandboxManager Integration Tests |
-| `tests/security.test.js` | 44 | 1.7 KB | — |
+| `tests/security.test.js` | 43 | 1.7 KB | — |
 | `tests/security_assertions.test.js` | 187 | 6.0 KB | CORS, SSRF, JSON Limit, and Prompt Sanitization assertion tests. |
+| `tests/security_red_team.test.js` | 105 | 4.1 KB | Red-Team Security Suite for Sprint 17 Release Candidate. |
 | `tests/semantic/claim_extraction.test.js` | 113 | 5.2 KB | Tests: ClaimExtractor — извлечение утверждений из текста. |
 | `tests/semantic/domain_boundary.test.js` | 174 | 8.2 KB | Tests: DomainBoundary — проверка границ и strength downgrade. |
 | `tests/semantic/expand_golden_set.js` | 355 | 12.1 KB | — |
@@ -700,876 +627,6 @@ graph TD
 | `tests/setup_fixtures.js` | 101 | 3.2 KB | — |
 | `tests/signal.js` | 18 | 0.5 KB | — |
 | `tests/tools/tool_gateway.test.js` | 101 | 3.5 KB | — |
-
-### `dist/config/env.js`
-- **Экспорт**: `config`, `env`, `config`
-- **Зависимости**:
-
-### `dist/core/config.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-
-### `dist/core/crypto.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-  - `./config` → SECRET
-
-### `dist/core/errors.js`
-- **Класс**: `AppError` extends `Error`
-- **Класс**: `AuthError` extends `AppError`
-- **Класс**: `ValidationError` extends `AppError`
-- **Класс**: `NotFoundError` extends `AppError`
-- **Экспорт**: `{`
-- **Зависимости**:
-
-### `dist/core/migrate.js`
-- **Экспорт**: `migrate`
-- **Зависимости**:
-  - `./sqlite` → db
-  - `./config` → USERS_FILE, CATEGORIES_FILE, SESSIONS_ROOT
-
-### `dist/core/providers.config.js`
-- **Экспорт**: `providersConfig`
-- **Зависимости**:
-  - `./config` → providerEnv
-
-### `dist/core/sqlite.js`
-- **Экспорт**: `db`
-- **Зависимости**:
-  - `./config` → DATA_DIR
-  - `./config` → DEFAULT_CATEGORY_PARAMS, DEFAULT_SYSTEM_PROMPT
-
-### `dist/core/utils.js`
-- **Экспорт**: `{`
-
-### `dist/modules/admin/admin.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /users`
-  - `POST /users/:username`
-  - `DELETE /users/:username`
-  - `GET /categories`
-  - `POST /categories/:category_name`
-  - `DELETE /categories/:category_name`
-  - `POST /categories/:category_name/test`
-  - `GET /stats`
-  - `GET /audit`
-  - `GET /dashboard/mvp`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate, requireAdmin
-  - `../../core/errors` → asyncHandler
-  - `../../core/utils` → assertSafeIdentifier, mergeFields, validateProviderUrl
-  - `../auth/user.repository` → userRepository
-  - `./category.repository` → categoryRepository
-  - `../chat/session.repository` → sessionRepository
-  - `../providers/provider.factory` → getProvider
-  - `../audit/audit.service` → AuditService
-  - `../../core/crypto` → crypto
-  - `../../core/config` → TEST_TIMEOUT
-  - `../../core/providers.config` → providersConfig
-  - `../../core/sqlite` → db
-  - `../../core/config` → FEATURE_FLAGS
-
-### `dist/modules/admin/category.repository.js`
-- **Класс**: `CategoryRepository`
-- **Экспорт**: `new CategoryRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-  - `../../core/crypto` → crypto
-
-### `dist/modules/audit/audit.service.js`
-- **Класс**: `AuditService`
-- **Экспорт**: `AuditService`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-  - `../policy/redaction.service` → RedactionService
-
-### `dist/modules/auth/auth.middleware.js`
-- **Экспорт**: `{ authenticate, requireAdmin, signToken, isExpired }`, `authenticate`, `requireAdmin`, `signToken`, `isExpired`
-- **Зависимости**:
-  - `../../core/config` → SECRET, TOKEN_EXPIRY
-  - `./user.repository` → userRepository
-  - `../../core/errors` → AppError, AuthError
-
-### `dist/modules/auth/auth.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /login`
-- **Зависимости**:
-  - `./auth.middleware` → signToken, isExpired
-  - `./user.repository` → userRepository
-  - `../../core/errors` → asyncHandler
-  - `../audit/audit.service` → AuditService
-
-### `dist/modules/auth/user.repository.js`
-- **Класс**: `UserRepository`
-- **Экспорт**: `new UserRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/modules/auth/users.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /me`
-  - `PATCH /me`
-- **Зависимости**:
-  - `./user.repository` → userRepository
-  - `./auth.middleware` → authenticate
-  - `../../core/errors` → asyncHandler
-
-### `dist/modules/chat/chat.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /completions`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate
-  - `../../core/errors` → asyncHandler
-  - `./chat.service` → chatService
-
-### `dist/modules/chat/chat.service.js`
-- **Класс**: `ChatService`
-- **Экспорт**: `new ChatService()`
-- **Зависимости**:
-  - `../admin/category.repository` → categoryRepository
-  - `./policyRouter` → policyRouter
-  - `./fallbackPolicy` → fallbackPolicy
-  - `../providers/provider.factory` → getProvider, adapters
-  - `../../core/providers.config` → providersConfig
-  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED, KNOWLEDGE_GATEWAY_ENABLED
-  - `../../core/utils` → validateProviderUrl, sanitizePromptText
-  - `../semantic/semantic.protocol` → SemanticProtocol
-  - `../providers/providerEvents` → ProviderEvents
-
-### `dist/modules/chat/fallbackPolicy.js`
-- **Класс**: `FallbackPolicy`
-- **Экспорт**: `new FallbackPolicy()`
-- **Зависимости**:
-  - `../providers/providerErrors` → ProviderError
-
-### `dist/modules/chat/policyRouter.js`
-- **Класс**: `PolicyRouter`
-- **Экспорт**: `new PolicyRouter()`
-- **Зависимости**:
-  - `../providers/provider.factory` → getProvider
-
-### `dist/modules/chat/session.repository.js`
-- **Класс**: `SessionRepository`
-- **Экспорт**: `new SessionRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/modules/chat/sessions.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /`
-  - `GET /:id`
-  - `POST /`
-  - `DELETE /:id`
-  - `PATCH /:id`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate
-  - `../../core/errors` → asyncHandler
-  - `./session.repository` → sessionRepository
-
-### `dist/modules/execution/artifact.service.js`
-- **Класс**: `ArtifactService`
-- **Экспорт**: `new ArtifactService()`
-- **Зависимости**:
-  - `./role_pass` → roleRegistry
-
-### `dist/modules/execution/cost.service.js`
-- **Класс**: `CostService`
-- **Экспорт**: `{ CostService }`, `CostService`
-
-### `dist/modules/execution/execution.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /`
-  - `GET /:id`
-  - `POST /:id/cancel`
-  - `GET /:id/events`
-- **Зависимости**:
-  - `./run.service` → runService
-  - `../../core/config` → AGENT_RUNS_ENABLED
-
-### `dist/modules/execution/mission.service.js`
-- **Класс**: `MissionService`
-- **Экспорт**: `new MissionService()`
-- **Зависимости**:
-
-### `dist/modules/execution/role_pass.js`
-- **Класс**: `RolePass`
-- **Класс**: `RoleRegistry`
-- **Экспорт**: `new RoleRegistry()`
-
-### `dist/modules/execution/run.repository.js`
-- **Класс**: `AgentRunRepository`
-- **Экспорт**: `new AgentRunRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/modules/execution/run.service.js`
-- **Класс**: `AgentRunService` extends `EventEmitter`
-- **Экспорт**: `new AgentRunService()`
-- **Зависимости**:
-  - `./run.repository` → runRepository
-  - `../mission/mission.repository` → missionRepository
-  - `../temporal/client` → temporalClient
-  - `../../core/config` → TEMPORAL_RUNTIME_ENABLED
-
-### `dist/modules/knowledge/knowledge.cache.js`
-- **Класс**: `KnowledgeCache`
-- **Экспорт**: `new KnowledgeCache()`
-
-### `dist/modules/knowledge/knowledge.gateway.js`
-- **Класс**: `KnowledgeGateway`
-- **Экспорт**: `new KnowledgeGateway()`
-- **Зависимости**:
-  - `./knowledge.router` → knowledgeRouter
-  - `./knowledge.types` → RetrievalResult
-  - `./knowledge.cache` → knowledgeCache
-  - `../../core/config` → KNOWLEDGE_GATEWAY_ENABLED
-
-### `dist/modules/knowledge/knowledge.router.js`
-- **Класс**: `KnowledgeRouter`
-- **Экспорт**: `new KnowledgeRouter()`
-
-### `dist/modules/knowledge/knowledge.types.js`
-- **Класс**: `RetrievalChunk`
-- **Класс**: `RetrievalResult`
-- **Экспорт**: `{`
-
-### `dist/modules/mission/mission.repository.js`
-- **Класс**: `MissionRepository`
-- **Экспорт**: `new MissionRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/modules/mission/mission.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /`
-  - `GET /:id`
-  - `GET /session/:sessionId`
-  - `PATCH /:id`
-- **Зависимости**:
-  - `./mission.repository` → missionRepository
-
-### `dist/modules/policy/approval.service.js`
-- **Класс**: `ApprovalService`
-- **Экспорт**: `{ ApprovalService }`, `ApprovalService`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/modules/policy/policy.engine.js`
-- **Класс**: `PolicyEngine`
-- **Экспорт**: `{ PolicyEngine, RiskClass }`, `PolicyEngine`, `RiskClass`
-- **Зависимости**:
-  - `./redaction.service` → RedactionService
-
-### `dist/modules/policy/redaction.service.js`
-- **Класс**: `RedactionService`
-- **Экспорт**: `{ RedactionService }`, `RedactionService`
-
-### `dist/modules/providers/adapters/deepseek.js`
-- **Экспорт**: `createProvider({`
-- **Зависимости**:
-  - `./openai_compat` → createProvider
-
-### `dist/modules/providers/adapters/google.js`
-- **Класс**: `GoogleProvider` extends `BaseProvider`
-- **Экспорт**: `new GoogleProvider()`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/modules/providers/adapters/grok.js`
-- **Класс**: `GrokProvider` extends `OpenAICompatProvider`
-- **Экспорт**: `new GrokProvider({`
-- **Зависимости**:
-  - `./openai_compat` → OpenAICompatProvider
-
-### `dist/modules/providers/adapters/grok_responses.js`
-- **Экспорт**: `createResponsesProvider({`
-- **Зависимости**:
-  - `./openai_responses_compat` → createResponsesProvider
-
-### `dist/modules/providers/adapters/llamacpp.js`
-- **Класс**: `LlamaCppProvider` extends `BaseProvider`
-- **Экспорт**: `new LlamaCppProvider()`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/modules/providers/adapters/mcp.js`
-- **Класс**: `MCPProvider` extends `BaseProvider`
-- **Экспорт**: `new MCPProvider({`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `../providerEvents` → ProviderEvents
-  - `../providerErrors` → ProviderError
-
-### `dist/modules/providers/adapters/openai.js`
-- **Экспорт**: `createProvider({`
-- **Зависимости**:
-  - `./openai_compat` → createProvider
-
-### `dist/modules/providers/adapters/openai_compat.js`
-- **Класс**: `OpenAICompatProvider` extends `BaseProvider`
-- **Экспорт**: `{ OpenAICompatProvider, createProvider }`, `OpenAICompatProvider`, `createProvider`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/modules/providers/adapters/openai_responses.js`
-- **Экспорт**: `createResponsesProvider({`
-- **Зависимости**:
-  - `./openai_responses_compat` → createResponsesProvider
-
-### `dist/modules/providers/adapters/openai_responses_compat.js`
-- **Класс**: `OpenAIResponsesProvider` extends `BaseProvider`
-- **Экспорт**: `{ OpenAIResponsesProvider, createResponsesProvider }`, `OpenAIResponsesProvider`, `createResponsesProvider`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/modules/providers/adapters/qwen.js`
-- **Экспорт**: `createProvider({`
-- **Зависимости**:
-  - `./openai_compat` → createProvider
-
-### `dist/modules/providers/base.provider.js`
-- **Класс**: `BaseProvider`
-- **Экспорт**: `BaseProvider`
-
-### `dist/modules/providers/provider.factory.js`
-- **Экспорт**: `{ getProvider, listProviders, adapters }`, `getProvider`, `listProviders`, `adapters`
-- **Зависимости**:
-  - `../../core/providers.config` → providersConfig
-  - `./adapters/llamacpp` → (side-effect)
-  - `./adapters/openai` → (side-effect)
-  - `./adapters/openai_responses` → (side-effect)
-  - `./adapters/deepseek` → (side-effect)
-  - `./adapters/google` → (side-effect)
-  - `./adapters/qwen` → (side-effect)
-  - `./adapters/grok` → (side-effect)
-  - `./adapters/grok_responses` → (side-effect)
-  - `./adapters/mcp` → (side-effect)
-  - `../../../tests/mocks/deterministic_provider` → DeterministicProvider
-
-### `dist/modules/providers/providerErrors.js`
-- **Класс**: `ProviderError` extends `Error`
-- **Экспорт**: `{ ProviderError }`, `ProviderError`
-
-### `dist/modules/providers/providerEvents.js`
-- **Экспорт**: `ProviderEvents`
-
-### `dist/modules/providers/providers.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /`
-  - `GET /health`
-  - `GET /:id/models`
-  - `GET /:id/health`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate
-  - `./provider.factory` → listProviders
-  - `../admin/category.repository` → categoryRepository
-  - `./provider.factory` → getProvider
-  - `../../core/providers.config` → providersConfig
-  - `../../core/providers.config` → providersConfig
-  - `../../core/providers.config` → providersConfig
-
-### `dist/modules/semantic/claim.extractor.js`
-- **Класс**: `ClaimExtractor`
-- **Экспорт**: `{ ClaimExtractor, STRENGTH_ORDER }`, `ClaimExtractor`, `STRENGTH_ORDER`
-- **Зависимости**:
-
-### `dist/modules/semantic/claim.ledger.js`
-- **Класс**: `ClaimLedger`
-- **Экспорт**: `{ ClaimLedger }`, `ClaimLedger`
-
-### `dist/modules/semantic/domain.boundary.js`
-- **Класс**: `DomainBoundary`
-- **Экспорт**: `{ DomainBoundary, DEFAULT_BOUNDARIES }`, `DomainBoundary`, `DEFAULT_BOUNDARIES`
-- **Зависимости**:
-  - `./claim.extractor` → ClaimExtractor
-  - `./semantic.events` → SemanticEvents
-
-### `dist/modules/semantic/semantic.events.js`
-- **Экспорт**: `SemanticEvents`
-
-### `dist/modules/semantic/semantic.protocol.js`
-- **Класс**: `SemanticProtocol`
-- **Экспорт**: `{ SemanticProtocol, PROTOCOL_VERSION }`, `SemanticProtocol`, `PROTOCOL_VERSION`
-- **Зависимости**:
-  - `./claim.extractor` → ClaimExtractor
-  - `./domain.boundary` → DomainBoundary
-  - `./claim.ledger` → ClaimLedger
-  - `./semantic.events` → SemanticEvents
-
-### `dist/modules/temporal/activities.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-  - `../execution/run.repository` → runRepository
-
-### `dist/modules/temporal/client.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-  - `../../core/config` → TEMPORAL_URL
-
-### `dist/modules/temporal/workflows.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-
-### `dist/providers/base.js`
-- **Класс**: `BaseProvider`
-- **Экспорт**: `BaseProvider`, `BaseProvider`
-
-### `dist/providers/openai-responses.provider.js`
-- **Класс**: `OpenAIResponsesProvider` extends `base_js_1`
-- **Экспорт**: `OpenAIResponsesProvider`, `OpenAIResponsesProvider`
-- **Зависимости**:
-  - `./base.js` → base_js_1
-
-### `dist/src/config/env.js`
-- **Экспорт**: `config`, `env`, `config`
-- **Зависимости**:
-
-### `dist/src/core/config.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-
-### `dist/src/core/crypto.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-  - `./config` → SECRET
-
-### `dist/src/core/errors.js`
-- **Класс**: `AppError` extends `Error`
-- **Класс**: `AuthError` extends `AppError`
-- **Класс**: `ValidationError` extends `AppError`
-- **Класс**: `NotFoundError` extends `AppError`
-- **Экспорт**: `{`
-- **Зависимости**:
-
-### `dist/src/core/migrate.js`
-- **Экспорт**: `migrate`
-- **Зависимости**:
-  - `./sqlite` → db
-  - `./config` → USERS_FILE, CATEGORIES_FILE, SESSIONS_ROOT
-
-### `dist/src/core/providers.config.js`
-- **Экспорт**: `providersConfig`
-- **Зависимости**:
-  - `./config` → providerEnv
-
-### `dist/src/core/sqlite.js`
-- **Экспорт**: `db`
-- **Зависимости**:
-  - `./config` → DATA_DIR
-  - `./config` → DEFAULT_CATEGORY_PARAMS, DEFAULT_SYSTEM_PROMPT
-
-### `dist/src/core/utils.js`
-- **Экспорт**: `{`
-
-### `dist/src/modules/admin/admin.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /users`
-  - `POST /users/:username`
-  - `DELETE /users/:username`
-  - `GET /categories`
-  - `POST /categories/:category_name`
-  - `DELETE /categories/:category_name`
-  - `POST /categories/:category_name/test`
-  - `GET /stats`
-  - `GET /audit`
-  - `GET /dashboard/mvp`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate, requireAdmin
-  - `../../core/errors` → asyncHandler
-  - `../../core/utils` → assertSafeIdentifier, mergeFields, validateProviderUrl
-  - `../auth/user.repository` → userRepository
-  - `./category.repository` → categoryRepository
-  - `../chat/session.repository` → sessionRepository
-  - `../providers/provider.factory` → getProvider
-  - `../audit/audit.service` → AuditService
-  - `../../core/crypto` → crypto
-  - `../../core/config` → TEST_TIMEOUT
-  - `../../core/providers.config` → providersConfig
-  - `../../core/sqlite` → db
-  - `../../core/config` → FEATURE_FLAGS
-
-### `dist/src/modules/admin/category.repository.js`
-- **Класс**: `CategoryRepository`
-- **Экспорт**: `new CategoryRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-  - `../../core/crypto` → crypto
-
-### `dist/src/modules/audit/audit.service.js`
-- **Класс**: `AuditService`
-- **Экспорт**: `AuditService`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-  - `../policy/redaction.service` → RedactionService
-
-### `dist/src/modules/auth/auth.middleware.js`
-- **Экспорт**: `{ authenticate, requireAdmin, signToken, isExpired }`, `authenticate`, `requireAdmin`, `signToken`, `isExpired`
-- **Зависимости**:
-  - `../../core/config` → SECRET, TOKEN_EXPIRY
-  - `./user.repository` → userRepository
-  - `../../core/errors` → AppError, AuthError
-
-### `dist/src/modules/auth/auth.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /login`
-- **Зависимости**:
-  - `./auth.middleware` → signToken, isExpired
-  - `./user.repository` → userRepository
-  - `../../core/errors` → asyncHandler
-  - `../audit/audit.service` → AuditService
-
-### `dist/src/modules/auth/user.repository.js`
-- **Класс**: `UserRepository`
-- **Экспорт**: `new UserRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/src/modules/auth/users.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /me`
-  - `PATCH /me`
-- **Зависимости**:
-  - `./user.repository` → userRepository
-  - `./auth.middleware` → authenticate
-  - `../../core/errors` → asyncHandler
-
-### `dist/src/modules/chat/chat.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /completions`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate
-  - `../../core/errors` → asyncHandler
-  - `./chat.service` → chatService
-
-### `dist/src/modules/chat/chat.service.js`
-- **Класс**: `ChatService`
-- **Экспорт**: `new ChatService()`
-- **Зависимости**:
-  - `../admin/category.repository` → categoryRepository
-  - `./policyRouter` → policyRouter
-  - `./fallbackPolicy` → fallbackPolicy
-  - `../providers/provider.factory` → getProvider, adapters
-  - `../../core/providers.config` → providersConfig
-  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED, KNOWLEDGE_GATEWAY_ENABLED
-  - `../../core/utils` → validateProviderUrl, sanitizePromptText
-  - `../semantic/semantic.protocol` → SemanticProtocol
-  - `../providers/providerEvents` → ProviderEvents
-
-### `dist/src/modules/chat/fallbackPolicy.js`
-- **Класс**: `FallbackPolicy`
-- **Экспорт**: `new FallbackPolicy()`
-- **Зависимости**:
-  - `../providers/providerErrors` → ProviderError
-
-### `dist/src/modules/chat/policyRouter.js`
-- **Класс**: `PolicyRouter`
-- **Экспорт**: `new PolicyRouter()`
-- **Зависимости**:
-  - `../providers/provider.factory` → getProvider
-
-### `dist/src/modules/chat/session.repository.js`
-- **Класс**: `SessionRepository`
-- **Экспорт**: `new SessionRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/src/modules/chat/sessions.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /`
-  - `GET /:id`
-  - `POST /`
-  - `DELETE /:id`
-  - `PATCH /:id`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate
-  - `../../core/errors` → asyncHandler
-  - `./session.repository` → sessionRepository
-
-### `dist/src/modules/execution/artifact.service.js`
-- **Класс**: `ArtifactService`
-- **Экспорт**: `new ArtifactService()`
-- **Зависимости**:
-  - `./role_pass` → roleRegistry
-
-### `dist/src/modules/execution/cost.service.js`
-- **Класс**: `CostService`
-- **Экспорт**: `{ CostService }`, `CostService`
-
-### `dist/src/modules/execution/execution.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /`
-  - `GET /:id`
-  - `POST /:id/cancel`
-  - `GET /:id/events`
-- **Зависимости**:
-  - `./run.service` → runService
-  - `../../core/config` → AGENT_RUNS_ENABLED
-
-### `dist/src/modules/execution/mission.service.js`
-- **Класс**: `MissionService`
-- **Экспорт**: `new MissionService()`
-- **Зависимости**:
-
-### `dist/src/modules/execution/role_pass.js`
-- **Класс**: `RolePass`
-- **Класс**: `RoleRegistry`
-- **Экспорт**: `new RoleRegistry()`
-
-### `dist/src/modules/execution/run.repository.js`
-- **Класс**: `AgentRunRepository`
-- **Экспорт**: `new AgentRunRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/src/modules/execution/run.service.js`
-- **Класс**: `AgentRunService` extends `EventEmitter`
-- **Экспорт**: `new AgentRunService()`
-- **Зависимости**:
-  - `./run.repository` → runRepository
-  - `../mission/mission.repository` → missionRepository
-  - `../temporal/client` → temporalClient
-  - `../../core/config` → TEMPORAL_RUNTIME_ENABLED
-
-### `dist/src/modules/knowledge/knowledge.cache.js`
-- **Класс**: `KnowledgeCache`
-- **Экспорт**: `new KnowledgeCache()`
-
-### `dist/src/modules/knowledge/knowledge.gateway.js`
-- **Класс**: `KnowledgeGateway`
-- **Экспорт**: `new KnowledgeGateway()`
-- **Зависимости**:
-  - `./knowledge.router` → knowledgeRouter
-  - `./knowledge.types` → RetrievalResult
-  - `./knowledge.cache` → knowledgeCache
-  - `../../core/config` → KNOWLEDGE_GATEWAY_ENABLED
-
-### `dist/src/modules/knowledge/knowledge.router.js`
-- **Класс**: `KnowledgeRouter`
-- **Экспорт**: `new KnowledgeRouter()`
-
-### `dist/src/modules/knowledge/knowledge.types.js`
-- **Класс**: `RetrievalChunk`
-- **Класс**: `RetrievalResult`
-- **Экспорт**: `{`
-
-### `dist/src/modules/mission/mission.repository.js`
-- **Класс**: `MissionRepository`
-- **Экспорт**: `new MissionRepository()`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/src/modules/mission/mission.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `POST /`
-  - `GET /:id`
-  - `GET /session/:sessionId`
-  - `PATCH /:id`
-- **Зависимости**:
-  - `./mission.repository` → missionRepository
-
-### `dist/src/modules/policy/approval.service.js`
-- **Класс**: `ApprovalService`
-- **Экспорт**: `{ ApprovalService }`, `ApprovalService`
-- **Зависимости**:
-  - `../../core/sqlite` → db
-
-### `dist/src/modules/policy/policy.engine.js`
-- **Класс**: `PolicyEngine`
-- **Экспорт**: `{ PolicyEngine, RiskClass }`, `PolicyEngine`, `RiskClass`
-- **Зависимости**:
-  - `./redaction.service` → RedactionService
-
-### `dist/src/modules/policy/redaction.service.js`
-- **Класс**: `RedactionService`
-- **Экспорт**: `{ RedactionService }`, `RedactionService`
-
-### `dist/src/modules/providers/adapters/deepseek.js`
-- **Экспорт**: `createProvider({`
-- **Зависимости**:
-  - `./openai_compat` → createProvider
-
-### `dist/src/modules/providers/adapters/google.js`
-- **Класс**: `GoogleProvider` extends `BaseProvider`
-- **Экспорт**: `new GoogleProvider()`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/src/modules/providers/adapters/grok.js`
-- **Класс**: `GrokProvider` extends `OpenAICompatProvider`
-- **Экспорт**: `new GrokProvider({`
-- **Зависимости**:
-  - `./openai_compat` → OpenAICompatProvider
-
-### `dist/src/modules/providers/adapters/grok_responses.js`
-- **Экспорт**: `createResponsesProvider({`
-- **Зависимости**:
-  - `./openai_responses_compat` → createResponsesProvider
-
-### `dist/src/modules/providers/adapters/llamacpp.js`
-- **Класс**: `LlamaCppProvider` extends `BaseProvider`
-- **Экспорт**: `new LlamaCppProvider()`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/src/modules/providers/adapters/mcp.js`
-- **Класс**: `MCPProvider` extends `BaseProvider`
-- **Экспорт**: `new MCPProvider({`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `../providerEvents` → ProviderEvents
-  - `../providerErrors` → ProviderError
-
-### `dist/src/modules/providers/adapters/openai.js`
-- **Экспорт**: `createProvider({`
-- **Зависимости**:
-  - `./openai_compat` → createProvider
-
-### `dist/src/modules/providers/adapters/openai_compat.js`
-- **Класс**: `OpenAICompatProvider` extends `BaseProvider`
-- **Экспорт**: `{ OpenAICompatProvider, createProvider }`, `OpenAICompatProvider`, `createProvider`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/src/modules/providers/adapters/openai_responses.js`
-- **Экспорт**: `createResponsesProvider({`
-- **Зависимости**:
-  - `./openai_responses_compat` → createResponsesProvider
-
-### `dist/src/modules/providers/adapters/openai_responses_compat.js`
-- **Класс**: `OpenAIResponsesProvider` extends `BaseProvider`
-- **Экспорт**: `{ OpenAIResponsesProvider, createResponsesProvider }`, `OpenAIResponsesProvider`, `createResponsesProvider`
-- **Зависимости**:
-  - `../base.provider` → BaseProvider
-  - `./../providerEvents` → ProviderEvents
-  - `./../providerErrors` → ProviderError
-
-### `dist/src/modules/providers/adapters/qwen.js`
-- **Экспорт**: `createProvider({`
-- **Зависимости**:
-  - `./openai_compat` → createProvider
-
-### `dist/src/modules/providers/base.provider.js`
-- **Класс**: `BaseProvider`
-- **Экспорт**: `BaseProvider`
-
-### `dist/src/modules/providers/provider.factory.js`
-- **Экспорт**: `{ getProvider, listProviders, adapters }`, `getProvider`, `listProviders`, `adapters`
-- **Зависимости**:
-  - `../../core/providers.config` → providersConfig
-  - `./adapters/llamacpp` → (side-effect)
-  - `./adapters/openai` → (side-effect)
-  - `./adapters/openai_responses` → (side-effect)
-  - `./adapters/deepseek` → (side-effect)
-  - `./adapters/google` → (side-effect)
-  - `./adapters/qwen` → (side-effect)
-  - `./adapters/grok` → (side-effect)
-  - `./adapters/grok_responses` → (side-effect)
-  - `./adapters/mcp` → (side-effect)
-  - `../../../tests/mocks/deterministic_provider` → DeterministicProvider
-
-### `dist/src/modules/providers/providerErrors.js`
-- **Класс**: `ProviderError` extends `Error`
-- **Экспорт**: `{ ProviderError }`, `ProviderError`
-
-### `dist/src/modules/providers/providerEvents.js`
-- **Экспорт**: `ProviderEvents`
-
-### `dist/src/modules/providers/providers.routes.js`
-- **Экспорт**: `router`
-- **Роуты**:
-  - `GET /`
-  - `GET /health`
-  - `GET /:id/models`
-  - `GET /:id/health`
-- **Зависимости**:
-  - `../auth/auth.middleware` → authenticate
-  - `./provider.factory` → listProviders
-  - `../admin/category.repository` → categoryRepository
-  - `./provider.factory` → getProvider
-  - `../../core/providers.config` → providersConfig
-  - `../../core/providers.config` → providersConfig
-  - `../../core/providers.config` → providersConfig
-
-### `dist/src/modules/semantic/claim.extractor.js`
-- **Класс**: `ClaimExtractor`
-- **Экспорт**: `{ ClaimExtractor, STRENGTH_ORDER }`, `ClaimExtractor`, `STRENGTH_ORDER`
-- **Зависимости**:
-
-### `dist/src/modules/semantic/claim.ledger.js`
-- **Класс**: `ClaimLedger`
-- **Экспорт**: `{ ClaimLedger }`, `ClaimLedger`
-
-### `dist/src/modules/semantic/domain.boundary.js`
-- **Класс**: `DomainBoundary`
-- **Экспорт**: `{ DomainBoundary, DEFAULT_BOUNDARIES }`, `DomainBoundary`, `DEFAULT_BOUNDARIES`
-- **Зависимости**:
-  - `./claim.extractor` → ClaimExtractor
-  - `./semantic.events` → SemanticEvents
-
-### `dist/src/modules/semantic/semantic.events.js`
-- **Экспорт**: `SemanticEvents`
-
-### `dist/src/modules/semantic/semantic.protocol.js`
-- **Класс**: `SemanticProtocol`
-- **Экспорт**: `{ SemanticProtocol, PROTOCOL_VERSION }`, `SemanticProtocol`, `PROTOCOL_VERSION`
-- **Зависимости**:
-  - `./claim.extractor` → ClaimExtractor
-  - `./domain.boundary` → DomainBoundary
-  - `./claim.ledger` → ClaimLedger
-  - `./semantic.events` → SemanticEvents
-
-### `dist/src/modules/temporal/activities.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-  - `../execution/run.repository` → runRepository
-
-### `dist/src/modules/temporal/client.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-  - `../../core/config` → TEMPORAL_URL
-
-### `dist/src/modules/temporal/workflows.js`
-- **Экспорт**: `{`
-- **Зависимости**:
-
-### `dist/src/providers/base.js`
-- **Класс**: `BaseProvider`
-- **Экспорт**: `BaseProvider`, `BaseProvider`
-
-### `dist/src/providers/openai-responses.provider.js`
-- **Класс**: `OpenAIResponsesProvider` extends `base_js_1`
-- **Экспорт**: `OpenAIResponsesProvider`, `OpenAIResponsesProvider`
-- **Зависимости**:
-  - `./base.js` → base_js_1
 
 ### `server.js`
 - **Экспорт**: `{ app, server }`, `app`, `server`
@@ -1594,6 +651,10 @@ graph TD
   - `./src/modules/auth/auth.middleware` → authenticate
   - `./src/modules/sandbox/sandbox.routes` → router: sandboxRouter
   - `./src/core/sqlite` → (side-effect)
+
+### `src/config/env.ts`
+- **Экспорт**: `env`, `config`
+- **Зависимости**:
 
 ### `src/core/config.js`
 - **Экспорт**: `{`
@@ -2088,6 +1149,12 @@ graph TD
 - **Экспорт**: `{`
 - **Зависимости**:
 
+### `src/providers/openai-responses.provider.ts`
+- **Экспорт**: `OpenAIResponsesProvider`
+- **Зависимости**:
+  - `./base.js` → BaseProvider, ProviderConfig, ChatEvent
+  - `../types/chat.js` → ChatMessage
+
 ### `tests/evals/rag.eval.js`
 - **Класс**: `RAGEvalRunner`
 - **Экспорт**: `{ RAGEvalRunner }`, `RAGEvalRunner`
@@ -2137,13 +1204,13 @@ graph TD
 
 | Переменная | Используется в |
 |---|---|
-| `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js, chatavg/utils.js, chatavg/utils.js |
-| `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js, chatavg/sqlite.js, chatavg/sqlite.js |
+| `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js |
+| `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js |
 | `CHATAVG_SECRET` | chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
-| `DEBUG_PROVIDER_PAYLOADS` | chatavg/grok.js, chatavg/openai_compat.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/grok.js, chatavg/openai_compat.js |
+| `DEBUG_PROVIDER_PAYLOADS` | chatavg/grok.js, chatavg/openai_compat.js |
 | `E2B_API_KEY` | chatavg/e2b.adapter.js, chatavg/sandbox.manager.js |
 | `E2B_TEMPLATE` | chatavg/sandbox.manager.js |
-| `NODE_ENV` | chatavg/errors.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/errors.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/server.js, chatavg/errors.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `PORT` | mcp_gateway/server.js |
 | `SEMANTIC_LAYER_ENABLED` | chatavg/mission_artifacts.test.js |
 
@@ -2153,68 +1220,6 @@ graph TD
 
 | Метод | Путь | Файл |
 |---|---|---|
-| `GET` | `/users` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `POST` | `/users/:username` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `DELETE` | `/users/:username` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `GET` | `/categories` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `POST` | `/categories/:category_name` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `DELETE` | `/categories/:category_name` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `POST` | `/categories/:category_name/test` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `GET` | `/stats` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `GET` | `/audit` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `GET` | `/dashboard/mvp` | `chatavg/dist/modules/admin/admin.routes.js` |
-| `POST` | `/login` | `chatavg/dist/modules/auth/auth.routes.js` |
-| `GET` | `/me` | `chatavg/dist/modules/auth/users.routes.js` |
-| `PATCH` | `/me` | `chatavg/dist/modules/auth/users.routes.js` |
-| `POST` | `/completions` | `chatavg/dist/modules/chat/chat.routes.js` |
-| `GET` | `/` | `chatavg/dist/modules/chat/sessions.routes.js` |
-| `GET` | `/:id` | `chatavg/dist/modules/chat/sessions.routes.js` |
-| `POST` | `/` | `chatavg/dist/modules/chat/sessions.routes.js` |
-| `DELETE` | `/:id` | `chatavg/dist/modules/chat/sessions.routes.js` |
-| `PATCH` | `/:id` | `chatavg/dist/modules/chat/sessions.routes.js` |
-| `POST` | `/` | `chatavg/dist/modules/execution/execution.routes.js` |
-| `GET` | `/:id` | `chatavg/dist/modules/execution/execution.routes.js` |
-| `POST` | `/:id/cancel` | `chatavg/dist/modules/execution/execution.routes.js` |
-| `GET` | `/:id/events` | `chatavg/dist/modules/execution/execution.routes.js` |
-| `POST` | `/` | `chatavg/dist/modules/mission/mission.routes.js` |
-| `GET` | `/:id` | `chatavg/dist/modules/mission/mission.routes.js` |
-| `GET` | `/session/:sessionId` | `chatavg/dist/modules/mission/mission.routes.js` |
-| `PATCH` | `/:id` | `chatavg/dist/modules/mission/mission.routes.js` |
-| `GET` | `/` | `chatavg/dist/modules/providers/providers.routes.js` |
-| `GET` | `/health` | `chatavg/dist/modules/providers/providers.routes.js` |
-| `GET` | `/:id/models` | `chatavg/dist/modules/providers/providers.routes.js` |
-| `GET` | `/:id/health` | `chatavg/dist/modules/providers/providers.routes.js` |
-| `GET` | `/users` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `POST` | `/users/:username` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `DELETE` | `/users/:username` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `GET` | `/categories` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `POST` | `/categories/:category_name` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `DELETE` | `/categories/:category_name` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `POST` | `/categories/:category_name/test` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `GET` | `/stats` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `GET` | `/audit` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `GET` | `/dashboard/mvp` | `chatavg/dist/src/modules/admin/admin.routes.js` |
-| `POST` | `/login` | `chatavg/dist/src/modules/auth/auth.routes.js` |
-| `GET` | `/me` | `chatavg/dist/src/modules/auth/users.routes.js` |
-| `PATCH` | `/me` | `chatavg/dist/src/modules/auth/users.routes.js` |
-| `POST` | `/completions` | `chatavg/dist/src/modules/chat/chat.routes.js` |
-| `GET` | `/` | `chatavg/dist/src/modules/chat/sessions.routes.js` |
-| `GET` | `/:id` | `chatavg/dist/src/modules/chat/sessions.routes.js` |
-| `POST` | `/` | `chatavg/dist/src/modules/chat/sessions.routes.js` |
-| `DELETE` | `/:id` | `chatavg/dist/src/modules/chat/sessions.routes.js` |
-| `PATCH` | `/:id` | `chatavg/dist/src/modules/chat/sessions.routes.js` |
-| `POST` | `/` | `chatavg/dist/src/modules/execution/execution.routes.js` |
-| `GET` | `/:id` | `chatavg/dist/src/modules/execution/execution.routes.js` |
-| `POST` | `/:id/cancel` | `chatavg/dist/src/modules/execution/execution.routes.js` |
-| `GET` | `/:id/events` | `chatavg/dist/src/modules/execution/execution.routes.js` |
-| `POST` | `/` | `chatavg/dist/src/modules/mission/mission.routes.js` |
-| `GET` | `/:id` | `chatavg/dist/src/modules/mission/mission.routes.js` |
-| `GET` | `/session/:sessionId` | `chatavg/dist/src/modules/mission/mission.routes.js` |
-| `PATCH` | `/:id` | `chatavg/dist/src/modules/mission/mission.routes.js` |
-| `GET` | `/` | `chatavg/dist/src/modules/providers/providers.routes.js` |
-| `GET` | `/health` | `chatavg/dist/src/modules/providers/providers.routes.js` |
-| `GET` | `/:id/models` | `chatavg/dist/src/modules/providers/providers.routes.js` |
-| `GET` | `/:id/health` | `chatavg/dist/src/modules/providers/providers.routes.js` |
 | `USE` | `/api/auth` | `chatavg/server.js` |
 | `USE` | `/api/users` | `chatavg/server.js` |
 | `USE` | `/api/admin` | `chatavg/server.js` |
@@ -2275,96 +1280,6 @@ graph TD
 
 ### chatavg
 ```
-crypto.js → config
-migrate.js → sqlite, config
-providers.config.js → config
-sqlite.js → config, config
-admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config, sqlite, config
-category.repository.js → sqlite, crypto
-audit.service.js → sqlite, redaction.service
-auth.middleware.js → config, user.repository, errors
-auth.routes.js → auth.middleware, user.repository, errors, audit.service
-user.repository.js → sqlite
-users.routes.js → user.repository, auth.middleware, errors
-chat.routes.js → auth.middleware, errors, chat.service
-chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, semantic.protocol, providerEvents
-fallbackPolicy.js → providerErrors
-policyRouter.js → provider.factory
-session.repository.js → sqlite
-sessions.routes.js → auth.middleware, errors, session.repository
-artifact.service.js → role_pass
-execution.routes.js → run.service, config
-run.repository.js → sqlite
-run.service.js → run.repository, mission.repository, client, config
-knowledge.gateway.js → knowledge.router, knowledge.types, knowledge.cache, config
-mission.repository.js → sqlite
-mission.routes.js → mission.repository
-approval.service.js → sqlite
-policy.engine.js → redaction.service
-deepseek.js → openai_compat
-google.js → base.provider, providerEvents, providerErrors
-grok.js → openai_compat
-grok_responses.js → openai_responses_compat
-llamacpp.js → base.provider, providerEvents, providerErrors
-mcp.js → base.provider, providerEvents, providerErrors
-openai.js → openai_compat
-openai_compat.js → base.provider, providerEvents, providerErrors
-openai_responses.js → openai_responses_compat
-openai_responses_compat.js → base.provider, providerEvents, providerErrors
-qwen.js → openai_compat
-provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp, deterministic_provider
-providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config, providers.config, providers.config
-domain.boundary.js → claim.extractor, semantic.events
-semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
-activities.js → run.repository
-client.js → config
-worker.js → config, activities
-openai-responses.provider.js → base
-crypto.js → config
-migrate.js → sqlite, config
-providers.config.js → config
-sqlite.js → config, config
-admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config, sqlite, config
-category.repository.js → sqlite, crypto
-audit.service.js → sqlite, redaction.service
-auth.middleware.js → config, user.repository, errors
-auth.routes.js → auth.middleware, user.repository, errors, audit.service
-user.repository.js → sqlite
-users.routes.js → user.repository, auth.middleware, errors
-chat.routes.js → auth.middleware, errors, chat.service
-chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, semantic.protocol, providerEvents
-fallbackPolicy.js → providerErrors
-policyRouter.js → provider.factory
-session.repository.js → sqlite
-sessions.routes.js → auth.middleware, errors, session.repository
-artifact.service.js → role_pass
-execution.routes.js → run.service, config
-run.repository.js → sqlite
-run.service.js → run.repository, mission.repository, client, config
-knowledge.gateway.js → knowledge.router, knowledge.types, knowledge.cache, config
-mission.repository.js → sqlite
-mission.routes.js → mission.repository
-approval.service.js → sqlite
-policy.engine.js → redaction.service
-deepseek.js → openai_compat
-google.js → base.provider, providerEvents, providerErrors
-grok.js → openai_compat
-grok_responses.js → openai_responses_compat
-llamacpp.js → base.provider, providerEvents, providerErrors
-mcp.js → base.provider, providerEvents, providerErrors
-openai.js → openai_compat
-openai_compat.js → base.provider, providerEvents, providerErrors
-openai_responses.js → openai_responses_compat
-openai_responses_compat.js → base.provider, providerEvents, providerErrors
-qwen.js → openai_compat
-provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp, deterministic_provider
-providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config, providers.config, providers.config
-domain.boundary.js → claim.extractor, semantic.events
-semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
-activities.js → run.repository
-client.js → config
-worker.js → config, activities
-openai-responses.provider.js → base
 reset_admin.js → sqlite
 server.js → config, errors, sqlite, auth.middleware, sandbox.routes, sqlite
 crypto.js → config
@@ -2416,7 +1331,9 @@ activities.js → run.repository
 client.js → config
 worker.js → config, activities
 tool.gateway.js → providerErrors, tool.registry
-agent_run.test.js → server, sqlite
+base.ts → chat
+openai-responses.provider.ts → base, chat
+agent_run.test.js → server, sqlite, client
 api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
 chaos.test.js → chat.service, fallbackPolicy
@@ -2441,6 +1358,7 @@ provider_events.test.js → providerEvents
 sandbox_manager.test.js → sandbox.manager, sandbox.types, egress.policy, sandbox.utils
 security.test.js → utils, server, sqlite
 security_assertions.test.js → utils
+security_red_team.test.js → egress.policy, tool.gateway, tool.registry, mission.repository, sqlite
 claim_extraction.test.js → claim.extractor
 domain_boundary.test.js → domain.boundary, claim.extractor, semantic.protocol
 semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json
