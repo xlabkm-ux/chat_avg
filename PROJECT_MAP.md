@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 07:02:51`
+> Автоматически сгенерировано: `2026-05-07 07:54:06`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -32,51 +32,62 @@ graph TD
     N21["policyRouter"]
     N22["session.repository"]
     N23["sessions.routes"]
-    N24["deepseek"]
-    N25["google"]
-    N26["grok"]
-    N27["grok_responses"]
-    N28["llamacpp"]
-    N29["mcp"]
-    N30["openai"]
-    N31["openai_compat"]
-    N32["openai_responses"]
-    N33["openai_responses_compat"]
-    N34["qwen"]
-    N35["base.provider"]
-    N36["provider.factory"]
-    N37["providerErrors"]
-    N38["providerEvents"]
-    N39["providers.routes"]
-    N40["claim.extractor"]
-    N41["claim.ledger"]
-    N42["domain.boundary"]
-    N43["semantic.events"]
-    N44["semantic.protocol"]
-    N45["api.test"]
-    N46["baseline_security.test"]
-    N47["contract_canonical_event.test"]
-    N48["deterministic_provider.test"]
-    N49["errors.test"]
-    N50["fast_path_guardrail.test"]
-    N51["health.test"]
-    N52["latency_baseline.test"]
-    N53["deterministic_provider"]
-    N54["provider_events.test"]
-    N55["security.test"]
-    N56["security_assertions.test"]
-    N57["claim_extraction.test"]
-    N58["domain_boundary.test"]
-    N59["semantic.eval"]
-    N60["setup_fixtures"]
+    N24["execution.routes"]
+    N25["run.repository"]
+    N26["run.service"]
+    N27["mission.repository"]
+    N28["mission.routes"]
+    N29["deepseek"]
+    N30["google"]
+    N31["grok"]
+    N32["grok_responses"]
+    N33["llamacpp"]
+    N34["mcp"]
+    N35["openai"]
+    N36["openai_compat"]
+    N37["openai_responses"]
+    N38["openai_responses_compat"]
+    N39["qwen"]
+    N40["base.provider"]
+    N41["provider.factory"]
+    N42["providerErrors"]
+    N43["providerEvents"]
+    N44["providers.routes"]
+    N45["claim.extractor"]
+    N46["claim.ledger"]
+    N47["domain.boundary"]
+    N48["semantic.events"]
+    N49["semantic.protocol"]
+    N50["activities"]
+    N51["client"]
+    N52["worker"]
+    N53["workflows"]
+    N54["agent_run.test"]
+    N55["api.test"]
+    N56["baseline_security.test"]
+    N57["contract_canonical_event.test"]
+    N58["deterministic_provider.test"]
+    N59["errors.test"]
+    N60["fast_path_guardrail.test"]
+    N61["health.test"]
+    N62["latency_baseline.test"]
+    N63["deterministic_provider"]
+    N64["provider_events.test"]
+    N65["security.test"]
+    N66["security_assertions.test"]
+    N67["claim_extraction.test"]
+    N68["domain_boundary.test"]
+    N69["semantic.eval"]
+    N70["setup_fixtures"]
   end
-  subgraph N61["mcp_gateway"]
-    N62["server"]
+  subgraph N71["mcp_gateway"]
+    N72["server"]
   end
   N2 --> N9
   N3 --> N4
   N3 --> N6
   N3 --> N9
+  N3 --> N14
   N5 --> N4
   N7 --> N9
   N7 --> N4
@@ -88,7 +99,7 @@ graph TD
   N11 --> N16
   N11 --> N12
   N11 --> N22
-  N11 --> N36
+  N11 --> N41
   N11 --> N13
   N11 --> N5
   N11 --> N4
@@ -113,88 +124,105 @@ graph TD
   N19 --> N12
   N19 --> N21
   N19 --> N20
-  N19 --> N36
+  N19 --> N41
   N19 --> N8
   N19 --> N4
   N19 --> N10
-  N19 --> N44
-  N19 --> N38
-  N20 --> N37
-  N21 --> N36
+  N19 --> N49
+  N19 --> N43
+  N20 --> N42
+  N21 --> N41
   N22 --> N9
   N23 --> N14
   N23 --> N6
   N23 --> N22
-  N24 --> N31
-  N25 --> N35
-  N25 --> N38
-  N25 --> N37
-  N26 --> N31
-  N27 --> N33
-  N28 --> N35
-  N28 --> N38
-  N28 --> N37
-  N29 --> N35
-  N29 --> N38
-  N29 --> N37
-  N30 --> N31
-  N31 --> N35
-  N31 --> N38
-  N31 --> N37
-  N32 --> N33
-  N33 --> N35
-  N33 --> N38
-  N33 --> N37
-  N34 --> N31
-  N36 --> N8
-  N36 --> N28
-  N36 --> N30
-  N36 --> N32
-  N36 --> N24
-  N36 --> N25
-  N36 --> N34
-  N36 --> N26
-  N36 --> N27
-  N36 --> N29
-  N39 --> N14
+  N24 --> N26
+  N24 --> N4
+  N25 --> N9
+  N26 --> N25
+  N26 --> N27
+  N26 --> N51
+  N26 --> N4
+  N27 --> N9
+  N28 --> N27
+  N29 --> N36
+  N30 --> N40
+  N30 --> N43
+  N30 --> N42
+  N31 --> N36
+  N32 --> N38
+  N33 --> N40
+  N33 --> N43
+  N33 --> N42
+  N34 --> N40
+  N34 --> N43
+  N34 --> N42
+  N35 --> N36
+  N36 --> N40
+  N36 --> N43
+  N36 --> N42
+  N37 --> N38
+  N38 --> N40
+  N38 --> N43
+  N38 --> N42
   N39 --> N36
-  N39 --> N12
-  N39 --> N8
-  N42 --> N40
-  N42 --> N43
-  N44 --> N40
-  N44 --> N42
+  N41 --> N8
+  N41 --> N33
+  N41 --> N35
+  N41 --> N37
+  N41 --> N29
+  N41 --> N30
+  N41 --> N39
+  N41 --> N31
+  N41 --> N32
+  N41 --> N34
+  N41 --> N63
+  N44 --> N14
   N44 --> N41
-  N44 --> N43
-  N45 --> N3
-  N45 --> N62
-  N45 --> N9
-  N46 --> N3
-  N46 --> N62
-  N46 --> N9
-  N47 --> N53
-  N47 --> N38
-  N48 --> N53
-  N49 --> N6
-  N51 --> N3
-  N51 --> N62
-  N51 --> N9
-  N52 --> N53
-  N53 --> N35
-  N53 --> N38
-  N54 --> N38
-  N55 --> N10
+  N44 --> N12
+  N44 --> N8
+  N47 --> N45
+  N47 --> N48
+  N49 --> N45
+  N49 --> N47
+  N49 --> N46
+  N49 --> N48
+  N50 --> N25
+  N51 --> N4
+  N52 --> N4
+  N52 --> N50
+  N54 --> N3
+  N54 --> N72
+  N54 --> N9
   N55 --> N3
-  N55 --> N62
+  N55 --> N72
   N55 --> N9
-  N56 --> N10
-  N57 --> N40
-  N58 --> N42
-  N58 --> N40
-  N58 --> N44
-  N59 --> N44
-  N59 --> N40
-  N60 --> N9
+  N56 --> N3
+  N56 --> N72
+  N56 --> N9
+  N57 --> N63
+  N57 --> N43
+  N58 --> N63
+  N59 --> N6
+  N61 --> N3
+  N61 --> N72
+  N61 --> N9
+  N62 --> N63
+  N63 --> N40
+  N63 --> N43
+  N64 --> N43
+  N65 --> N10
+  N65 --> N3
+  N65 --> N72
+  N65 --> N9
+  N66 --> N10
+  N67 --> N45
+  N68 --> N47
+  N68 --> N45
+  N68 --> N49
+  N69 --> N49
+  N69 --> N45
+  N70 --> N9
 ```
 
 ## Компонент: `chatavg`
@@ -203,13 +231,13 @@ graph TD
 |---|---|---|---|
 | `diagnose_mcp.js` | 38 | 1.1 KB | — |
 | `reset_admin.js` | 22 | 0.6 KB | Admin Reset Utility (SQLite) |
-| `server.js` | 157 | 5.4 KB | — |
-| `src/core/config.js` | 141 | 5.0 KB | — |
+| `server.js` | 161 | 5.7 KB | — |
+| `src/core/config.js` | 159 | 5.5 KB | — |
 | `src/core/crypto.js` | 78 | 1.9 KB | AES-256-GCM encryption/decryption service. |
 | `src/core/errors.js` | 84 | 2.1 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
-| `src/core/providers.config.js` | 119 | 4.4 KB | — |
-| `src/core/sqlite.js` | 203 | 5.8 KB | — |
+| `src/core/providers.config.js` | 129 | 4.7 KB | — |
+| `src/core/sqlite.js` | 236 | 6.8 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
 | `src/modules/admin/admin.routes.js` | 341 | 12.5 KB | — |
 | `src/modules/admin/category.repository.js` | 74 | 3.0 KB | Класс: CategoryRepository |
@@ -218,12 +246,17 @@ graph TD
 | `src/modules/auth/auth.routes.js` | 67 | 2.3 KB | Routes: Authentication |
 | `src/modules/auth/user.repository.js` | 70 | 2.5 KB | Класс: UserRepository |
 | `src/modules/auth/users.routes.js` | 49 | 1.4 KB | Routes: User Profile |
-| `src/modules/chat/chat.routes.js` | 60 | 2.4 KB | Routes: Chat Completions |
-| `src/modules/chat/chat.service.js` | 388 | 15.6 KB | Класс: ChatService |
+| `src/modules/chat/chat.routes.js` | 62 | 2.4 KB | Routes: Chat Completions |
+| `src/modules/chat/chat.service.js` | 437 | 17.5 KB | Класс: ChatService |
 | `src/modules/chat/fallbackPolicy.js` | 49 | 1.6 KB | Класс: FallbackPolicy |
 | `src/modules/chat/policyRouter.js` | 39 | 1.1 KB | Класс: PolicyRouter |
 | `src/modules/chat/session.repository.js` | 59 | 1.7 KB | Класс: SessionRepository |
 | `src/modules/chat/sessions.routes.js` | 105 | 3.3 KB | Routes: Sessions CRUD |
+| `src/modules/execution/execution.routes.js` | 100 | 2.4 KB | POST /api/runs |
+| `src/modules/execution/run.repository.js` | 63 | 1.4 KB | Класс: AgentRunRepository |
+| `src/modules/execution/run.service.js` | 128 | 3.4 KB | Класс: AgentRunService |
+| `src/modules/mission/mission.repository.js` | 81 | 2.6 KB | Класс: MissionRepository |
+| `src/modules/mission/mission.routes.js` | 80 | 1.9 KB | POST /api/missions |
 | `src/modules/providers/adapters/deepseek.js` | 19 | 0.4 KB | Provider: DeepSeek |
 | `src/modules/providers/adapters/google.js` | 125 | 4.0 KB | Класс: GoogleProvider |
 | `src/modules/providers/adapters/grok.js` | 234 | 8.4 KB | Provider: Grok (xAI) |
@@ -236,7 +269,7 @@ graph TD
 | `src/modules/providers/adapters/openai_responses_compat.js` | 176 | 5.7 KB | Класс: OpenAIResponsesProvider |
 | `src/modules/providers/adapters/qwen.js` | 20 | 0.5 KB | Provider: Qwen (Alibaba Cloud / DashScope) |
 | `src/modules/providers/base.provider.js` | 110 | 3.5 KB | Класс: BaseProvider |
-| `src/modules/providers/provider.factory.js` | 50 | 1.3 KB | — |
+| `src/modules/providers/provider.factory.js` | 62 | 1.7 KB | — |
 | `src/modules/providers/providerErrors.js` | 13 | 0.3 KB | Класс: ProviderError |
 | `src/modules/providers/providerEvents.js` | 27 | 0.9 KB | — |
 | `src/modules/providers/providers.routes.js` | 103 | 3.1 KB | — |
@@ -245,6 +278,11 @@ graph TD
 | `src/modules/semantic/domain.boundary.js` | 202 | 8.6 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
 | `src/modules/semantic/semantic.events.js` | 53 | 2.1 KB | Semantic Events — канонические типы событий семантического слоя. |
 | `src/modules/semantic/semantic.protocol.js` | 116 | 3.6 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
+| `src/modules/temporal/activities.js` | 24 | 0.7 KB | — |
+| `src/modules/temporal/client.js` | 33 | 0.8 KB | — |
+| `src/modules/temporal/worker.js` | 23 | 0.6 KB | — |
+| `src/modules/temporal/workflows.js` | 43 | 1.3 KB | — |
+| `tests/agent_run.test.js` | 139 | 4.0 KB | — |
 | `tests/api.test.js` | 170 | 5.3 KB | — |
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
 | `tests/contract_canonical_event.test.js` | 164 | 5.9 KB | Contract tests for AsyncIterable semantics of provider adapters. |
@@ -271,6 +309,8 @@ graph TD
   - `USE /api/sessions`
   - `USE /api/chat`
   - `USE /api/providers`
+  - `USE /api/missions`
+  - `USE /api/runs`
   - `GET /health`
   - `GET /ready`
   - `USE /api`
@@ -279,6 +319,7 @@ graph TD
   - `./src/core/config` → PORT, WEBUI_DIR, allowedOrigins, isDev
   - `./src/core/errors` → errorHandler, AppError
   - `./src/core/sqlite` → (side-effect)
+  - `./src/modules/auth/auth.middleware` → authenticate
   - `./src/core/sqlite` → (side-effect)
 
 ### `src/core/config.js`
@@ -406,7 +447,7 @@ graph TD
   - `./fallbackPolicy` → fallbackPolicy
   - `../providers/provider.factory` → getProvider, adapters
   - `../../core/providers.config` → providersConfig
-  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED
+  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED
   - `../../core/utils` → validateProviderUrl, sanitizePromptText
   - `../semantic/semantic.protocol` → SemanticProtocol
   - `../providers/providerEvents` → ProviderEvents
@@ -441,6 +482,48 @@ graph TD
   - `../auth/auth.middleware` → authenticate
   - `../../core/errors` → asyncHandler
   - `./session.repository` → sessionRepository
+
+### `src/modules/execution/execution.routes.js`
+- **Экспорт**: `router`
+- **Роуты**:
+  - `POST /`
+  - `GET /:id`
+  - `POST /:id/cancel`
+  - `GET /:id/events`
+- **Зависимости**:
+  - `./run.service` → runService
+  - `../../core/config` → AGENT_RUNS_ENABLED
+
+### `src/modules/execution/run.repository.js`
+- **Класс**: `AgentRunRepository`
+- **Экспорт**: `new AgentRunRepository()`
+- **Зависимости**:
+  - `../../core/sqlite` → db
+
+### `src/modules/execution/run.service.js`
+- **Класс**: `AgentRunService` extends `EventEmitter`
+- **Экспорт**: `new AgentRunService()`
+- **Зависимости**:
+  - `./run.repository` → runRepository
+  - `../mission/mission.repository` → missionRepository
+  - `../temporal/client` → temporalClient
+  - `../../core/config` → TEMPORAL_RUNTIME_ENABLED
+
+### `src/modules/mission/mission.repository.js`
+- **Класс**: `MissionRepository`
+- **Экспорт**: `new MissionRepository()`
+- **Зависимости**:
+  - `../../core/sqlite` → db
+
+### `src/modules/mission/mission.routes.js`
+- **Экспорт**: `router`
+- **Роуты**:
+  - `POST /`
+  - `GET /:id`
+  - `GET /session/:sessionId`
+  - `PATCH /:id`
+- **Зависимости**:
+  - `./mission.repository` → missionRepository
 
 ### `src/modules/providers/adapters/deepseek.js`
 - **Экспорт**: `createProvider({`
@@ -530,6 +613,7 @@ graph TD
   - `./adapters/grok` → (side-effect)
   - `./adapters/grok_responses` → (side-effect)
   - `./adapters/mcp` → (side-effect)
+  - `../../../tests/mocks/deterministic_provider` → DeterministicProvider
 
 ### `src/modules/providers/providerErrors.js`
 - **Класс**: `ProviderError` extends `Error`
@@ -582,6 +666,20 @@ graph TD
   - `./claim.ledger` → ClaimLedger
   - `./semantic.events` → SemanticEvents
 
+### `src/modules/temporal/activities.js`
+- **Экспорт**: `{`
+- **Зависимости**:
+  - `../execution/run.repository` → runRepository
+
+### `src/modules/temporal/client.js`
+- **Экспорт**: `{`
+- **Зависимости**:
+  - `../../core/config` → TEMPORAL_URL
+
+### `src/modules/temporal/workflows.js`
+- **Экспорт**: `{`
+- **Зависимости**:
+
 ### `tests/mocks/deterministic_provider.js`
 - **Класс**: `DeterministicProvider` extends `BaseProvider`
 - **Экспорт**: `{ DeterministicProvider }`, `DeterministicProvider`
@@ -623,8 +721,8 @@ graph TD
 |---|---|
 | `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js |
 | `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js |
-| `CHATAVG_SECRET` | chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
-| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `CHATAVG_SECRET` | chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/provider.factory.js, chatavg/agent_run.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `PORT` | mcp_gateway/server.js |
 
 ## API Реестр
@@ -639,6 +737,8 @@ graph TD
 | `USE` | `/api/sessions` | `chatavg/server.js` |
 | `USE` | `/api/chat` | `chatavg/server.js` |
 | `USE` | `/api/providers` | `chatavg/server.js` |
+| `USE` | `/api/missions` | `chatavg/server.js` |
+| `USE` | `/api/runs` | `chatavg/server.js` |
 | `GET` | `/health` | `chatavg/server.js` |
 | `GET` | `/ready` | `chatavg/server.js` |
 | `USE` | `/api` | `chatavg/server.js` |
@@ -661,6 +761,14 @@ graph TD
 | `POST` | `/` | `chatavg/src/modules/chat/sessions.routes.js` |
 | `DELETE` | `/:id` | `chatavg/src/modules/chat/sessions.routes.js` |
 | `PATCH` | `/:id` | `chatavg/src/modules/chat/sessions.routes.js` |
+| `POST` | `/` | `chatavg/src/modules/execution/execution.routes.js` |
+| `GET` | `/:id` | `chatavg/src/modules/execution/execution.routes.js` |
+| `POST` | `/:id/cancel` | `chatavg/src/modules/execution/execution.routes.js` |
+| `GET` | `/:id/events` | `chatavg/src/modules/execution/execution.routes.js` |
+| `POST` | `/` | `chatavg/src/modules/mission/mission.routes.js` |
+| `GET` | `/:id` | `chatavg/src/modules/mission/mission.routes.js` |
+| `GET` | `/session/:sessionId` | `chatavg/src/modules/mission/mission.routes.js` |
+| `PATCH` | `/:id` | `chatavg/src/modules/mission/mission.routes.js` |
 | `GET` | `/` | `chatavg/src/modules/providers/providers.routes.js` |
 | `GET` | `/health` | `chatavg/src/modules/providers/providers.routes.js` |
 | `GET` | `/:id/models` | `chatavg/src/modules/providers/providers.routes.js` |
@@ -674,7 +782,7 @@ graph TD
 ### chatavg
 ```
 reset_admin.js → sqlite
-server.js → config, errors, sqlite, sqlite
+server.js → config, errors, sqlite, auth.middleware, sqlite
 crypto.js → config
 migrate.js → sqlite, config
 providers.config.js → config
@@ -692,6 +800,11 @@ fallbackPolicy.js → providerErrors
 policyRouter.js → provider.factory
 session.repository.js → sqlite
 sessions.routes.js → auth.middleware, errors, session.repository
+execution.routes.js → run.service, config
+run.repository.js → sqlite
+run.service.js → run.repository, mission.repository, client, config
+mission.repository.js → sqlite
+mission.routes.js → mission.repository
 deepseek.js → openai_compat
 google.js → base.provider, providerEvents, providerErrors
 grok.js → openai_compat
@@ -703,10 +816,14 @@ openai_compat.js → base.provider, providerEvents, providerErrors
 openai_responses.js → openai_responses_compat
 openai_responses_compat.js → base.provider, providerEvents, providerErrors
 qwen.js → openai_compat
-provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp
+provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp, deterministic_provider
 providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config, providers.config, providers.config
 domain.boundary.js → claim.extractor, semantic.events
 semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
+activities.js → run.repository
+client.js → config
+worker.js → config, activities
+agent_run.test.js → server, sqlite
 api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
 contract_canonical_event.test.js → deterministic_provider, providerEvents

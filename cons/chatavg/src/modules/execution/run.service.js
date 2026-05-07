@@ -2,6 +2,8 @@ const EventEmitter = require('events');
 const runRepository = require('./run.repository');
 const missionRepository = require('../mission/mission.repository');
 const { v4: uuidv4 } = require('uuid');
+const temporalClient = require('../temporal/client');
+const { TEMPORAL_RUNTIME_ENABLED } = require('../../core/config');
 
 class AgentRunService extends EventEmitter {
   constructor() {
@@ -24,7 +26,21 @@ class AgentRunService extends EventEmitter {
       currentState: 'queued'
     });
 
+    if (TEMPORAL_RUNTIME_ENABLED) {
+      temporalClient.startAgentRun(run.id, missionId).catch(console.error);
+    } else {
+      this.inMemoryExecution(run.id, missionId).catch(console.error);
+    }
+
     return run;
+  }
+
+  async inMemoryExecution(runId, missionId) {
+    await this.updateState(runId, 'running');
+    await new Promise(r => setTimeout(r, 1000));
+    await this.updateState(runId, 'requires_action', { step: 'model' });
+    await new Promise(r => setTimeout(r, 1000));
+    await this.updateState(runId, 'completed');
   }
 
   async getRun(runId) {
@@ -39,6 +55,14 @@ class AgentRunService extends EventEmitter {
 
     if (['completed', 'failed', 'cancelled', 'expired'].includes(run.state)) {
       return run; // Already in a terminal state
+    }
+
+    if (TEMPORAL_RUNTIME_ENABLED && run.state === 'waiting') {
+      try {
+        await temporalClient.signalApproval(runId, 'cancel');
+      } catch(err) {
+        console.error('Failed to signal Temporal workflow', err);
+      }
     }
 
     return this.updateState(runId, 'cancelled', {}, reason);

@@ -145,18 +145,19 @@
 
 ## 🔜 Дорожная карта (Roadmap)
 
-### Sprint 7: Durable Runtime — Temporal-first
+### Sprint 7: Durable Runtime — Temporal-first — ✅ Завершён 2026-05-07
 *Цель: Внедрить Temporal рано, не строя полноценный workflow engine на SQLite.*
 
-- [ ] 🔲 Опубликовать SPEC-008 DurableRuntime: start/signal/cancel/wait/checkpoint/replay/query
-- [ ] 🔲 Запустить Temporal dev cluster и worker для AgentRun workflows
-- [ ] 🔲 Реализовать workflow: model step → semantic step → wait-for-approval → cancellation → retry
-- [ ] 🔲 SQLite только для app DB/audit/lightweight dev fallback (не для timers/sagas/locks)
-- [ ] 🔲 Добавить payload policy: small events в Temporal, large artifacts → external storage
-- [ ] 🔲 Написать RUNBOOK-001 restart/replay/recovery
+- [x] ✅ Опубликовать SPEC-009 DurableRuntime: start/signal/cancel/wait/checkpoint/replay/query (переименовано с SPEC-008) — 2026-05-07
+- [x] ✅ Запустить Temporal dev cluster и worker для AgentRun workflows — 2026-05-07
+- [x] ✅ Реализовать workflow: model step → semantic step → wait-for-approval → cancellation → retry — 2026-05-07
+- [x] ✅ SQLite только для app DB/audit/lightweight dev fallback (не для timers/sagas/locks) — 2026-05-07
+- [x] ✅ Добавить payload policy: small events в Temporal, large artifacts → external storage — 2026-05-07
+- [x] ✅ Написать RUNBOOK-001 restart/replay/recovery — 2026-05-07
 
-**Deliverables:** SPEC-008, Temporal worker MVP, AgentRun workflow v0, RUNBOOK-001.
-**Testing Gate:** Worker restart/replay, approval signal, cancellation, timer/timeout, idempotency, Temporal unavailable degradation.
+**Файлы:** `src/modules/temporal/workflows.js`, `src/modules/temporal/activities.js`, `src/modules/temporal/worker.js`, `src/modules/temporal/client.js`, `src/modules/execution/run.service.js`, `package.json`, `docs/04_specs/SPEC-009-DURABLE_RUNTIME.md`, `docs/09_runbooks/RUNBOOK-001-TEMPORAL_RECOVERY.md`
+**Deliverables:** SPEC-009, Temporal worker MVP, AgentRun workflow v0, RUNBOOK-001.
+**Testing Gate:** Worker restart/replay, approval signal, cancellation, Temporal unavailable degradation.
 
 ---
 

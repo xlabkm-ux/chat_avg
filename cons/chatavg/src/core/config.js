@@ -45,6 +45,7 @@ const envSchema = z.object({
   TOOL_GATEWAY_ENABLED: z.string().transform(v => v === 'true').default('false'),
   SANDBOX_FORGE_ENABLED: z.string().transform(v => v === 'true').default('false'),
   TEMPORAL_RUNTIME_ENABLED: z.string().transform(v => v === 'true').default('false'),
+  TEMPORAL_URL: z.string().default('localhost:7233'),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -134,6 +135,7 @@ module.exports = {
   TOOL_GATEWAY_ENABLED,
   SANDBOX_FORGE_ENABLED,
   TEMPORAL_RUNTIME_ENABLED,
+  TEMPORAL_URL: env.TEMPORAL_URL,
   FEATURE_FLAGS,
   isDev: env.NODE_ENV === 'development',
   isTest: env.NODE_ENV === 'test',
