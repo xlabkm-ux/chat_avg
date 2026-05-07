@@ -1,51 +1,59 @@
-# 🚀 Project Backlog — Chat AVG
+# 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Этот файл является центральным хранилищем всех планов, задач и истории развития проекта.
+Текущая стадия: **Sprint 0 — Repo Hygiene and Architecture Lock**
 
----
+## 🏁 Текущий спринт (Sprint 0)
+*Цель: Очистить репозиторий, зафиксировать v2.3 и убрать конфликтующие направления.*
 
-## 🗺️ Текущий Roadmap (Enterprise AI Gateway & MCP)
-*Статус: В разработке (Май 2026). Эволюция `chatavg-gateway` в интеллектуальный маршрутизатор (Policy-Based Router) и интеграция с Remote MCP.*
+- [x] ✅ Создать структуру документации (`docs/`) — 2026-05-07
+- [x] ✅ Подготовить `ARCHITECTURE_OVERVIEW_V2_3.md`, `ADR_INDEX.md`, `GLOSSARY.md` — 2026-05-07
+- [x] ✅ Обновить `AGENT_INSTRUCTIONS.md` — 2026-05-07
+- [x] ✅ Обновить `.gitignore` (добавить БД и временные файлы) — 2026-05-07
+- [x] ✅ Обновить и проверить `PROJECT_MAP.md` (скриптом refresh.js) — 2026-05-07
+- [x] ✅ Сформировать `REGRESSION_BASELINE.md` и `THREAT_MODEL.md` — 2026-05-07
+- [x] ✅ Подготовить `LOCAL_DEVELOPMENT_SETUP.md` — 2026-05-07
+- [ ] 🔲 Настроить базовые Feature Flags в коде
 
-### [В РАБОТЕ] Этап 1 — Нормализация Provider Layer (Contract Fix)
-- [x] **Спринт 1.1: Унификация контрактов** — Создание `providerEvents.js` и `providerErrors.js`. Перевод `handleChat` в `base.provider.js` на `AsyncIterable` (CanonicalChatEvent). Приведение всех адаптеров к единому формату (`yield { type: 'delta' }`).
-- [x] **Спринт 1.2: Policy Router** — Создание `services/policyRouter.js` поверх конфигурации категорий. Внедрение полей `routing_mode`, `fallback_provider` в настройки категорий. Интеграция роутера в `chat.service.js`.
-- [x] **Спринт 1.3: Policy-aware Fallback** — Создание `services/fallbackPolicy.js`. Настройка безопасного переключения (только для retryable-ошибок вроде timeout/502) без обхода политик доступа.
+## 🔜 Дорожная карта (Roadmap)
 
-### [ОЖИДАЕТ] Этап 2 — MCP Provider и Remote Server MVP
-- [x] **Спринт 2.1: MCP Provider в Gateway** — Интеграция `@modelcontextprotocol/sdk`. Создание `providers/adapters/mcp.js`. Реализация вызова инструмента `ai.chat` и маппинга потока в CanonicalChatEvent.
-- [x] **Спринт 2.2: Remote MCP Server MVP** — Создание отдельного Node.js сервиса `mcp_gateway/` внутри репозитория. Настройка эндпоинта `/mcp` (Streamable HTTP) и базового проксирования в OpenAI-совместимые API.
-- [ ] **Спринт 2.3: Model Registry** — Разработка ресурса/инструмента `ai.models.list` на удаленном сервере для динамического предоставления списка моделей клиенту.
+### Sprint 1: Regression Baseline & Environment
+- [x] ✅ Настройка базовых тестов и фикстур (Test harness) — 2026-05-07
+- [x] ✅ Environment secrets config (правила работы с .env) — 2026-05-07
+- [x] ✅ Обновление UI Audit (мобильная верстка, safe-area) — 2026-05-07
+      Файлы: `tests/*.test.js`, `server.js`, `docs/07_security/ENVIRONMENT_SECRETS.md`, `UI_AUDIT.md`
+      Итог: Исправлены зависания тестов при выполнении через node --test (очистка event loop и закрытие БД/сервера), создана документация для работы с .env, актуализирован UI_AUDIT.md.
 
----
+### Sprint 2: Fast Path Discipline
+- [ ] 🔲 Зафиксировать `CanonicalChatEvent` (контракт потокового ответа)
+- [ ] 🔲 Изолировать "Быстрый путь" чата от тяжелого RAG и песочниц
+- [ ] 🔲 Реализовать контракт ошибок (Error Contract)
 
-## 🕒 Хронология и История планов (Full History)
+### Sprint 3: Model Registry
+- [ ] 🔲 Разработать API динамического списка моделей (`MODEL_REGISTRY_API`)
+- [ ] 🔲 Внедрить проверку "здоровья" (health) AI-провайдеров
 
-### Май 2026: Завершение Interface v2.0
-- [x] ✅ **Независимые сессии (клиент)**: Изоляция сессий, авто-сохранение.
-- [x] ✅ **Серверная синхронизация сессий**: REST API, SQLite.
-- [x] ✅ **Финальная полировка**: XSS-защита (DOMPurify), Markdown рендер.
-- [x] **Строгий CORS**: Переход на точное соответствие origin (exact match) для предотвращения обходов через поддомены.
-- [x] **Конфигурируемые Таймауты**: Вынос `PROVIDER_TIMEOUT` и `TEST_TIMEOUT` в `.env` и `config.js`.
+### Sprint 4: Model Gateway (LiteLLM Pilot)
+- [ ] 🔲 Развернуть LiteLLM Proxy как основной Model Gateway
+- [ ] 🔲 Настроить routing, fallbacks и учет стоимости токенов
 
-### Май 2026: Аудит и Санация (Remediation)
-- [x] **Реструктуризация**: Переименование папки проекта в `cons` и обновление путей.
-- [x] **Модернизация Портов**: Переход на `8200` (Gateway) и `8201` (Llama) для исключения конфликтов.
-- [x] **Docker Readiness**: Добавлены эндпоинты `/health` и `/ready` для мониторинга.
-- [x] **Защита от Prompt Injection**: Внедрена утилита `sanitizePromptText`.
+### Sprint 5: Semantic Protocol PoC (Critical Gate)
+- [ ] 🔲 Реализовать `Claim Ledger` (извлечение утверждений)
+- [ ] 🔲 Внедрить `Domain Boundary Rules` (границы адекватности)
+- [ ] 🔲 Подготовить `Semantic Eval Golden Set` (набор тестов)
 
-### Апрель 2026: Модульность и Стабильность
-- [x] **Модульная архитектура**: Рефакторинг `server.js` на модули (`src/core`, `src/modules`).
-- [x] **Database Migration**: Переход с JSON-файлов на `better-sqlite3` с версионированием.
-- [x] **Security Baseline P0**: Ограничение JSON лимитов (2MB), защита от SSRF (блокировка приватных IP).
+### Sprint 6-9: AgentRun, Temporal & MVP Release
+- [ ] 🔲 API долгих миссий (AgentRun API)
+- [ ] 🔲 Внедрение Temporal для Durable Runtime
+- [ ] 🔲 Policy & Cost Control Plane (система одобрений Approval UX)
+- [ ] 🔲 Запуск MVP-версии (Fast Chat + AgentRun + Approvals)
 
-### Март 2026: Эпоха MimikaStudio (Python/FastAPI)
-- [x] **Системные фиксы Windows**: Замена `/tmp` на `tempfile.gettempdir()`.
-- [x] **Кодировки**: Исправление записи транскриптов с принудительным `encoding="utf-8"`.
+### Sprint 10-14: Beta Expansion (Knowledge, Tools, Forge)
+- [ ] 🔲 Knowledge Gateway (различные режимы RAG)
+- [ ] 🔲 MCP Tool Gateway (реестр версионированных инструментов)
+- [ ] 🔲 Hybrid Sandbox / Forge (интеграция E2B для безопасного выполнения кода)
+- [ ] 🔲 Role Passes & Artifact Workspace
 
----
-
-## 📝 Беклог идей и технических улучшений
-- [ ] **Светлая тема**: Реализация `prefers-color-scheme` и ручного переключателя.
-- [ ] **Интеграция с локальными моделями**: Поддержка автоматического обнаружения моделей в `models_cache`.
-- [ ] **Голосовой ввод/вывод**: Интеграция TTS (Fish Speech) и STT (Whisper) напрямую в WebUI.
+### Sprint 15-16: Hardening & Release Candidate
+- [ ] 🔲 Нагрузочное тестирование (Performance / Chaos testing)
+- [ ] 🔲 Дашборды Observability
+- [ ] 🔲 Аудит безопасности и Release Candidate (RC)

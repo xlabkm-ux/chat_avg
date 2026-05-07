@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-06 17:14:14`
+> Автоматически сгенерировано: `2026-05-07 05:36:47`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -50,11 +50,16 @@ graph TD
     N39["providers.routes"]
     N40["api.test"]
     N41["baseline_security.test"]
-    N42["health.test"]
-    N43["security.test"]
+    N42["deterministic_provider.test"]
+    N43["errors.test"]
+    N44["health.test"]
+    N45["deterministic_provider"]
+    N46["provider_events.test"]
+    N47["security.test"]
+    N48["setup_fixtures"]
   end
-  subgraph N44["mcp_gateway"]
-    N45["server"]
+  subgraph N49["mcp_gateway"]
+    N50["server"]
   end
   N2 --> N9
   N3 --> N4
@@ -63,6 +68,7 @@ graph TD
   N5 --> N4
   N7 --> N9
   N7 --> N4
+  N8 --> N4
   N9 --> N4
   N11 --> N14
   N11 --> N6
@@ -142,16 +148,24 @@ graph TD
   N39 --> N12
   N39 --> N8
   N40 --> N3
-  N40 --> N45
+  N40 --> N50
   N40 --> N9
   N41 --> N3
-  N41 --> N45
-  N42 --> N3
+  N41 --> N50
+  N41 --> N9
   N42 --> N45
-  N42 --> N9
-  N43 --> N10
-  N43 --> N3
-  N43 --> N45
+  N43 --> N6
+  N44 --> N3
+  N44 --> N50
+  N44 --> N9
+  N45 --> N35
+  N45 --> N38
+  N46 --> N38
+  N47 --> N10
+  N47 --> N3
+  N47 --> N50
+  N47 --> N9
+  N48 --> N9
 ```
 
 ## Компонент: `chatavg`
@@ -160,12 +174,12 @@ graph TD
 |---|---|---|---|
 | `diagnose_mcp.js` | 38 | 1.1 KB | — |
 | `reset_admin.js` | 22 | 0.6 KB | Admin Reset Utility (SQLite) |
-| `server.js` | 154 | 5.2 KB | — |
-| `src/core/config.js` | 88 | 2.8 KB | — |
+| `server.js` | 157 | 5.4 KB | — |
+| `src/core/config.js` | 117 | 3.8 KB | — |
 | `src/core/crypto.js` | 78 | 1.9 KB | AES-256-GCM encryption/decryption service. |
 | `src/core/errors.js` | 84 | 2.1 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
-| `src/core/providers.config.js` | 102 | 3.4 KB | — |
+| `src/core/providers.config.js` | 101 | 3.4 KB | — |
 | `src/core/sqlite.js` | 203 | 5.8 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
 | `src/modules/admin/admin.routes.js` | 341 | 12.5 KB | — |
@@ -197,10 +211,15 @@ graph TD
 | `src/modules/providers/providerErrors.js` | 12 | 0.3 KB | Класс: ProviderError |
 | `src/modules/providers/providerEvents.js` | 9 | 0.3 KB | — |
 | `src/modules/providers/providers.routes.js` | 49 | 1.5 KB | — |
-| `tests/api.test.js` | 162 | 5.1 KB | — |
-| `tests/baseline_security.test.js` | 45 | 1.9 KB | — |
-| `tests/health.test.js` | 50 | 1.4 KB | — |
-| `tests/security.test.js` | 38 | 1.7 KB | — |
+| `tests/api.test.js` | 170 | 5.3 KB | — |
+| `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
+| `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
+| `tests/errors.test.js` | 53 | 1.8 KB | — |
+| `tests/health.test.js` | 51 | 1.5 KB | — |
+| `tests/mocks/deterministic_provider.js` | 79 | 2.7 KB | DeterministicProvider — синтетический провайдер для тестов. |
+| `tests/provider_events.test.js` | 60 | 2.0 KB | — |
+| `tests/security.test.js` | 44 | 1.7 KB | — |
+| `tests/setup_fixtures.js` | 101 | 3.2 KB | — |
 
 ### `server.js`
 - **Экспорт**: `{ app, server }`, `app`, `server`
@@ -246,6 +265,7 @@ graph TD
 ### `src/core/providers.config.js`
 - **Экспорт**: `providersConfig`
 - **Зависимости**:
+  - `./config` → providerEnv
 
 ### `src/core/sqlite.js`
 - **Экспорт**: `db`
@@ -488,6 +508,18 @@ graph TD
   - `./provider.factory` → getProvider
   - `../../core/providers.config` → providersConfig
 
+### `tests/mocks/deterministic_provider.js`
+- **Класс**: `DeterministicProvider` extends `BaseProvider`
+- **Экспорт**: `{ DeterministicProvider }`, `DeterministicProvider`
+- **Зависимости**:
+  - `../../src/modules/providers/base.provider` → BaseProvider
+  - `../../src/modules/providers/providerEvents` → ProviderEvents
+
+### `tests/setup_fixtures.js`
+- **Экспорт**: `{ loadFixtures }`, `loadFixtures`
+- **Зависимости**:
+  - `../src/core/sqlite` → db
+
 ## Компонент: `mcp_gateway`
 
 | Файл | Строк | Размер | Описание |
@@ -509,22 +541,9 @@ graph TD
 |---|---|
 | `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js |
 | `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js |
-| `CHATAVG_SECRET` | chatavg/api.test.js, chatavg/health.test.js |
-| `DEEPSEEK_API_KEY` | chatavg/providers.config.js |
-| `DEEPSEEK_URL` | chatavg/providers.config.js |
-| `GEMINI_API_KEY` | chatavg/providers.config.js |
-| `GROK_API_KEY` | chatavg/providers.config.js |
-| `GROK_URL` | chatavg/providers.config.js |
-| `LLAMACPP_API_KEY` | chatavg/providers.config.js |
-| `LLAMACPP_URL` | chatavg/providers.config.js |
-| `MCP_API_KEY` | chatavg/providers.config.js |
-| `MCP_GATEWAY_URL` | chatavg/providers.config.js |
-| `NODE_ENV` | chatavg/errors.js, chatavg/api.test.js, chatavg/health.test.js |
-| `OPENAI_API_KEY` | chatavg/providers.config.js |
-| `OPENAI_URL` | chatavg/providers.config.js |
+| `CHATAVG_SECRET` | chatavg/api.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/health.test.js, chatavg/provider_events.test.js, chatavg/setup_fixtures.js |
+| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/api.test.js, chatavg/deterministic_provider.test.js, chatavg/errors.test.js, chatavg/health.test.js, chatavg/provider_events.test.js, chatavg/setup_fixtures.js |
 | `PORT` | mcp_gateway/server.js |
-| `QWEN_API_KEY` | chatavg/providers.config.js |
-| `QWEN_URL` | chatavg/providers.config.js |
 
 ## API Реестр
 
@@ -574,6 +593,7 @@ reset_admin.js → sqlite
 server.js → config, errors, sqlite, sqlite
 crypto.js → config
 migrate.js → sqlite, config
+providers.config.js → config
 sqlite.js → config, config
 admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config
 category.repository.js → sqlite, crypto
@@ -602,9 +622,14 @@ qwen.js → openai_compat
 provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp
 providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config
 api.test.js → server, sqlite
-baseline_security.test.js → server
+baseline_security.test.js → server, sqlite
+deterministic_provider.test.js → deterministic_provider
+errors.test.js → errors
 health.test.js → server, sqlite
-security.test.js → utils, server
+deterministic_provider.js → base.provider, providerEvents
+provider_events.test.js → providerEvents
+security.test.js → utils, server, sqlite
+setup_fixtures.js → sqlite
 ```
 
 ### mcp_gateway

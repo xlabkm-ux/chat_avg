@@ -7,10 +7,17 @@ node_modules/
 models_cache/
 gemma_app/llama_cpp/models_cache/
 
-# Runtime data
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Runtime data & Artifacts
 data/
+artifacts/
 *.log
 *.tmp
+sandbox_tmp/
 
 # IDEs
 .vscode/

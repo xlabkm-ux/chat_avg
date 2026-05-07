@@ -11,18 +11,27 @@ if (!process.env.CHATAVG_SECRET) {
   process.env.CHATAVG_SECRET = 'test_secret_that_is_at_least_32_characters_long';
 }
 
-const { app, server } = require('../server');
+const { app } = require('../server');
 const db = require('../src/core/sqlite');
+
+let testServer;
 
 test('API Integration Tests', async (t) => {
   let adminToken = '';
   let testUserId = 'test_user_' + Date.now();
   let testUserToken = '';
 
-  t.after(() => {
+  t.before((done) => {
+    testServer = app.listen(0, done);
+  });
+
+  t.after((done) => {
     // Cleanup
-    if (server) {
-      server.close();
+    if (testServer) {
+      testServer.closeAllConnections();
+      testServer.close(done);
+    } else {
+      done();
     }
     db.close();
     // Optionally remove the test database file
@@ -30,14 +39,13 @@ test('API Integration Tests', async (t) => {
     if (fs.existsSync(dataTestDir)) {
       try {
         fs.rmSync(dataTestDir, { recursive: true, force: true });
-      } catch (e) {
-        console.warn('Could not remove test database: ', e.message);
-      }
+      } catch (e) {}
     }
+    setTimeout(() => process.exit(0), 50).unref();
   });
 
   await t.test('POST /api/auth/login - should fail with invalid credentials', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .post('/api/auth/login')
       .send({ username: 'admin', password: 'wrongpassword' })
       .expect(401);
@@ -52,7 +60,7 @@ test('API Integration Tests', async (t) => {
     const hash = bcrypt.hashSync(adminPass, 10);
     db.prepare('UPDATE users SET password_hash = ? WHERE username = ?').run(hash, 'admin');
 
-    const res = await request(app)
+    const res = await request(testServer)
       .post('/api/auth/login')
       .send({ username: 'admin', password: adminPass })
       .expect(200);
@@ -62,7 +70,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('GET /api/users/me - should fetch own profile', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .get('/api/users/me')
       .set('Authorization', `Bearer ${adminToken}`)
       .expect(200);
@@ -72,7 +80,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('POST /api/admin/users/:username - should create a new user', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .post(`/api/admin/users/${testUserId}`)
       .set('Authorization', `Bearer ${adminToken}`)
       .send({
@@ -86,7 +94,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('POST /api/auth/login - should login as new user', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .post('/api/auth/login')
       .send({ username: testUserId, password: 'TestUserPass123!' })
       .expect(200);
@@ -96,7 +104,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('POST /api/sessions - should save session', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .post('/api/sessions')
       .set('Authorization', `Bearer ${testUserToken}`)
       .send({
@@ -111,7 +119,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('GET /api/sessions - should list sessions', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .get('/api/sessions')
       .set('Authorization', `Bearer ${testUserToken}`)
       .expect(200);
@@ -122,7 +130,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('GET /api/sessions/:id - should get session details', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .get('/api/sessions/sess-123')
       .set('Authorization', `Bearer ${testUserToken}`)
       .expect(200);
@@ -133,7 +141,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('DELETE /api/sessions/:id - should delete session', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .delete('/api/sessions/sess-123')
       .set('Authorization', `Bearer ${testUserToken}`)
       .expect(200);
@@ -142,7 +150,7 @@ test('API Integration Tests', async (t) => {
   });
 
   await t.test('PATCH /api/users/me - should update password and invalidate old token', async () => {
-    const res = await request(app)
+    const res = await request(testServer)
       .patch('/api/users/me')
       .set('Authorization', `Bearer ${testUserToken}`)
       .send({

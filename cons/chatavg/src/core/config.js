@@ -22,6 +22,20 @@ const envSchema = z.object({
   CHATAVG_PROVIDER_TIMEOUT: z.string().transform(Number).default('60000'),
   CHATAVG_TEST_TIMEOUT: z.string().transform(Number).default('5000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
+  // Provider variables
+  LLAMACPP_URL: z.string().optional(),
+  LLAMACPP_API_KEY: z.string().optional(),
+  OPENAI_URL: z.string().optional(),
+  OPENAI_API_KEY: z.string().optional(),
+  DEEPSEEK_URL: z.string().optional(),
+  DEEPSEEK_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  QWEN_URL: z.string().optional(),
+  QWEN_API_KEY: z.string().optional(),
+  GROK_URL: z.string().optional(),
+  GROK_API_KEY: z.string().optional(),
+  MCP_GATEWAY_URL: z.string().optional(),
+  MCP_API_KEY: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -83,5 +97,20 @@ module.exports = {
   DEFAULT_SYSTEM_PROMPT,
   isDev: env.NODE_ENV === 'development',
   isTest: env.NODE_ENV === 'test',
-  allowedOrigins: env.CHATAVG_ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean)
+  allowedOrigins: env.CHATAVG_ALLOWED_ORIGINS.split(',').map(s => s.trim()).filter(Boolean),
+  providerEnv: {
+    LLAMACPP_URL: env.LLAMACPP_URL,
+    LLAMACPP_API_KEY: env.LLAMACPP_API_KEY,
+    OPENAI_URL: env.OPENAI_URL,
+    OPENAI_API_KEY: env.OPENAI_API_KEY,
+    DEEPSEEK_URL: env.DEEPSEEK_URL,
+    DEEPSEEK_API_KEY: env.DEEPSEEK_API_KEY,
+    GEMINI_API_KEY: env.GEMINI_API_KEY,
+    QWEN_URL: env.QWEN_URL,
+    QWEN_API_KEY: env.QWEN_API_KEY,
+    GROK_URL: env.GROK_URL,
+    GROK_API_KEY: env.GROK_API_KEY,
+    MCP_GATEWAY_URL: env.MCP_GATEWAY_URL,
+    MCP_API_KEY: env.MCP_API_KEY
+  }
 };

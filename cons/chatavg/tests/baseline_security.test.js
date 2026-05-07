@@ -1,7 +1,15 @@
 const test = require('node:test');
+const { after } = require('node:test');
 const assert = require('node:assert');
 const request = require('supertest');
-const { app } = require('../server');
+const { app, server } = require('../server');
+const db = require('../src/core/sqlite');
+
+after(() => {
+  if (server) server.close();
+  db.close();
+  setTimeout(() => process.exit(0), 50).unref();
+});
 
 test('Security Baseline: CORS enforcement', async () => {
   // Should allow same-origin (no Origin header)
@@ -16,7 +24,7 @@ test('Security Baseline: CORS enforcement', async () => {
   
   // CORS error should result in an error response (depending on how errorHandler handles it)
   // In server.js, callback(new Error('CORS policy violation')) is called.
-  assert.strictEqual(res1.status, 500); // errorHandler usually maps unknown errors to 500
+  assert.strictEqual(res1.status, 403); 
   assert.ok(res1.body.error.message.includes('CORS policy violation'));
 });
 

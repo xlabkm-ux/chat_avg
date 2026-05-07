@@ -1,5 +1,4 @@
-const dotenv = require('dotenv');
-dotenv.config();
+const { providerEnv } = require('./config');
 
 /**
  * Конфигурация провайдеров и моделей.
@@ -8,8 +7,8 @@ const providersConfig = {
   "llamacpp": {
     "name": "Локальная LLM (Llama.cpp)",
     "adapter": "llamacpp",
-    "endpoint_url": process.env.LLAMACPP_URL || "http://127.0.0.1:8201",
-    "api_key": process.env.LLAMACPP_API_KEY || "",
+    "endpoint_url": providerEnv.LLAMACPP_URL || "http://127.0.0.1:8201",
+    "api_key": providerEnv.LLAMACPP_API_KEY || "",
     "extra_params": {},
     "models": {
       "default": { "name": "Модель по умолчанию", "extra_params": {} }
@@ -18,8 +17,8 @@ const providersConfig = {
   "openai": {
     "name": "OpenAI API",
     "adapter": "openai",
-    "endpoint_url": process.env.OPENAI_URL || "https://api.openai.com/v1",
-    "api_key": process.env.OPENAI_API_KEY || "",
+    "endpoint_url": providerEnv.OPENAI_URL || "https://api.openai.com/v1",
+    "api_key": providerEnv.OPENAI_API_KEY || "",
     "extra_params": {},
     "models": {
       "gpt-4.1": { "name": "GPT-4.1", "extra_params": {} },
@@ -31,8 +30,8 @@ const providersConfig = {
   "openai_responses": {
     "name": "OpenAI Responses API",
     "adapter": "openai_responses",
-    "endpoint_url": process.env.OPENAI_URL || "https://api.openai.com/v1",
-    "api_key": process.env.OPENAI_API_KEY || "",
+    "endpoint_url": providerEnv.OPENAI_URL || "https://api.openai.com/v1",
+    "api_key": providerEnv.OPENAI_API_KEY || "",
     "extra_params": {},
     "models": {
       "gpt-4.1": { "name": "GPT-4.1", "extra_params": {} },
@@ -42,8 +41,8 @@ const providersConfig = {
   "deepseek": {
     "name": "DeepSeek",
     "adapter": "deepseek",
-    "endpoint_url": process.env.DEEPSEEK_URL || "https://api.deepseek.com/v1",
-    "api_key": process.env.DEEPSEEK_API_KEY || "",
+    "endpoint_url": providerEnv.DEEPSEEK_URL || "https://api.deepseek.com/v1",
+    "api_key": providerEnv.DEEPSEEK_API_KEY || "",
     "extra_params": {},
     "models": {
       "deepseek-chat": { "name": "DeepSeek Chat", "extra_params": {} },
@@ -54,7 +53,7 @@ const providersConfig = {
     "name": "Google Gemini",
     "adapter": "google",
     "endpoint_url": "",
-    "api_key": process.env.GEMINI_API_KEY || "",
+    "api_key": providerEnv.GEMINI_API_KEY || "",
     "extra_params": {},
     "models": {
       "gemini-2.5-flash": { "name": "Gemini 2.5 Flash", "extra_params": {} },
@@ -64,8 +63,8 @@ const providersConfig = {
   "qwen": {
     "name": "Qwen (DashScope)",
     "adapter": "qwen",
-    "endpoint_url": process.env.QWEN_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-    "api_key": process.env.QWEN_API_KEY || "",
+    "endpoint_url": providerEnv.QWEN_URL || "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+    "api_key": providerEnv.QWEN_API_KEY || "",
     "extra_params": {},
     "models": {
       "qwen-plus": { "name": "Qwen Plus", "extra_params": {} },
@@ -75,8 +74,8 @@ const providersConfig = {
   "grok": {
     "name": "Grok (xAI)",
     "adapter": "grok",
-    "endpoint_url": process.env.GROK_URL || "https://api.x.ai/v1",
-    "api_key": process.env.GROK_API_KEY || "",
+    "endpoint_url": providerEnv.GROK_URL || "https://api.x.ai/v1",
+    "api_key": providerEnv.GROK_API_KEY || "",
     "extra_params": {
       "collection_ids": ["collection_82226a3f-f5b0-4a74-a818-55f7b3e71fdc"]
     },
@@ -89,8 +88,8 @@ const providersConfig = {
   "mcp": {
     "name": "MCP Gateway",
     "adapter": "mcp",
-    "endpoint_url": process.env.MCP_GATEWAY_URL || "http://127.0.0.1:8202",
-    "api_key": process.env.MCP_API_KEY || "",
+    "endpoint_url": providerEnv.MCP_GATEWAY_URL || "http://127.0.0.1:8202",
+    "api_key": providerEnv.MCP_API_KEY || "",
     "extra_params": {},
     "models": {
       "default": { "name": "Модель по умолчанию", "extra_params": {} }

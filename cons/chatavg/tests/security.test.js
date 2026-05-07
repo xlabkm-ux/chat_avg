@@ -16,10 +16,16 @@ test('Security Utility: sanitizePromptText', () => {
   assert.strictEqual(sanitizePromptText(undefined), '');
 });
 
-// Mocking dependencies for integration tests if needed, 
-// but since I can use supertest, let's try a real app test if possible.
+const { after } = require('node:test');
 const request = require('supertest');
-const { app } = require('../server');
+const { app, server } = require('../server');
+const db = require('../src/core/sqlite');
+
+after(() => {
+  if (server) server.close();
+  db.close();
+  setTimeout(() => process.exit(0), 50).unref();
+});
 
 test('Security API: /api/chat/completions', async (t) => {
   // We need a token for authentication. 

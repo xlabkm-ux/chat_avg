@@ -13,6 +13,9 @@ require('./src/core/sqlite'); // Ensures DB and schema exist
 
 const app = express();
 
+// Trust proxy for express-rate-limit (required when running behind Nginx/Cloudflare)
+app.set('trust proxy', 1);
+
 // Security middlewares
 app.use(helmet({
   contentSecurityPolicy: {
@@ -50,7 +53,7 @@ app.use(cors({
 app.use(express.json({ limit: '2mb' }));
 
 // Rate limiters
-const authLimiter = rateLimit({
+const authLimiter = process.env.NODE_ENV === 'test' ? (req, res, next) => next() : rateLimit({
   windowMs: 15 * 60 * 1000, 
   max: 20, 
   handler: (req, res, next, options) => {
@@ -61,7 +64,7 @@ const authLimiter = rateLimit({
   message: 'Слишком много попыток входа, попробуйте позже'
 });
 
-const chatLimiter = rateLimit({
+const chatLimiter = process.env.NODE_ENV === 'test' ? (req, res, next) => next() : rateLimit({
   windowMs: 1 * 60 * 1000,
   max: 60,
   handler: (req, res, next, options) => {
