@@ -42,3 +42,7 @@ Desktop.ini
 # Docker related
 Dockerfile
 docker-compose.yml
+
+# Temporal Binaries
+temporal_bin/
+temporal_cli.zip

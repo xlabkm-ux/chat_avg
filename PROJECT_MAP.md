@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 07:54:06`
+> Автоматически сгенерировано: `2026-05-07 08:10:47`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -79,9 +79,10 @@ graph TD
     N68["domain_boundary.test"]
     N69["semantic.eval"]
     N70["setup_fixtures"]
+    N71["signal"]
   end
-  subgraph N71["mcp_gateway"]
-    N72["server"]
+  subgraph N72["mcp_gateway"]
+    N73["server"]
   end
   N2 --> N9
   N3 --> N4
@@ -192,20 +193,20 @@ graph TD
   N52 --> N4
   N52 --> N50
   N54 --> N3
-  N54 --> N72
+  N54 --> N73
   N54 --> N9
   N55 --> N3
-  N55 --> N72
+  N55 --> N73
   N55 --> N9
   N56 --> N3
-  N56 --> N72
+  N56 --> N73
   N56 --> N9
   N57 --> N63
   N57 --> N43
   N58 --> N63
   N59 --> N6
   N61 --> N3
-  N61 --> N72
+  N61 --> N73
   N61 --> N9
   N62 --> N63
   N63 --> N40
@@ -213,7 +214,7 @@ graph TD
   N64 --> N43
   N65 --> N10
   N65 --> N3
-  N65 --> N72
+  N65 --> N73
   N65 --> N9
   N66 --> N10
   N67 --> N45
@@ -223,6 +224,7 @@ graph TD
   N69 --> N49
   N69 --> N45
   N70 --> N9
+  N71 --> N51
 ```
 
 ## Компонент: `chatavg`
@@ -299,6 +301,7 @@ graph TD
 | `tests/semantic/domain_boundary.test.js` | 174 | 8.2 KB | Tests: DomainBoundary — проверка границ и strength downgrade. |
 | `tests/semantic/semantic.eval.js` | 163 | 6.2 KB | Semantic Eval Runner — запуск golden set тестов. |
 | `tests/setup_fixtures.js` | 101 | 3.2 KB | — |
+| `tests/signal.js` | 18 | 0.5 KB | — |
 
 ### `server.js`
 - **Экспорт**: `{ app, server }`, `app`, `server`
@@ -839,6 +842,7 @@ claim_extraction.test.js → claim.extractor
 domain_boundary.test.js → domain.boundary, claim.extractor, semantic.protocol
 semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json
 setup_fixtures.js → sqlite
+signal.js → client
 ```
 
 ### mcp_gateway
