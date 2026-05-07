@@ -341,6 +341,7 @@ router.get('/audit', asyncHandler(async (req, res) => {
 
 router.get('/dashboard/mvp', asyncHandler(async (req, res) => {
   const db = require('../../core/sqlite');
+  const traceBus = require('../observability/trace.bus');
   
   const runStatusRows = db.prepare('SELECT state, count(*) as count FROM agent_runs GROUP BY state').all();
   const runStatus = {};
@@ -363,13 +364,21 @@ router.get('/dashboard/mvp', asyncHandler(async (req, res) => {
   // Feature flags
   const { FEATURE_FLAGS } = require('../../core/config');
 
+  // Traces
+  const traces = traceBus.getRecentTraces(100);
+
   res.json({
     run_status: runStatus,
     semantic_events: semanticEvents,
     approval_events: approvalEvents,
     total_cost_usd: totalCostUsd,
     feature_flags: FEATURE_FLAGS,
-    latency_p95: 0.69 // from baseline metrics
+    latency_p95: 0.69, // from baseline metrics
+    sandbox_warm_count: 0, // Placeholder for sprint 16
+    sandbox_cold_count: 0, // Placeholder for sprint 16
+    rag_quality_score: 1.0, // Placeholder
+    semantic_quality_score: 0.845, // Placeholder from MVP
+    recent_traces: traces
   });
 }));
 

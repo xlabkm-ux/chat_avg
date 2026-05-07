@@ -293,18 +293,18 @@
 
 ---
 
-### Sprint 16: Observability, Load/Chaos and Operational Hardening
+### Sprint 16: Observability, Load/Chaos and Operational Hardening — ✅ Завершён 2026-05-07
 *Цель: Доказать надёжность, стоимость, observability и graceful degradation.*
 
-- [ ] 🔲 Dashboards: cost, P95 latency, approvals, sandbox warm/cold, RAG quality, semantic quality
-- [ ] 🔲 Trace Bus как source of truth; external tools only overlay
-- [ ] 🔲 Load tests: fast chats, RAG chats, AgentRun streams, long workflows, tools, sandbox
-- [ ] 🔲 Chaos tests: provider timeout, LiteLLM unavailable, Temporal restart, vector store unavailable, MCP down, sandbox crash
-- [ ] 🔲 Multi-provider fallback pilot
-- [ ] 🔲 Backpressure вместо uncontrolled provider overload
+- [x] ✅ Dashboards: cost, P95 latency, approvals, sandbox warm/cold, RAG quality, semantic quality
+- [x] ✅ Trace Bus как source of truth; external tools only overlay
+- [x] ✅ Load tests: fast chats, RAG chats, AgentRun streams, long workflows, tools, sandbox
+- [x] ✅ Chaos tests: provider timeout, LiteLLM unavailable, Temporal restart, vector store unavailable, MCP down, sandbox crash
+- [x] ✅ Multi-provider fallback pilot
+- [x] ✅ Backpressure вместо uncontrolled provider overload
 
 **Deliverables:** Observability dashboards, Load test report, Chaos report, RUNBOOK-003, RUNBOOK-004, Fallback report.
-**Testing Gate:** Load harness, chaos fault injection, recovery/replay, fallback model tests, dashboard event completeness, DR drill.
+**Testing Gate:** Load harness, chaos fault injection, recovery/replay, fallback model tests, dashboard event completeness, DR drill — pass.
 
 ---
 

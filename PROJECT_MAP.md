@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 11:23:50`
+> Автоматически сгенерировано: `2026-05-07 14:01:12`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -175,6 +175,7 @@ graph TD
     N33["knowledge.types"]
     N34["mission.repository"]
     N35["mission.routes"]
+    N69["trace.bus"]
     N36["approval.service"]
     N37["policy.engine"]
     N38["redaction.service"]
@@ -194,12 +195,13 @@ graph TD
     N52["providerErrors"]
     N53["providerEvents"]
     N54["providers.routes"]
-    N69["e2b.adapter"]
-    N70["local.adapter"]
-    N71["egress.policy"]
-    N72["sandbox.manager"]
-    N73["sandbox.routes"]
-    N74["sandbox.types"]
+    N70["e2b.adapter"]
+    N71["local.adapter"]
+    N72["egress.policy"]
+    N73["sandbox.manager"]
+    N74["sandbox.routes"]
+    N75["sandbox.types"]
+    N76["sandbox.utils"]
     N55["claim.extractor"]
     N56["claim.ledger"]
     N57["domain.boundary"]
@@ -209,42 +211,44 @@ graph TD
     N61["client"]
     N62["worker"]
     N63["workflows"]
-    N75["tool.gateway"]
-    N76["tool.registry"]
-    N77["agent_run.test"]
-    N78["api.test"]
-    N79["baseline_security.test"]
-    N80["contract_canonical_event.test"]
-    N81["deterministic_provider.test"]
-    N82["e2e_mvp_gate.test"]
-    N83["errors.test"]
-    N84["rag.eval"]
-    N85["mission_artifacts.test"]
-    N86["fast_path_guardrail.test"]
-    N87["health.test"]
-    N88["knowledge_gateway.test"]
-    N89["performance.test"]
-    N90["rag_integration.test"]
-    N91["latency_baseline.test"]
-    N92["deterministic_provider"]
-    N93["approval.service.test"]
-    N94["cost.service.test"]
-    N95["policy.engine.test"]
-    N96["redaction.service.test"]
-    N97["provider_events.test"]
-    N98["sandbox_manager.test"]
-    N99["security.test"]
-    N100["security_assertions.test"]
-    N101["claim_extraction.test"]
-    N102["domain_boundary.test"]
-    N103["expand_golden_set"]
-    N104["semantic.eval"]
-    N105["setup_fixtures"]
-    N106["signal"]
-    N107["tool_gateway.test"]
+    N77["tool.gateway"]
+    N78["tool.registry"]
+    N79["agent_run.test"]
+    N80["api.test"]
+    N81["baseline_security.test"]
+    N82["chaos.test"]
+    N83["contract_canonical_event.test"]
+    N84["deterministic_provider.test"]
+    N85["e2e_mvp_gate.test"]
+    N86["errors.test"]
+    N87["rag.eval"]
+    N88["mission_artifacts.test"]
+    N89["fast_path_guardrail.test"]
+    N90["health.test"]
+    N91["knowledge_gateway.test"]
+    N92["performance.test"]
+    N93["rag_integration.test"]
+    N94["latency_baseline.test"]
+    N95["load_harness.test"]
+    N96["deterministic_provider"]
+    N97["approval.service.test"]
+    N98["cost.service.test"]
+    N99["policy.engine.test"]
+    N100["redaction.service.test"]
+    N101["provider_events.test"]
+    N102["sandbox_manager.test"]
+    N103["security.test"]
+    N104["security_assertions.test"]
+    N105["claim_extraction.test"]
+    N106["domain_boundary.test"]
+    N107["expand_golden_set"]
+    N108["semantic.eval"]
+    N109["setup_fixtures"]
+    N110["signal"]
+    N111["tool_gateway.test"]
   end
-  subgraph N108["mcp_gateway"]
-    N109["server"]
+  subgraph N112["mcp_gateway"]
+    N113["server"]
   end
   N4 --> N3
   N6 --> N8
@@ -343,7 +347,7 @@ graph TD
   N51 --> N41
   N51 --> N42
   N51 --> N44
-  N51 --> N92
+  N51 --> N96
   N54 --> N13
   N54 --> N51
   N54 --> N11
@@ -364,86 +368,95 @@ graph TD
   N68 --> N5
   N68 --> N8
   N68 --> N13
-  N68 --> N73
-  N69 --> N74
-  N70 --> N74
-  N72 --> N71
-  N72 --> N69
-  N72 --> N70
-  N73 --> N13
-  N73 --> N5
-  N73 --> N3
+  N68 --> N74
+  N10 --> N69
+  N18 --> N69
+  N70 --> N75
+  N71 --> N75
   N73 --> N72
-  N73 --> N12
-  N75 --> N52
-  N75 --> N76
-  N77 --> N68
-  N77 --> N109
-  N77 --> N8
-  N78 --> N68
-  N78 --> N109
-  N78 --> N8
+  N73 --> N70
+  N73 --> N71
+  N73 --> N76
+  N74 --> N13
+  N74 --> N5
+  N74 --> N3
+  N74 --> N73
+  N74 --> N12
+  N77 --> N52
+  N77 --> N78
   N79 --> N68
-  N79 --> N109
+  N79 --> N113
   N79 --> N8
-  N80 --> N92
-  N80 --> N53
-  N81 --> N92
-  N82 --> N68
-  N82 --> N109
-  N82 --> N8
-  N82 --> N36
-  N82 --> N55
-  N82 --> N57
-  N83 --> N5
-  N84 --> N18
-  N84 --> N31
-  N84 --> N11
-  N84 --> N51
-  N85 --> N27
-  N85 --> N23
-  N85 --> N26
-  N85 --> N18
-  N85 --> N11
-  N87 --> N68
-  N87 --> N109
-  N87 --> N8
-  N88 --> N31
-  N88 --> N32
-  N88 --> N33
-  N89 --> N31
-  N89 --> N30
-  N90 --> N18
-  N90 --> N31
-  N90 --> N11
-  N91 --> N92
-  N92 --> N50
-  N92 --> N53
-  N93 --> N36
-  N93 --> N8
-  N94 --> N24
-  N95 --> N37
-  N96 --> N38
-  N97 --> N53
-  N98 --> N72
-  N98 --> N74
-  N98 --> N71
-  N99 --> N9
-  N99 --> N68
-  N99 --> N109
-  N99 --> N8
-  N100 --> N9
-  N101 --> N55
-  N102 --> N57
-  N102 --> N55
-  N102 --> N59
-  N104 --> N59
-  N104 --> N55
-  N105 --> N8
-  N106 --> N61
-  N107 --> N76
-  N107 --> N75
-  N107 --> N52
+  N80 --> N68
+  N80 --> N113
+  N80 --> N8
+  N81 --> N68
+  N81 --> N113
+  N81 --> N8
+  N82 --> N18
+  N82 --> N19
+  N83 --> N96
+  N83 --> N53
+  N84 --> N96
+  N85 --> N68
+  N85 --> N113
+  N85 --> N8
+  N85 --> N36
+  N85 --> N55
+  N85 --> N57
+  N86 --> N5
+  N87 --> N18
+  N87 --> N31
+  N87 --> N11
+  N87 --> N51
+  N88 --> N27
+  N88 --> N23
+  N88 --> N26
+  N88 --> N18
+  N88 --> N11
+  N90 --> N68
+  N90 --> N113
+  N90 --> N8
+  N91 --> N31
+  N91 --> N32
+  N91 --> N33
+  N92 --> N31
+  N92 --> N30
+  N93 --> N18
+  N93 --> N31
+  N93 --> N11
+  N94 --> N96
+  N95 --> N18
+  N95 --> N19
+  N95 --> N69
+  N96 --> N50
+  N96 --> N53
+  N97 --> N36
+  N97 --> N8
+  N98 --> N24
+  N99 --> N37
+  N100 --> N38
+  N101 --> N53
+  N102 --> N73
+  N102 --> N75
+  N102 --> N72
+  N102 --> N76
+  N103 --> N9
+  N103 --> N68
+  N103 --> N113
+  N103 --> N8
+  N104 --> N9
+  N105 --> N55
+  N106 --> N57
+  N106 --> N55
+  N106 --> N59
+  N108 --> N59
+  N108 --> N55
+  N109 --> N8
+  N110 --> N61
+  N111 --> N78
+  N111 --> N77
+  N111 --> N52
 ```
 
 ## Компонент: `chatavg`
@@ -590,7 +603,7 @@ graph TD
 | `src/core/providers.config.js` | 129 | 4.7 KB | — |
 | `src/core/sqlite.js` | 273 | 7.8 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
-| `src/modules/admin/admin.routes.js` | 377 | 13.9 KB | — |
+| `src/modules/admin/admin.routes.js` | 386 | 14.2 KB | — |
 | `src/modules/admin/category.repository.js` | 74 | 3.0 KB | Класс: CategoryRepository |
 | `src/modules/audit/audit.service.js` | 70 | 2.2 KB | Log an action to the audit log. |
 | `src/modules/auth/auth.middleware.js` | 78 | 2.4 KB | Authentication — JWT middleware & helpers |
@@ -598,7 +611,7 @@ graph TD
 | `src/modules/auth/user.repository.js` | 70 | 2.5 KB | Класс: UserRepository |
 | `src/modules/auth/users.routes.js` | 49 | 1.4 KB | Routes: User Profile |
 | `src/modules/chat/chat.routes.js` | 62 | 2.4 KB | Routes: Chat Completions |
-| `src/modules/chat/chat.service.js` | 555 | 22.0 KB | Класс: ChatService |
+| `src/modules/chat/chat.service.js` | 595 | 23.5 KB | Класс: ChatService |
 | `src/modules/chat/fallbackPolicy.js` | 49 | 1.6 KB | Класс: FallbackPolicy |
 | `src/modules/chat/policyRouter.js` | 39 | 1.1 KB | Класс: PolicyRouter |
 | `src/modules/chat/session.repository.js` | 59 | 1.7 KB | Класс: SessionRepository |
@@ -616,6 +629,7 @@ graph TD
 | `src/modules/knowledge/knowledge.types.js` | 55 | 1.6 KB | Canonical types for the Knowledge Module. |
 | `src/modules/mission/mission.repository.js` | 92 | 2.9 KB | Класс: MissionRepository |
 | `src/modules/mission/mission.routes.js` | 80 | 1.9 KB | POST /api/missions |
+| `src/modules/observability/trace.bus.js` | 47 | 1.0 KB | Emit a trace event. |
 | `src/modules/policy/approval.service.js` | 83 | 2.2 KB | Класс: ApprovalService |
 | `src/modules/policy/policy.engine.js` | 83 | 2.7 KB | Evaluates an action and returns a PolicyDecision. |
 | `src/modules/policy/redaction.service.js` | 33 | 1.1 KB | Redacts sensitive information from a string or object payload. |
@@ -638,9 +652,10 @@ graph TD
 | `src/modules/sandbox/adapters/e2b.adapter.js` | 130 | 4.0 KB | E2BAdapter — primary sandbox adapter backed by E2B (e2b.dev). |
 | `src/modules/sandbox/adapters/local.adapter.js` | 73 | 2.1 KB | LocalAdapter — dev/fallback sandbox adapter using Node.js child_process. |
 | `src/modules/sandbox/egress.policy.js` | 112 | 4.0 KB | EgressPolicy — default-deny outbound traffic control for sandboxes. |
-| `src/modules/sandbox/sandbox.manager.js` | 375 | 13.0 KB | SandboxManager — orchestrates sandbox lifecycle for high-risk agent actions. |
+| `src/modules/sandbox/sandbox.manager.js` | 335 | 11.6 KB | SandboxManager — orchestrates sandbox lifecycle for high-risk agent actions. |
 | `src/modules/sandbox/sandbox.routes.js` | 151 | 4.4 KB | Routes: Sandbox / Forge API |
 | `src/modules/sandbox/sandbox.types.js` | 126 | 3.3 KB | Canonical types for the Sandbox / Forge module. |
+| `src/modules/sandbox/sandbox.utils.js` | 66 | 2.0 KB | Scans artifacts for suspicious content and applies size limits. |
 | `src/modules/semantic/claim.extractor.js` | 155 | 5.3 KB | ClaimExtractor — pipeline извлечения утверждений из текста. |
 | `src/modules/semantic/claim.ledger.js` | 118 | 2.6 KB | ClaimLedger — реестр всех извлечённых claims per session. |
 | `src/modules/semantic/domain.boundary.js` | 209 | 9.5 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
@@ -655,6 +670,7 @@ graph TD
 | `tests/agent_run.test.js` | 139 | 4.0 KB | — |
 | `tests/api.test.js` | 170 | 5.3 KB | — |
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
+| `tests/chaos/chaos.test.js` | 58 | 2.1 KB | — |
 | `tests/contract_canonical_event.test.js` | 164 | 5.9 KB | Contract tests for AsyncIterable semantics of provider adapters. |
 | `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
 | `tests/e2e_mvp_gate.test.js` | 136 | 4.3 KB | — |
@@ -667,13 +683,14 @@ graph TD
 | `tests/knowledge/performance.test.js` | 53 | 2.1 KB | — |
 | `tests/knowledge/rag_integration.test.js` | 70 | 2.3 KB | — |
 | `tests/latency_baseline.test.js` | 138 | 5.0 KB | Latency Measurement Utility |
+| `tests/load/load_harness.test.js` | 54 | 1.7 KB | — |
 | `tests/mocks/deterministic_provider.js` | 79 | 2.7 KB | DeterministicProvider — синтетический провайдер для тестов. |
 | `tests/policy/approval.service.test.js` | 45 | 1.9 KB | — |
 | `tests/policy/cost.service.test.js` | 16 | 0.5 KB | — |
 | `tests/policy/policy.engine.test.js` | 33 | 1.5 KB | — |
 | `tests/policy/redaction.service.test.js` | 29 | 1.0 KB | — |
 | `tests/provider_events.test.js` | 60 | 2.0 KB | — |
-| `tests/sandbox/sandbox_manager.test.js` | 383 | 13.4 KB | SandboxManager Integration Tests |
+| `tests/sandbox/sandbox_manager.test.js` | 384 | 13.5 KB | SandboxManager Integration Tests |
 | `tests/security.test.js` | 44 | 1.7 KB | — |
 | `tests/security_assertions.test.js` | 187 | 6.0 KB | CORS, SSRF, JSON Limit, and Prompt Sanitization assertion tests. |
 | `tests/semantic/claim_extraction.test.js` | 113 | 5.2 KB | Tests: ClaimExtractor — извлечение утверждений из текста. |
@@ -1641,6 +1658,7 @@ graph TD
   - `../../core/config` → TEST_TIMEOUT
   - `../../core/providers.config` → providersConfig
   - `../../core/sqlite` → db
+  - `../observability/trace.bus` → traceBus
   - `../../core/config` → FEATURE_FLAGS
 
 ### `src/modules/admin/category.repository.js`
@@ -1711,6 +1729,7 @@ graph TD
   - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED, KNOWLEDGE_GATEWAY_ENABLED
   - `../../core/utils` → validateProviderUrl, sanitizePromptText
   - `../semantic/semantic.protocol` → SemanticProtocol
+  - `../observability/trace.bus` → traceBus
   - `../providers/providerEvents` → ProviderEvents
 
 ### `src/modules/chat/fallbackPolicy.js`
@@ -1827,6 +1846,11 @@ graph TD
   - `PATCH /:id`
 - **Зависимости**:
   - `./mission.repository` → missionRepository
+
+### `src/modules/observability/trace.bus.js`
+- **Класс**: `TraceBus` extends `EventEmitter`
+- **Экспорт**: `new TraceBus()`
+- **Зависимости**:
 
 ### `src/modules/policy/approval.service.js`
 - **Класс**: `ApprovalService`
@@ -1981,6 +2005,7 @@ graph TD
   - `./egress.policy` → EgressPolicy
   - `./adapters/e2b.adapter` → E2BAdapter
   - `./adapters/local.adapter` → LocalAdapter
+  - `./sandbox.utils` → scanArtifacts, estimateCost, MAX_OUTPUT_BYTES
 
 ### `src/modules/sandbox/sandbox.routes.js`
 - **Экспорт**: `{ router, sandboxManager }`, `router`, `sandboxManager`
@@ -2002,6 +2027,10 @@ graph TD
 
 ### `src/modules/sandbox/sandbox.types.js`
 - **Экспорт**: `{`
+
+### `src/modules/sandbox/sandbox.utils.js`
+- **Экспорт**: `{`
+- **Зависимости**:
 
 ### `src/modules/semantic/claim.extractor.js`
 - **Класс**: `ClaimExtractor`
@@ -2342,7 +2371,7 @@ crypto.js → config
 migrate.js → sqlite, config
 providers.config.js → config
 sqlite.js → config, config
-admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config, sqlite, config
+admin.routes.js → auth.middleware, errors, utils, user.repository, category.repository, session.repository, provider.factory, audit.service, crypto, config, providers.config, sqlite, trace.bus, config
 category.repository.js → sqlite, crypto
 audit.service.js → sqlite, redaction.service
 auth.middleware.js → config, user.repository, errors
@@ -2350,7 +2379,7 @@ auth.routes.js → auth.middleware, user.repository, errors, audit.service
 user.repository.js → sqlite
 users.routes.js → user.repository, auth.middleware, errors
 chat.routes.js → auth.middleware, errors, chat.service
-chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, semantic.protocol, providerEvents
+chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, semantic.protocol, trace.bus, providerEvents
 fallbackPolicy.js → providerErrors
 policyRouter.js → provider.factory
 session.repository.js → sqlite
@@ -2379,7 +2408,7 @@ provider.factory.js → providers.config, llamacpp, openai, openai_responses, de
 providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config, providers.config, providers.config
 e2b.adapter.js → sandbox.types
 local.adapter.js → sandbox.types
-sandbox.manager.js → egress.policy, e2b.adapter, local.adapter
+sandbox.manager.js → egress.policy, e2b.adapter, local.adapter, sandbox.utils
 sandbox.routes.js → auth.middleware, errors, config, sandbox.manager, audit.service
 domain.boundary.js → claim.extractor, semantic.events
 semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
@@ -2390,6 +2419,7 @@ tool.gateway.js → providerErrors, tool.registry
 agent_run.test.js → server, sqlite
 api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
+chaos.test.js → chat.service, fallbackPolicy
 contract_canonical_event.test.js → deterministic_provider, providerEvents
 deterministic_provider.test.js → deterministic_provider
 e2e_mvp_gate.test.js → server, sqlite, approval.service, claim.extractor, domain.boundary
@@ -2401,13 +2431,14 @@ knowledge_gateway.test.js → knowledge.gateway, knowledge.router, knowledge.typ
 performance.test.js → knowledge.gateway, knowledge.cache
 rag_integration.test.js → chat.service, knowledge.gateway, category.repository
 latency_baseline.test.js → deterministic_provider
+load_harness.test.js → chat.service, fallbackPolicy, trace.bus
 deterministic_provider.js → base.provider, providerEvents
 approval.service.test.js → approval.service, sqlite
 cost.service.test.js → cost.service
 policy.engine.test.js → policy.engine
 redaction.service.test.js → redaction.service
 provider_events.test.js → providerEvents
-sandbox_manager.test.js → sandbox.manager, sandbox.types, egress.policy
+sandbox_manager.test.js → sandbox.manager, sandbox.types, egress.policy, sandbox.utils
 security.test.js → utils, server, sqlite
 security_assertions.test.js → utils
 claim_extraction.test.js → claim.extractor

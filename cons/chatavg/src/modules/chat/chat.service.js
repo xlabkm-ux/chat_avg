@@ -65,6 +65,12 @@ function pickAllowedExtraParams(input, allowed) {
   return out;
 }
 
+const traceBus = require('../observability/trace.bus');
+
+// Backpressure state
+const activeRequests = new Map();
+const MAX_CONCURRENT_PER_PROVIDER = 50;
+
 class ChatService {
   async handleCompletion({ user, body, res }) {
     const catSettings = await categoryRepository.findByName(user.category) || {};
@@ -268,12 +274,31 @@ class ChatService {
     let lastError = null;
     let finalProviderId = route.providerId;
     let finalProviderName = route.provider?.name;
+    const startTimeMs = Date.now();
 
     try {
       for (const currentProviderObj of providersToTry) {
         let currentProviderId = currentProviderObj.id;
         let currentProvider = currentProviderObj.provider;
         let providerMergedSettings = { ...mergedSettings };
+
+        // Backpressure check
+        const currentActive = activeRequests.get(currentProviderId) || 0;
+        if (currentActive >= MAX_CONCURRENT_PER_PROVIDER) {
+           console.warn(`[Backpressure] Provider ${currentProviderId} is overloaded.`);
+           const bpError = new Error(`Provider ${currentProviderId} is currently overloaded (Too Many Requests).`);
+           bpError.status = 429;
+           bpError.code = 'rate_limit_exceeded';
+           bpError.isRetryable = true;
+           
+           if (fallbackPolicy.shouldFallback(bpError)) {
+             continue;
+           } else {
+             throw bpError;
+           }
+        }
+
+        activeRequests.set(currentProviderId, currentActive + 1);
 
         // MCP Gateway Logic: If mcp_gateway is set for this category, 
         // we route the request through the MCP adapter instead of the native one.
@@ -472,10 +497,19 @@ class ChatService {
           if (runId && AGENT_RUNS_ENABLED) {
             await getAgentRunService().updateState(runId, 'completed');
           }
+          
+          traceBus.emitTrace('ChatService', 'model.completed', {
+             providerId: finalProviderId,
+             model: catSettings.model_name,
+             latencyMs: Date.now() - startTimeMs
+          });
+
           lastError = null;
+          activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
           break;
 
         } catch (err) {
+          activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
           if (err.message === 'Client disconnected') throw err; // Throw to outer block
           
           lastError = err;
@@ -540,6 +574,12 @@ class ChatService {
     if (runId && AGENT_RUNS_ENABLED) {
       getAgentRunService().updateState(runId, 'failed', { error: errorPayload.error }).catch(console.error);
     }
+    
+    traceBus.emitTrace('ChatService', 'model.failed', {
+       providerId,
+       error: message,
+       code
+    });
 
     if (res.headersSent) {
       res.write(`data: ${JSON.stringify(errorPayload)}\n\n`);
