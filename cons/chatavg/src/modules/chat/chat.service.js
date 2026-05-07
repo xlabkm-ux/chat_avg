@@ -22,6 +22,12 @@ class ChatService {
   async handleCompletion({ user, body, res }) {
     const catSettings = await categoryRepository.findByName(user.category) || {};
 
+    // Fast Path Isolation
+    const isFastPath = !catSettings.mcp_gateway && !catSettings.rag_enabled && !catSettings.sandbox_enabled;
+    if (isFastPath) {
+      console.log(`[Chat] Fast Path execution for user=${user.username} (Direct to Gateway, No RAG/Sandboxes)`);
+    }
+
     // Resolve route and provider via Policy Router
     const route = policyRouter.resolveRoute(catSettings);
     
@@ -183,7 +189,7 @@ class ChatService {
             let finalUsage = null;
             for await (const event of tempStream) {
               if (event.type === 'error') {
-                throw Object.assign(new Error(event.message), { status: event.status, code: event.code, isRetryable: event.isRetryable });
+                throw Object.assign(new Error(event.message), { status: event.status, code: event.code, isRetryable: event.isRetryable, details: event.details });
               }
               if (event.type === 'delta') fullText += event.text;
               if (event.type === 'done') finalUsage = event.usage;
@@ -200,7 +206,7 @@ class ChatService {
 
           if (!firstResult.done && firstResult.value && firstResult.value.type === 'error') {
             const event = firstResult.value;
-            throw Object.assign(new Error(event.message), { status: event.status, code: event.code, isRetryable: event.isRetryable });
+            throw Object.assign(new Error(event.message), { status: event.status, code: event.code, isRetryable: event.isRetryable, details: event.details });
           }
 
           // Connection is successful, we can commit to this provider
@@ -235,7 +241,14 @@ class ChatService {
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`);
                 res.write('data: [DONE]\n\n');
               } else if (event.type === 'error') {
-                res.write(`data: ${JSON.stringify({ error: event.message, code: 'provider_error' })}\n\n`);
+                const errorPayload = {
+                  error: {
+                    message: event.message,
+                    code: event.code || 'provider_error',
+                    details: event.details || null
+                  }
+                };
+                res.write(`data: ${JSON.stringify(errorPayload)}\n\n`);
                 res.write('data: [DONE]\n\n');
               }
             }
@@ -318,19 +331,20 @@ class ChatService {
   _handleError(err, providerId, providerName, res) {
     console.error(`[ChatService Error - ${providerId}]`, err.message);
     const status = err.status || 502;
+    const code = err.code || 'provider_error';
     const message = `${providerName || providerId}: ${err.message}`;
+    const details = err.details || null;
+
+    const errorPayload = {
+      error: { code, message, details }
+    };
 
     if (res.headersSent) {
-      res.write(`data: ${JSON.stringify({ error: message, code: 'provider_error' })}\n\n`);
+      res.write(`data: ${JSON.stringify(errorPayload)}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();
     } else {
-      res.status(status).json({
-        error: {
-          code: 'provider_error',
-          message: message
-        }
-      });
+      res.status(status).json(errorPayload);
     }
   }
 }

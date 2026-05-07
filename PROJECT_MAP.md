@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 05:36:47`
+> Автоматически сгенерировано: `2026-05-07 05:41:12`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -190,7 +190,7 @@ graph TD
 | `src/modules/auth/user.repository.js` | 70 | 2.5 KB | Класс: UserRepository |
 | `src/modules/auth/users.routes.js` | 49 | 1.4 KB | Routes: User Profile |
 | `src/modules/chat/chat.routes.js` | 60 | 2.4 KB | Routes: Chat Completions |
-| `src/modules/chat/chat.service.js` | 339 | 13.4 KB | Класс: ChatService |
+| `src/modules/chat/chat.service.js` | 353 | 14.0 KB | Класс: ChatService |
 | `src/modules/chat/fallbackPolicy.js` | 49 | 1.6 KB | Класс: FallbackPolicy |
 | `src/modules/chat/policyRouter.js` | 39 | 1.1 KB | Класс: PolicyRouter |
 | `src/modules/chat/session.repository.js` | 59 | 1.7 KB | Класс: SessionRepository |
@@ -208,8 +208,8 @@ graph TD
 | `src/modules/providers/adapters/qwen.js` | 20 | 0.5 KB | Provider: Qwen (Alibaba Cloud / DashScope) |
 | `src/modules/providers/base.provider.js` | 100 | 3.2 KB | Класс: BaseProvider |
 | `src/modules/providers/provider.factory.js` | 50 | 1.3 KB | — |
-| `src/modules/providers/providerErrors.js` | 12 | 0.3 KB | Класс: ProviderError |
-| `src/modules/providers/providerEvents.js` | 9 | 0.3 KB | — |
+| `src/modules/providers/providerErrors.js` | 13 | 0.3 KB | Класс: ProviderError |
+| `src/modules/providers/providerEvents.js` | 27 | 0.9 KB | — |
 | `src/modules/providers/providers.routes.js` | 49 | 1.5 KB | — |
 | `tests/api.test.js` | 170 | 5.3 KB | — |
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
