@@ -21,16 +21,8 @@ const { LocalAdapter } = require('./adapters/local.adapter');
 // Resource limits (defaults, can be overridden per-session)
 const DEFAULT_MAX_TTL_MS    = 300_000; // 5 min
 const DEFAULT_IDLE_TIMEOUT  = 60_000;  // 1 min
-const MAX_OUTPUT_BYTES      = 10 * 1024 * 1024; // 10 MB
-const MAX_ARTIFACTS         = 20;
 
-// Quarantine: MIME types that are immediately suspicious
-const BLOCKED_MIME_TYPES = new Set([
-  'application/x-executable',
-  'application/x-elf',
-  'application/x-mach-binary',
-  'application/x-msdownload',
-]);
+const { scanArtifacts, estimateCost, MAX_OUTPUT_BYTES } = require('./sandbox.utils');
 
 class SandboxManager {
   /**
@@ -204,7 +196,7 @@ class SandboxManager {
     const raw     = await adapter.terminate(session);
 
     // Artifact quarantine scan
-    const { artifacts, quarantined } = this._scanArtifacts(raw.artifacts || []);
+    const { artifacts, quarantined } = scanArtifacts(raw.artifacts || []);
 
     this._transition(session, SandboxState.TERMINATED);
     session.terminatedAt = new Date().toISOString();
@@ -217,7 +209,7 @@ class SandboxManager {
       stdout: (raw.stdout || '').slice(0, MAX_OUTPUT_BYTES),
       stderr: (raw.stderr || '').slice(0, MAX_OUTPUT_BYTES),
       artifacts,
-      cost: this._estimateCost(session),
+      cost: estimateCost(session),
       quarantined,
       terminatedAt: session.terminatedAt,
     };
@@ -307,39 +299,7 @@ class SandboxManager {
     this._sessions.set(session.sandboxId, session);
   }
 
-  _scanArtifacts(rawArtifacts) {
-    if (!Array.isArray(rawArtifacts) || rawArtifacts.length === 0) {
-      return { artifacts: [], quarantined: false };
-    }
 
-    const artifacts = rawArtifacts.slice(0, MAX_ARTIFACTS).map(a => {
-      const suspiciousMime = BLOCKED_MIME_TYPES.has(a.mimeType);
-      const oversized = (a.sizeBytes || 0) > MAX_OUTPUT_BYTES;
-      return {
-        artifactId: a.artifactId || crypto.randomBytes(6).toString('hex'),
-        name: a.name || 'unknown',
-        mimeType: a.mimeType || 'application/octet-stream',
-        sizeBytes: a.sizeBytes || 0,
-        contentHash: a.contentHash || '',
-        clean: !suspiciousMime && !oversized,
-      };
-    });
-
-    const quarantined = artifacts.some(a => !a.clean);
-    return { artifacts, quarantined };
-  }
-
-  _estimateCost(session) {
-    const elapsedMs = session.terminatedAt
-      ? new Date(session.terminatedAt).getTime() - new Date(session.assignedAt).getTime()
-      : Date.now() - new Date(session.assignedAt).getTime();
-    return {
-      cpuMs: elapsedMs,
-      memoryMbMs: 0,     // Adapter-reported in production
-      egressBytes: 0,    // Audit-tracked in production
-      estimatedUsd: parseFloat((elapsedMs / 1000 * 0.00005).toFixed(6)), // ~$0.05/CPU-hour placeholder
-    };
-  }
 
   _emit(event, data = {}) {
     if (this.auditService && typeof this.auditService.log === 'function') {

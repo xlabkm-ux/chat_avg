@@ -20,6 +20,7 @@ const assert = require('node:assert/strict');
 const { SandboxManager }  = require('../../src/modules/sandbox/sandbox.manager');
 const { SandboxState, ExecutionClass } = require('../../src/modules/sandbox/sandbox.types');
 const { EgressPolicy }    = require('../../src/modules/sandbox/egress.policy');
+const { scanArtifacts }   = require('../../src/modules/sandbox/sandbox.utils');
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -305,7 +306,7 @@ describe('SandboxManager — artifact quarantine scan', () => {
   it('clean artifacts pass through', async () => {
     const session = await mgr.assign({ runId: 'run_art', executionClass: ExecutionClass.CODE });
     // Inject mock artifacts via terminate override — use internal scan helper
-    const { artifacts, quarantined } = mgr._scanArtifacts([
+    const { artifacts, quarantined } = scanArtifacts([
       { name: 'output.txt', mimeType: 'text/plain', sizeBytes: 1024, contentHash: 'abc' },
     ]);
     assert.equal(quarantined, false);
@@ -315,7 +316,7 @@ describe('SandboxManager — artifact quarantine scan', () => {
   });
 
   it('executable MIME triggers quarantine', () => {
-    const { artifacts, quarantined } = mgr._scanArtifacts([
+    const { artifacts, quarantined } = scanArtifacts([
       { name: 'malware', mimeType: 'application/x-elf', sizeBytes: 1024, contentHash: 'xyz' },
     ]);
     assert.equal(quarantined, true);
@@ -323,7 +324,7 @@ describe('SandboxManager — artifact quarantine scan', () => {
   });
 
   it('oversized artifact triggers quarantine', () => {
-    const { quarantined } = mgr._scanArtifacts([
+    const { quarantined } = scanArtifacts([
       { name: 'big.bin', mimeType: 'application/octet-stream', sizeBytes: 20 * 1024 * 1024, contentHash: 'x' },
     ]);
     assert.equal(quarantined, true);
