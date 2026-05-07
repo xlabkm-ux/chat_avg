@@ -64,6 +64,29 @@ class PolicyEngine {
         resolution = 'downgrade';
         reason = 'Sensitive data detected. Payload must be redacted.';
       }
+    } else if (action.type === 'sandbox_operation') {
+      const op = action.payload?.operation || '';
+      if (['run', 'snapshot'].includes(op)) {
+        riskScore = 80;
+        riskClass = RiskClass.CODE_EXECUTION;
+        resolution = 'require_approval';
+        reason = 'Sandbox execution requires user approval.';
+      } else if (['terminate', 'quarantine'].includes(op)) {
+        riskScore = 30;
+        riskClass = RiskClass.PRIVILEGED;
+        resolution = 'allow'; // termination is generally safe but privileged
+        reason = 'Sandbox lifecycle operation allowed.';
+      }
+    } else if (action.type === 'agent_run') {
+      riskScore = 40;
+      riskClass = RiskClass.SYSTEM_WRITE;
+      resolution = 'allow'; // creating a run is allowed by default but logged
+      reason = 'Agent run creation allowed.';
+    } else if (action.type === 'provider_operation') {
+      riskScore = 25;
+      riskClass = RiskClass.EXTERNAL_API;
+      resolution = 'allow'; // listing models or health check is usually safe
+      reason = 'Provider metadata operation allowed.';
     }
 
     return {

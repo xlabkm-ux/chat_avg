@@ -21,6 +21,7 @@ const { asyncHandler } = require('../../core/errors');
 const { SANDBOX_FORGE_ENABLED } = require('../../core/config');
 const { SandboxManager } = require('./sandbox.manager');
 const { AuditService } = require('../audit/audit.service');
+const { policyGuard } = require('../policy/policy.guard');
 
 const router = Router();
 
@@ -90,8 +91,9 @@ router.get('/:sandboxId', authenticate, asyncHandler(async (req, res) => {
  * POST /api/sandboxes/:sandboxId/run
  * Execute a command.
  */
-router.post('/:sandboxId/run', authenticate, asyncHandler(async (req, res) => {
+router.post('/:sandboxId/run', authenticate, policyGuard('sandbox_operation'), asyncHandler(async (req, res) => {
   const { command, timeoutMs, egressUrls } = req.body;
+  req.body.operation = 'run'; // for policy engine
 
   if (!command) {
     return res.status(400).json({ error: 'MISSING_FIELD', message: 'command is required' });
@@ -105,7 +107,8 @@ router.post('/:sandboxId/run', authenticate, asyncHandler(async (req, res) => {
  * POST /api/sandboxes/:sandboxId/snapshot
  * Create a filesystem snapshot.
  */
-router.post('/:sandboxId/snapshot', authenticate, asyncHandler(async (req, res) => {
+router.post('/:sandboxId/snapshot', authenticate, policyGuard('sandbox_operation'), asyncHandler(async (req, res) => {
+  req.body.operation = 'snapshot';
   const result = await sandboxManager.snapshot(req.params.sandboxId);
   res.json(result);
 }));
@@ -123,7 +126,8 @@ router.post('/:sandboxId/freeze', authenticate, asyncHandler(async (req, res) =>
  * POST /api/sandboxes/:sandboxId/terminate
  * Terminate sandbox + extract artifacts.
  */
-router.post('/:sandboxId/terminate', authenticate, asyncHandler(async (req, res) => {
+router.post('/:sandboxId/terminate', authenticate, policyGuard('sandbox_operation'), asyncHandler(async (req, res) => {
+  req.body.operation = 'terminate';
   const result = await sandboxManager.terminate(req.params.sandboxId);
   res.json(result);
 }));
@@ -132,8 +136,9 @@ router.post('/:sandboxId/terminate', authenticate, asyncHandler(async (req, res)
  * POST /api/sandboxes/:sandboxId/quarantine
  * Lock sandbox; flag for security review.
  */
-router.post('/:sandboxId/quarantine', authenticate, asyncHandler(async (req, res) => {
+router.post('/:sandboxId/quarantine', authenticate, policyGuard('sandbox_operation'), asyncHandler(async (req, res) => {
   const { reason } = req.body;
+  req.body.operation = 'quarantine';
   const result = await sandboxManager.quarantine(req.params.sandboxId, reason);
   res.json(result);
 }));

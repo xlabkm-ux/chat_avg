@@ -22,6 +22,7 @@ const envSchema = z.object({
   CHATAVG_PROVIDER_TIMEOUT: z.string().transform(Number).default('60000'),
   CHATAVG_TEST_TIMEOUT: z.string().transform(Number).default('5000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('production'),
+  E2B_API_KEY: z.string().optional(),
   // Provider variables
   LLAMACPP_URL: z.string().optional(),
   LLAMACPP_API_KEY: z.string().optional(),
@@ -56,6 +57,21 @@ if (!parsedEnv.success) {
 }
 
 const env = parsedEnv.data;
+
+// 2.5 Production Safety Hardening
+if (env.NODE_ENV === 'production') {
+  // Fail if admin password is missing in production
+  if (!env.CHATAVG_ADMIN_PASSWORD) {
+    console.error('❌ [Security] CHATAVG_ADMIN_PASSWORD is required in production mode. Auto-generation is prohibited for safety.');
+    process.exit(1);
+  }
+
+  // Fail if sandbox is enabled but E2B key is missing in production
+  if (env.SANDBOX_FORGE_ENABLED && !env.E2B_API_KEY) {
+    console.error('❌ [Security] SANDBOX_FORGE_ENABLED is true, but E2B_API_KEY is missing. LocalAdapter is prohibited in production.');
+    process.exit(1);
+  }
+}
 
 // 3. Constants & Paths
 const PORT = env.CHATAVG_PORT;

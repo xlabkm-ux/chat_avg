@@ -9,20 +9,38 @@ class AuditService {
    * @param {any} details - Additional details. Will be redacted and JSON stringified.
    * @param {string} ip_address - The IP address of the request.
    */
-  static log(username, action, details = null, ip_address = null) {
+  static log(usernameOrObj, action, details = null, ip_address = null) {
+    let username = usernameOrObj;
+    let finalAction = action;
+    let finalDetails = details;
+    let finalIp = ip_address;
+
+    // Handle single object parameter
+    if (typeof usernameOrObj === 'object' && usernameOrObj !== null && !action) {
+      username = usernameOrObj.username || null;
+      finalAction = usernameOrObj.action;
+      finalDetails = usernameOrObj.details || usernameOrObj;
+      finalIp = usernameOrObj.ip_address || null;
+      // If we used the whole object as details, remove redundant fields
+      if (typeof finalDetails === 'object') {
+        const { username: _u, action: _a, ip_address: _i, ...rest } = finalDetails;
+        finalDetails = rest;
+      }
+    }
+
     try {
       const stmt = db.prepare(`
         INSERT INTO audit_logs (username, action, details, ip_address, created_at)
         VALUES (@username, @action, @details, @ip_address, @created_at)
       `);
       
-      const redactedDetails = RedactionService.redact(details);
+      const redactedDetails = RedactionService.redact(finalDetails);
       
       stmt.run({
         username: username || null,
-        action,
+        action: finalAction || 'UNKNOWN',
         details: redactedDetails ? (typeof redactedDetails === 'object' ? JSON.stringify(redactedDetails) : String(redactedDetails)) : null,
-        ip_address: ip_address || null,
+        ip_address: finalIp || null,
         created_at: Date.now()
       });
     } catch (error) {

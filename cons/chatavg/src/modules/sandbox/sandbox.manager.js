@@ -272,8 +272,19 @@ class SandboxManager {
     if (this._preferAdapter && this._adapters[this._preferAdapter]) {
       return this._adapters[this._preferAdapter];
     }
-    // E2B is primary; fallback to local if no API key
-    if (process.env.E2B_API_KEY) return this._adapters[SandboxAdapter.E2B];
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    const hasE2BKey = !!process.env.E2B_API_KEY;
+
+    if (hasE2BKey) {
+      return this._adapters[SandboxAdapter.E2B];
+    }
+
+    if (isProduction) {
+      throw new Error('[Security] E2B_API_KEY is missing. LocalAdapter is prohibited in production.');
+    }
+
+    // development/test fallback
     return this._adapters[SandboxAdapter.LOCAL];
   }
 

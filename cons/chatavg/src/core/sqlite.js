@@ -243,10 +243,16 @@ function seed() {
     const finalAdminPass = adminPass || crypto.randomBytes(16).toString('hex');
     
     if (!adminPass) {
-      console.log(`\n======================================================\n`);
-      console.log(`  GENERATED ADMIN PASSWORD: ${finalAdminPass}`);
-      console.log(`  Please save it and change it immediately upon login!`);
-      console.log(`\n======================================================\n`);
+      const isProduction = process.env.NODE_ENV === 'production';
+      if (!isProduction) {
+        console.log(`\n======================================================\n`);
+        console.log(`  GENERATED ADMIN PASSWORD: ${finalAdminPass}`);
+        console.log(`  Please save it and change it immediately upon login!`);
+        console.log(`\n======================================================\n`);
+      } else {
+        // This should normally be unreachable due to config.js checks
+        console.warn('[Security] CHATAVG_ADMIN_PASSWORD was missing in production seed. Password auto-generated but NOT logged.');
+      }
     }
 
     db.prepare(`

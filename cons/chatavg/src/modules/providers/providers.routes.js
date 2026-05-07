@@ -5,6 +5,7 @@
 const { Router } = require('express');
 const { authenticate } = require('../auth/auth.middleware');
 const { listProviders } = require('./provider.factory');
+const { policyGuard } = require('../policy/policy.guard');
 
 const categoryRepository = require('../admin/category.repository');
 const { getProvider } = require('./provider.factory');
@@ -15,7 +16,7 @@ router.get('/', authenticate, (req, res) => {
   res.json(listProviders());
 });
 
-router.get('/health', authenticate, async (req, res) => {
+router.get('/health', authenticate, policyGuard('provider_operation'), async (req, res) => {
   try {
     const user = req.user;
     const catSettings = await categoryRepository.findByName(user.category) || {};
@@ -45,7 +46,7 @@ router.get('/health', authenticate, async (req, res) => {
   }
 });
 
-router.get('/:id/models', authenticate, async (req, res) => {
+router.get('/:id/models', authenticate, policyGuard('provider_operation'), async (req, res) => {
   try {
     const providerId = req.params.id;
     const provider = getProvider(providerId);
@@ -71,7 +72,7 @@ router.get('/:id/models', authenticate, async (req, res) => {
   }
 });
 
-router.get('/:id/health', authenticate, async (req, res) => {
+router.get('/:id/health', authenticate, policyGuard('provider_operation'), async (req, res) => {
   try {
     const providerId = req.params.id;
     const provider = getProvider(providerId);

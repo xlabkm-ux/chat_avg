@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const runService = require('./run.service');
 const { AGENT_RUNS_ENABLED } = require('../../core/config');
+const { policyGuard } = require('../policy/policy.guard');
 
 // Middleware to check if Agent Runs are enabled
 router.use((req, res, next) => {
@@ -15,7 +16,7 @@ router.use((req, res, next) => {
  * POST /api/runs
  * Create a new Agent Run for a Mission
  */
-router.post('/', async (req, res) => {
+router.post('/', policyGuard('agent_run'), async (req, res) => {
   try {
     const { missionId, metadata } = req.body;
     const username = req.user?.username || 'admin';
