@@ -1,5 +1,5 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 05:41:12`
+> Автоматически сгенерировано: `2026-05-07 05:59:43`
 > Скрипт: `node dev_studio/refresh.js`
 
 ---
@@ -179,7 +179,7 @@ graph TD
 | `src/core/crypto.js` | 78 | 1.9 KB | AES-256-GCM encryption/decryption service. |
 | `src/core/errors.js` | 84 | 2.1 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
-| `src/core/providers.config.js` | 101 | 3.4 KB | — |
+| `src/core/providers.config.js` | 119 | 4.4 KB | — |
 | `src/core/sqlite.js` | 203 | 5.8 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
 | `src/modules/admin/admin.routes.js` | 341 | 12.5 KB | — |
@@ -199,18 +199,18 @@ graph TD
 | `src/modules/providers/adapters/google.js` | 125 | 4.0 KB | Класс: GoogleProvider |
 | `src/modules/providers/adapters/grok.js` | 234 | 8.4 KB | Provider: Grok (xAI) |
 | `src/modules/providers/adapters/grok_responses.js` | 21 | 0.5 KB | Provider: Grok Responses API (xAI) |
-| `src/modules/providers/adapters/llamacpp.js` | 132 | 4.3 KB | Класс: LlamaCppProvider |
-| `src/modules/providers/adapters/mcp.js` | 120 | 3.7 KB | Класс: MCPProvider |
+| `src/modules/providers/adapters/llamacpp.js` | 156 | 5.1 KB | Класс: LlamaCppProvider |
+| `src/modules/providers/adapters/mcp.js` | 156 | 4.9 KB | Класс: MCPProvider |
 | `src/modules/providers/adapters/openai.js` | 22 | 0.5 KB | Provider: OpenAI |
-| `src/modules/providers/adapters/openai_compat.js` | 121 | 3.9 KB | Класс: OpenAICompatProvider |
+| `src/modules/providers/adapters/openai_compat.js` | 140 | 4.5 KB | Класс: OpenAICompatProvider |
 | `src/modules/providers/adapters/openai_responses.js` | 23 | 0.6 KB | Provider: OpenAI Responses API |
-| `src/modules/providers/adapters/openai_responses_compat.js` | 142 | 4.8 KB | Класс: OpenAIResponsesProvider |
+| `src/modules/providers/adapters/openai_responses_compat.js` | 176 | 5.7 KB | Класс: OpenAIResponsesProvider |
 | `src/modules/providers/adapters/qwen.js` | 20 | 0.5 KB | Provider: Qwen (Alibaba Cloud / DashScope) |
-| `src/modules/providers/base.provider.js` | 100 | 3.2 KB | Класс: BaseProvider |
+| `src/modules/providers/base.provider.js` | 110 | 3.5 KB | Класс: BaseProvider |
 | `src/modules/providers/provider.factory.js` | 50 | 1.3 KB | — |
 | `src/modules/providers/providerErrors.js` | 13 | 0.3 KB | Класс: ProviderError |
 | `src/modules/providers/providerEvents.js` | 27 | 0.9 KB | — |
-| `src/modules/providers/providers.routes.js` | 49 | 1.5 KB | — |
+| `src/modules/providers/providers.routes.js` | 103 | 3.1 KB | — |
 | `tests/api.test.js` | 170 | 5.3 KB | — |
 | `tests/baseline_security.test.js` | 53 | 2.0 KB | — |
 | `tests/deterministic_provider.test.js` | 89 | 3.0 KB | — |
@@ -501,11 +501,15 @@ graph TD
 - **Роуты**:
   - `GET /`
   - `GET /health`
+  - `GET /:id/models`
+  - `GET /:id/health`
 - **Зависимости**:
   - `../auth/auth.middleware` → authenticate
   - `./provider.factory` → listProviders
   - `../admin/category.repository` → categoryRepository
   - `./provider.factory` → getProvider
+  - `../../core/providers.config` → providersConfig
+  - `../../core/providers.config` → providersConfig
   - `../../core/providers.config` → providersConfig
 
 ### `tests/mocks/deterministic_provider.js`
@@ -581,6 +585,8 @@ graph TD
 | `PATCH` | `/:id` | `chatavg/src/modules/chat/sessions.routes.js` |
 | `GET` | `/` | `chatavg/src/modules/providers/providers.routes.js` |
 | `GET` | `/health` | `chatavg/src/modules/providers/providers.routes.js` |
+| `GET` | `/:id/models` | `chatavg/src/modules/providers/providers.routes.js` |
+| `GET` | `/:id/health` | `chatavg/src/modules/providers/providers.routes.js` |
 | `GET` | `/mcp` | `mcp_gateway/server.js` |
 | `POST` | `/mcp/message/:sessionId` | `mcp_gateway/server.js` |
 | `GET` | `/health` | `mcp_gateway/server.js` |
@@ -620,7 +626,7 @@ openai_responses.js → openai_responses_compat
 openai_responses_compat.js → base.provider, providerEvents, providerErrors
 qwen.js → openai_compat
 provider.factory.js → providers.config, llamacpp, openai, openai_responses, deepseek, google, qwen, grok, grok_responses, mcp
-providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config
+providers.routes.js → auth.middleware, provider.factory, category.repository, provider.factory, providers.config, providers.config, providers.config
 api.test.js → server, sqlite
 baseline_security.test.js → server, sqlite
 deterministic_provider.test.js → deterministic_provider

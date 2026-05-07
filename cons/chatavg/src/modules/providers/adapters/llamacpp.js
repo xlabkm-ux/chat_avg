@@ -126,6 +126,30 @@ class LlamaCppProvider extends BaseProvider {
       return false;
     }
   }
+
+  async getModels(config) {
+    const endpointUrl = (config.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (config.api_key) headers['Authorization'] = `Bearer ${config.api_key}`;
+
+      const r = await fetch(`${endpointUrl}/v1/models`, {
+        method: 'GET',
+        headers,
+        signal: AbortSignal.timeout(5000)
+      });
+      if (r.ok) {
+        const data = await r.json();
+        if (data && data.data && Array.isArray(data.data)) {
+          return data.data.map(m => m.id);
+        }
+      }
+      return this.models;
+    } catch (e) {
+      console.error(`[${this.id}] Error fetching models dynamically:`, e.message);
+      return this.models;
+    }
+  }
 }
 
 module.exports = new LlamaCppProvider();

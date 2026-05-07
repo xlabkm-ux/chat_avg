@@ -45,4 +45,58 @@ router.get('/health', authenticate, async (req, res) => {
   }
 });
 
+router.get('/:id/models', authenticate, async (req, res) => {
+  try {
+    const providerId = req.params.id;
+    const provider = getProvider(providerId);
+
+    if (!provider) {
+      return res.status(404).json({ error: 'Provider not found' });
+    }
+
+    const providersConfig = require('../../core/providers.config');
+    const providerCfg = providersConfig[providerId] || {};
+    
+    // Some providers might need the exact config to fetch models
+    const configToPass = {
+      ...providerCfg,
+      endpoint_url: providerCfg.endpoint_url || null,
+      api_key: providerCfg.api_key || null
+    };
+
+    const models = await provider.getModels(configToPass);
+    res.json({ provider: providerId, models });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get('/:id/health', authenticate, async (req, res) => {
+  try {
+    const providerId = req.params.id;
+    const provider = getProvider(providerId);
+
+    if (!provider) {
+      return res.status(404).json({ status: 'offline', error: 'Provider not found' });
+    }
+
+    const providersConfig = require('../../core/providers.config');
+    const providerCfg = providersConfig[providerId] || {};
+
+    const configToPass = {
+      ...providerCfg,
+      endpoint_url: providerCfg.endpoint_url || null,
+      api_key: providerCfg.api_key || null
+    };
+
+    const isOnline = await provider.checkHealth(configToPass);
+    res.json({ 
+      status: isOnline ? 'online' : 'offline',
+      provider: providerId
+    });
+  } catch (err) {
+    res.json({ status: 'offline', error: err.message });
+  }
+});
+
 module.exports = router;

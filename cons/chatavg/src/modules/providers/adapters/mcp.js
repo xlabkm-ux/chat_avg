@@ -109,6 +109,42 @@ class MCPProvider extends BaseProvider {
       return false;
     }
   }
+
+  async getModels(config) {
+    if (!config.endpoint_url) return this.models;
+    try {
+      const transport = new SSEClientTransport(new URL(config.endpoint_url));
+      const client = new Client({ name: "models-list", version: "1.0.0" }, { capabilities: {} });
+      await client.connect(transport);
+      
+      const result = await client.callTool({
+        name: "ai.models.list",
+        arguments: {}
+      });
+
+      if (result && result.content && result.content[0]?.text) {
+        try {
+          const models = JSON.parse(result.content[0].text);
+          if (Array.isArray(models) && models.length > 0) {
+            this.models = models.map(m => m.id || m);
+            if (!this.models.includes(this.defaultModel)) {
+              this.defaultModel = this.models[0];
+            }
+            if (transport.close) await transport.close();
+            return this.models;
+          }
+        } catch (e) {
+          // ignore parsing errors
+        }
+      }
+      
+      if (transport.close) await transport.close();
+      return this.models;
+    } catch(e) {
+      console.error(`[${this.id}] Error fetching models dynamically:`, e.message);
+      return this.models;
+    }
+  }
 }
 
 module.exports = new MCPProvider({

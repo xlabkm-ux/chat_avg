@@ -4,6 +4,24 @@ const { providerEnv } = require('./config');
  * Конфигурация провайдеров и моделей.
  */
 const providersConfig = {
+  "litellm": {
+    "name": "Model Gateway (LiteLLM)",
+    "adapter": "openai_compat",
+    "endpoint_url": providerEnv.LITELLM_URL || "http://127.0.0.1:4000/v1",
+    "api_key": providerEnv.LITELLM_API_KEY || "dummy-key",
+    "extra_params": {},
+    "models": {
+      "gpt-4o": { "name": "GPT-4 Omni (Routed)", "extra_params": {} },
+      "gpt-4o-mini": { "name": "GPT-4 Omni Mini (Routed)", "extra_params": {} },
+      "gpt-4.1": { "name": "GPT-4.1 (Routed)", "extra_params": {} },
+      "deepseek-chat": { "name": "DeepSeek Chat (Routed)", "extra_params": {} },
+      "deepseek-reasoner": { "name": "DeepSeek Reasoner (Routed)", "extra_params": {} },
+      "gemini-2.5-flash": { "name": "Gemini 2.5 Flash (Routed)", "extra_params": {} },
+      "gemini-2.5-pro": { "name": "Gemini 2.5 Pro (Routed)", "extra_params": {} },
+      "qwen-plus": { "name": "Qwen Plus (Routed)", "extra_params": {} },
+      "grok-3": { "name": "Grok 3 (Routed)", "extra_params": {} }
+    }
+  },
   "llamacpp": {
     "name": "Локальная LLM (Llama.cpp)",
     "adapter": "llamacpp",

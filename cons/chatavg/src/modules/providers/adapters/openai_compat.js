@@ -111,6 +111,25 @@ class OpenAICompatProvider extends BaseProvider {
       return false;
     }
   }
+
+  async getModels(config) {
+    const client = new OpenAI({
+      apiKey: config.api_key || 'dummy',
+      baseURL: config.endpoint_url || this.defaultBaseUrl,
+      timeout: 5000,
+      maxRetries: 1,
+    });
+    try {
+      const response = await client.models.list();
+      if (response && response.data && Array.isArray(response.data)) {
+        return response.data.map(m => m.id);
+      }
+      return this.models;
+    } catch (e) {
+      console.error(`[${this.id}] Error fetching models dynamically:`, e.message);
+      return this.models;
+    }
+  }
 }
 
 function createProvider(config) {

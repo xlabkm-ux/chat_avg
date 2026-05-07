@@ -32,12 +32,16 @@
 
 
 ### Sprint 3: Model Registry
-- [ ] 🔲 Разработать API динамического списка моделей (`MODEL_REGISTRY_API`)
-- [ ] 🔲 Внедрить проверку "здоровья" (health) AI-провайдеров
+- [x] ✅ Разработать API динамического списка моделей (`MODEL_REGISTRY_API`)
+- [x] ✅ Внедрить проверку "здоровья" (health) AI-провайдеров
+      Файлы: `providers.routes.js`, `base.provider.js`, `openai_compat.js`, `openai_responses_compat.js`, `llamacpp.js`, `mcp.js`
+      Итог: Реализованы API `/api/providers/:id/models` и `/api/providers/:id/health`. Добавлены методы `getModels` и обновлен `checkHealth` для динамического опроса моделей AI-провайдеров.
 
 ### Sprint 4: Model Gateway (LiteLLM Pilot)
-- [ ] 🔲 Развернуть LiteLLM Proxy как основной Model Gateway
-- [ ] 🔲 Настроить routing, fallbacks и учет стоимости токенов
+- [x] ✅ Развернуть LiteLLM Proxy как основной Model Gateway — 2026-05-07
+- [x] ✅ Настроить routing, fallbacks и учет стоимости токенов — 2026-05-07
+      Файлы: `cons/litellm_gateway/litellm_config.yaml`, `cons/litellm_gateway/start_proxy.cmd`, `cons/chatavg/src/core/providers.config.js`
+      Итог: Развернута конфигурация LiteLLM Proxy, настроена маршрутизация с fallback механизмами и создан стартовый скрипт. Провайдер `litellm` успешно добавлен в ChatAVG.
 
 ### Sprint 5: Semantic Protocol PoC (Critical Gate)
 - [ ] 🔲 Реализовать `Claim Ledger` (извлечение утверждений)

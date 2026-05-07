@@ -94,6 +94,16 @@ class BaseProvider {
   async checkHealth(config) {
     return true; // Default to true if not specifically implemented
   }
+
+  /**
+   * Get dynamic list of models available from the provider.
+   * Default implementation returns statically configured models.
+   * @param {Object} config - Category config
+   * @returns {Promise<string[]>}
+   */
+  async getModels(config) {
+    return this.models;
+  }
 }
 
 module.exports = BaseProvider;

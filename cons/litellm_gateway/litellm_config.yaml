@@ -1,0 +1,54 @@
+model_list:
+  - model_name: gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: "os.environ/OPENAI_API_KEY"
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: "os.environ/OPENAI_API_KEY"
+  - model_name: gpt-4.1
+    litellm_params:
+      model: openai/gpt-4.1
+      api_key: "os.environ/OPENAI_API_KEY"
+  - model_name: deepseek-chat
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_key: "os.environ/DEEPSEEK_API_KEY"
+  - model_name: deepseek-reasoner
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_key: "os.environ/DEEPSEEK_API_KEY"
+  - model_name: gemini-2.5-flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: "os.environ/GEMINI_API_KEY"
+  - model_name: gemini-2.5-pro
+    litellm_params:
+      model: gemini/gemini-2.5-pro
+      api_key: "os.environ/GEMINI_API_KEY"
+  - model_name: qwen-plus
+    litellm_params:
+      model: openai/qwen-plus
+      api_base: "os.environ/QWEN_URL"
+      api_key: "os.environ/QWEN_API_KEY"
+  - model_name: grok-3
+    litellm_params:
+      model: openai/grok-3
+      api_base: "os.environ/GROK_URL"
+      api_key: "os.environ/GROK_API_KEY"
+  - model_name: llamacpp
+    litellm_params:
+      model: openai/local
+      api_base: "os.environ/LLAMACPP_URL"
+      api_key: "dummy-key"
+
+litellm_settings:
+  # Enable token usage tracking and limits
+  set_verbose: false
+
+router_settings:
+  fallbacks:
+    - {"gpt-4o": ["deepseek-chat", "gemini-2.5-pro"]}
+    - {"gpt-4o-mini": ["gemini-2.5-flash"]}
+    - {"deepseek-chat": ["qwen-plus"]}
