@@ -86,6 +86,8 @@ app.use('/api/chat', chatLimiter, authenticate, require('./src/modules/chat/chat
 app.use('/api/providers',  require('./src/modules/providers/providers.routes'));
 app.use('/api/missions',   authenticate, require('./src/modules/mission/mission.routes'));
 app.use('/api/runs',       authenticate, require('./src/modules/execution/execution.routes'));
+const { router: sandboxRouter } = require('./src/modules/sandbox/sandbox.routes');
+app.use('/api/sandboxes', sandboxRouter);
 
 // ── Health Checks ──────────────────────────────────────
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));

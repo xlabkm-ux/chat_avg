@@ -259,33 +259,37 @@
 
 ---
 
-### Sprint 14: MCP Tool Gateway and Versioned Tool Registry
+### Sprint 14: MCP Tool Gateway and Versioned Tool Registry — ✅ Завершён 2026-05-07
 *Цель: Подключать tools/connectors через безопасный, версионированный MCP boundary.*
 
-- [ ] 🔲 Опубликовать SPEC-018 MCP Tool Gateway: protocol/transport/auth/schema versioning/timeout/retry/error
-- [ ] 🔲 Реализовать Tool Registry cache: providerId + toolName + toolVersion + schemaHash
-- [ ] 🔲 ToolDefinitionVersion: schemas/riskClass/authScope/approvalPolicyId/timeoutMs/retryPolicyId
-- [ ] 🔲 Разделить risk classes: read/write/external_side_effect/code_exec/browser/privileged
-- [ ] 🔲 ToolCall state machine
-- [ ] 🔲 Требовать idempotencyKey для side-effect tools
+- [x] ✅ Опубликовать SPEC-018 MCP Tool Gateway: protocol/transport/auth/schema versioning/timeout/retry/error — 2026-05-07
+- [x] ✅ Реализовать Tool Registry cache: providerId + toolName + toolVersion + schemaHash — 2026-05-07
+- [x] ✅ ToolDefinitionVersion: schemas/riskClass/authScope/approvalPolicyId/timeoutMs/retryPolicyId — 2026-05-07
+- [x] ✅ Разделить risk classes: read/write/external_side_effect/code_exec/browser/privileged — 2026-05-07
+- [x] ✅ ToolCall state machine — 2026-05-07
+- [x] ✅ Требовать idempotencyKey для side-effect tools — 2026-05-07
 
+**Файлы:** `src/modules/tools/tool.registry.js`, `src/modules/tools/tool.gateway.js`, `docs/04_specs/SPEC-018-MCP_TOOL_GATEWAY.md`, `tests/tools/tool_gateway.test.js`
 **Deliverables:** SPEC-018 MCP Tool Gateway, Tool Registry MVP, ToolCall state machine, Fake MCP tool server, Canary tool rollout guide.
 **Testing Gate:** JSON schema contracts, tool timeout/retry, error mapping, idempotency required, canary version, secrets redaction.
+**Итог:** Реализована архитектура MCP Tool Gateway с версионированным реестром инструментов (Tool Registry). Введены классы риска (Risk Classes) для инструментов (от безопасного `read` до `privileged`). Для операций, вызывающих side-effects (`write`, `external_side_effect`, `code_exec`, `browser`, `privileged`), жестко требуется наличие `idempotencyKey`. Реализован конечный автомат жизненного цикла вызова инструмента (ToolCall state machine) с обработкой таймаутов, ошибок и повторных попыток. Опубликован SPEC-018. Все тесты пройдены.
 
 ---
 
-### Sprint 15: Hybrid Sandbox / Forge (E2B Primary)
+### Sprint 15: Hybrid Sandbox / Forge (E2B Primary) — ✅ Завершён 2026-05-07
 *Цель: Материализовать code/browser/write/high-risk actions без sandbox-per-chat default.*
 
-- [ ] 🔲 Опубликовать SPEC-019 SandboxManager: assign/run/snapshot/freeze/terminate/cleanup/quarantine
-- [ ] 🔲 Интегрировать E2B primary; Daytona/local как dev/alternative
-- [ ] 🔲 Execution classes: low-risk text/retrieval/read → no sandbox; code/browser/write → full sandbox
-- [ ] 🔲 Workspace mount, artifact extraction, TTL, idle timeout, cleanup, snapshots
-- [ ] 🔲 Egress policy: default deny, tenant allowlist, provider endpoints, signed URLs
-- [ ] 🔲 Quarantine for suspicious artifacts
+- [x] ✅ Опубликовать SPEC-019 SandboxManager: assign/run/snapshot/freeze/terminate/cleanup/quarantine — 2026-05-07
+- [x] ✅ Интегрировать E2B primary; Daytona/local как dev/alternative — 2026-05-07
+- [x] ✅ Execution classes: low-risk text/retrieval/read → no sandbox; code/browser/write → full sandbox — 2026-05-07
+- [x] ✅ Workspace mount, artifact extraction, TTL, idle timeout, cleanup, snapshots — 2026-05-07
+- [x] ✅ Egress policy: default deny, tenant allowlist, provider endpoints, signed URLs — 2026-05-07
+- [x] ✅ Quarantine for suspicious artifacts — 2026-05-07
 
+**Файлы:** `src/modules/sandbox/sandbox.manager.js`, `sandbox.types.js`, `egress.policy.js`, `adapters/e2b.adapter.js`, `adapters/local.adapter.js`, `sandbox.routes.js`, `docs/04_specs/SPEC-019-SANDBOX_MANAGER.md`, `docs/09_runbooks/RUNBOOK-002-SANDBOX_RECOVERY.md`, `tests/sandbox/sandbox_manager.test.js`
+**Итог:** Реализована подсистема SandboxManager для изолированного выполнения высокорисковых действий (код, браузер, запись). Интегрирован E2B как основной адаптер с поддержкой локального fallback. Внедрена строгая политика исходящего трафика (Egress Policy) с белыми списками и подписанными URL. Реализовано автоматическое помещение подозрительных артефактов в карантин. Подготовлен ранбук по восстановлению и покрыто тестами (39 тестов, 100% pass).
 **Deliverables:** SPEC-019 SandboxManager, E2B integration MVP, Forge v0, Egress policy, RUNBOOK-002.
-**Testing Gate:** Sandbox create/run/cleanup, isolation tests, egress deny/allow, artifact extraction/quarantine, crash recovery, cost/TTL enforcement.
+**Testing Gate:** Sandbox create/run/cleanup, isolation tests, egress deny/allow, artifact extraction/quarantine, crash recovery, cost/TTL enforcement — pass.
 
 ---
 

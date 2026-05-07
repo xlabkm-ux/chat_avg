@@ -18,11 +18,13 @@
     "eval:semantic:full": "node tests/semantic/semantic.eval.js",
     "eval:rag": "node tests/evals/rag.eval.js",
     "eval:full": "npm run eval:semantic:full && npm run eval:rag",
-    "test:pr": "node --test tests/provider_events.test.js tests/errors.test.js tests/deterministic_provider.test.js tests/contract_canonical_event.test.js tests/fast_path_guardrail.test.js tests/security_assertions.test.js tests/health.test.js",
-    "test:nightly": "node --test tests/*.test.js tests/semantic/*.test.js",
-    "test:release": "node --test tests/*.test.js tests/semantic/*.test.js && node tests/semantic/semantic.eval.js"
+    "test:sandbox": "node --test tests/sandbox/sandbox_manager.test.js",
+    "test:pr": "node --test tests/provider_events.test.js tests/errors.test.js tests/deterministic_provider.test.js tests/contract_canonical_event.test.js tests/fast_path_guardrail.test.js tests/security_assertions.test.js tests/health.test.js tests/sandbox/sandbox_manager.test.js",
+    "test:nightly": "node --test tests/*.test.js tests/semantic/*.test.js tests/sandbox/*.test.js",
+    "test:release": "node --test tests/*.test.js tests/semantic/*.test.js tests/sandbox/*.test.js && node tests/semantic/semantic.eval.js"
   },
   "dependencies": {
+    "@e2b/code-interpreter": "^2.4.2",
     "@google/generative-ai": "^0.24.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@temporalio/activity": "^1.17.0",
