@@ -65,20 +65,23 @@ function loadFixtures() {
     console.log('Loading Sessions Fixture...');
     const sessions = JSON.parse(fs.readFileSync(sessionsPath, 'utf8'));
     const insertSession = db.prepare(`
-      INSERT INTO sessions (id, username, title, messages, updated_at)
+      INSERT INTO sessions (id, username, title, messages, updatedAt)
       VALUES (@id, @username, @title, @messages, @updatedAt)
-      ON CONFLICT(id) DO UPDATE SET
+      ON CONFLICT(id, username) DO UPDATE SET
         title=excluded.title,
         messages=excluded.messages,
-        updated_at=excluded.updated_at
+        updatedAt=excluded.updatedAt
     `);
+
 
     db.transaction(() => {
       for (const sess of sessions) {
         insertSession.run({
           ...sess,
-          messages: JSON.stringify(sess.messages)
+          messages: JSON.stringify(sess.messages),
+          updatedAt: sess.updatedAt || sess.updated_at || Date.now()
         });
+
         console.log(`  - Upserted session: ${sess.id} (${sess.title})`);
       }
     })();

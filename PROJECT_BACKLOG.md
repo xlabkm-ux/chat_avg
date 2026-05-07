@@ -1,6 +1,6 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Sprint R1 — Production safety hardening**
+Текущая стадия: **Sprint R4 — Semantic Layer v0.2**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
 
 ---
@@ -413,3 +413,16 @@
 - [x] ✅ Cancellation logic: сигнал в Temporal при отмене — 2026-05-08
 
 **Итог:** Жизненный цикл AgentRun стал устойчивым к перезагрузкам сервера. События персистентны, стрим восстановим.
+---
+
+### Sprint R3: Temporal production workflow — ✅ Завершён 2026-05-08
+*Цель: Превратить Temporal skeleton в реальный DurableRuntime MVP.*
+
+**Задачи:**
+- [x] ✅ Workflow contract: формализация входов/выходов — 2026-05-08
+- [x] ✅ Signals & Queries: управление активными ранами (approve/cancel/status) — 2026-05-08
+- [x] ✅ Real activities: замена моков на логику взаимодействия с репозиториями — 2026-05-08
+- [x] ✅ Replay safety & failure semantics: проверка детерминизма — 2026-05-08
+- [x] ✅ DurableRuntime interface: абстракция над Temporal — 2026-05-08
+
+**Итог:** Temporal workflow теперь является полноценным Durable Runtime для AgentRun. Поддерживаются сигналы одобрения/отмены и внешние запросы состояния.

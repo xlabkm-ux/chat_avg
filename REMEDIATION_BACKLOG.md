@@ -18,17 +18,17 @@
 - [x] Route-level security: аудит всех sensitive routes.
 - [x] Audit hardening: логирование всех security-sensitive действий.
 
-## Sprint R2: AgentRun durability foundation (P0)
-- [ ] Persisted event log: запись событий в БД.
-- [ ] Recoverable SSE stream: поддержка `sinceEventId`.
-- [ ] Strict state machine: валидация переходов состояний.
-- [ ] Idempotency foundation: таблица `idempotency_keys`.
+## Sprint R2: AgentRun durability foundation (P0) — ✅ Завершён 2026-05-08
+- [x] Persisted event log: запись событий в БД.
+- [x] Recoverable SSE stream: поддержка `sinceEventId`.
+- [x] Strict state machine: валидация переходов состояний.
+- [x] Idempotency foundation: таблица `idempotency_keys`.
 
-## Sprint R3: Temporal production workflow (P0)
-- [ ] Workflow contract: формализация входов/выходов.
-- [ ] Signals & Queries: управление активными ранами.
-- [ ] Real activities: замена моков на реальную логику.
-- [ ] Replay safety & failure semantics.
+## Sprint R3: Temporal production workflow (P0) — ✅ Завершён 2026-05-08
+- [x] Workflow contract: формализация входов/выходов.
+- [x] Signals & Queries: управление активными ранами.
+- [x] Real activities: замена моков на реальную логику.
+- [x] Replay safety & failure semantics.
 
 ## Sprint R4: Semantic Layer v0.2 (P1)
 - [ ] Persisted Claim Ledger: таблицы для claims, boundaries, events.
