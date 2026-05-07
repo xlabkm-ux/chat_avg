@@ -11,7 +11,12 @@ class AgentRunService extends EventEmitter {
     this.activeStreams = new Map(); // runId -> Set of res objects
   }
 
-  async createRun(missionId, metadata = {}, username) {
+  async createRun(missionId, metadata = {}, username, idempotencyKey = null) {
+    if (idempotencyKey) {
+      const existing = runRepository.getIdempotencyKey(idempotencyKey);
+      if (existing) return existing.responseBody;
+    }
+
     const mission = missionRepository.findById(missionId, username);
     if (!mission) throw new Error('Mission not found or unauthorized');
 
@@ -30,6 +35,10 @@ class AgentRunService extends EventEmitter {
       temporalClient.startAgentRun(run.id, missionId).catch(console.error);
     } else {
       this.inMemoryExecution(run.id, missionId).catch(console.error);
+    }
+
+    if (idempotencyKey) {
+      runRepository.saveIdempotencyKey(idempotencyKey, 201, run);
     }
 
     return run;
@@ -53,15 +62,18 @@ class AgentRunService extends EventEmitter {
     const run = runRepository.findById(runId, username);
     if (!run) throw new Error('Run not found or unauthorized');
 
-    if (['completed', 'failed', 'cancelled', 'expired'].includes(run.state)) {
+    const terminalStates = ['completed', 'failed', 'cancelled', 'expired'];
+    if (terminalStates.includes(run.state)) {
       return run; // Already in a terminal state
     }
 
-    if (TEMPORAL_RUNTIME_ENABLED && run.state === 'waiting') {
+    // Signal Temporal if active
+    if (TEMPORAL_RUNTIME_ENABLED) {
       try {
         await temporalClient.signalApproval(runId, 'cancel');
       } catch(err) {
-        console.error('Failed to signal Temporal workflow', err);
+        // If workflow is not found, it might be already finished or in dev mode
+        console.warn(`Failed to signal Temporal workflow for run ${runId}:`, err.message);
       }
     }
 
@@ -87,16 +99,16 @@ class AgentRunService extends EventEmitter {
   }
 
   emitEvent(runId, type, payload) {
-    const event = {
-      runId,
-      eventId: uuidv4(),
-      timestamp: new Date().toISOString(),
-      type,
-      payload
-    };
+    const event = runRepository.createEvent(runId, type, payload);
 
     // Emit locally for SSE streams
-    this.emit(`event:${runId}`, event);
+    this.emit(`event:${runId}`, {
+      runId: event.runId,
+      eventId: event.id,
+      timestamp: new Date(event.createdAt).toISOString(),
+      type: event.eventType,
+      payload: event.payload
+    });
   }
 
   addStream(runId, res) {

@@ -399,3 +399,17 @@
 - [x] ✅ Audit hardening: логирование всех security-sensitive действий — 2026-05-08
 
 **Итог:** Система защищена от случайного запуска небезопасных песочниц в продакшене. Все критические действия аудитятся и проходят через Policy Engine.
+
+---
+
+### Sprint R2: AgentRun durability foundation — ✅ Завершён 2026-05-08
+*Цель: Сделать AgentRun state/event модель восстанавливаемой и пригодной для Temporal production workflow.*
+
+**Задачи:**
+- [x] ✅ Persisted event log: события пишутся в `agent_run_events` — 2026-05-08
+- [x] ✅ Recoverable SSE stream: поддержка `sinceEventId`/`sinceTimestamp` — 2026-05-08
+- [x] ✅ Strict state machine: валидация переходов в репозитории — 2026-05-08
+- [x] ✅ Idempotency foundation: таблица `idempotency_keys` и хелперы — 2026-05-08
+- [x] ✅ Cancellation logic: сигнал в Temporal при отмене — 2026-05-08
+
+**Итог:** Жизненный цикл AgentRun стал устойчивым к перезагрузкам сервера. События персистентны, стрим восстановим.

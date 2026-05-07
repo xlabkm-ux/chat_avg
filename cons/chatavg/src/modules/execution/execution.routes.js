@@ -19,12 +19,13 @@ router.use((req, res, next) => {
 router.post('/', policyGuard('agent_run'), async (req, res) => {
   try {
     const { missionId, metadata } = req.body;
+    const idempotencyKey = req.headers['x-idempotency-key'];
     const username = req.user?.username || 'admin';
     if (!missionId) {
       return res.status(400).json({ error: 'missionId is required' });
     }
 
-    const run = await runService.createRun(missionId, metadata, username);
+    const run = await runService.createRun(missionId, metadata, username, idempotencyKey);
     res.status(201).json(run);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -69,6 +70,8 @@ router.post('/:id/cancel', async (req, res) => {
  */
 router.get('/:id/events', async (req, res) => {
   const runId = req.params.id;
+  const sinceEventId = req.query.sinceEventId;
+  const sinceTimestamp = req.query.sinceTimestamp;
   
   // Verify run exists
   const run = await runService.getRun(runId);
@@ -82,19 +85,35 @@ router.get('/:id/events', async (req, res) => {
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  // Send initial state event
-  const initialEvent = {
-    runId,
-    eventId: 'initial',
-    timestamp: new Date().toISOString(),
-    type: 'run.status_changed',
-    payload: {
-      previousState: null,
-      currentState: run.state,
-      reason: 'Initial stream connection'
-    }
-  };
-  res.write(`data: ${JSON.stringify(initialEvent)}\n\n`);
+  const runRepository = require('./run.repository');
+  const backlog = runRepository.getEvents(runId, sinceEventId, sinceTimestamp);
+
+  for (const event of backlog) {
+    const sseEvent = {
+      runId: event.run_id,
+      eventId: event.id,
+      timestamp: new Date(event.created_at).toISOString(),
+      type: event.event_type,
+      payload: event.payload
+    };
+    res.write(`data: ${JSON.stringify(sseEvent)}\n\n`);
+  }
+
+  if (backlog.length === 0 && !sinceEventId && !sinceTimestamp) {
+    // Send initial state event if no history requested and no events exist yet
+    const initialEvent = {
+      runId,
+      eventId: 'initial',
+      timestamp: new Date().toISOString(),
+      type: 'run.status_changed',
+      payload: {
+        previousState: null,
+        currentState: run.state,
+        reason: 'Initial stream connection'
+      }
+    };
+    res.write(`data: ${JSON.stringify(initialEvent)}\n\n`);
+  }
 
   // Add client to service streams
   runService.addStream(runId, res);
