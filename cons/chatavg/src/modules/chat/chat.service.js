@@ -4,8 +4,17 @@ const policyRouter = require('./policyRouter');
 const fallbackPolicy = require('./fallbackPolicy');
 const { getProvider, adapters } = require('../providers/provider.factory');
 const providersConfig = require('../../core/providers.config');
-const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED } = require('../../core/config');
+const { ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED } = require('../../core/config');
 const { validateProviderUrl, sanitizePromptText } = require('../../core/utils');
+
+// Agent Execution (lazy-loaded)
+let _agentRunService = null;
+function getAgentRunService() {
+  if (!_agentRunService) {
+    _agentRunService = require('../execution/run.service');
+  }
+  return _agentRunService;
+}
 
 // Semantic Layer (lazy-loaded, behind feature flag)
 let _semanticProtocol = null;
@@ -48,7 +57,7 @@ class ChatService {
     const effectiveApiKey = providerCfg.api_key || null;
 
     // SSRF Validation
-    const isLocalProvider = ['llamacpp', 'ollama', 'mcp'].includes(providerCfg.adapter);
+    const isLocalProvider = ['llamacpp', 'ollama', 'mcp', 'deterministic'].includes(providerCfg.adapter);
     if (effectiveEndpointUrl) {
       try {
         validateProviderUrl(effectiveEndpointUrl, isLocalProvider);
@@ -150,7 +159,12 @@ class ChatService {
       mergedSettings.extra_params = { ...mergedSettings.extra_params, ...safeParams };
     }
 
-    console.log(`[Chat] user=${user.username} primary_provider=${route.providerId} model=${catSettings.model_name || 'default'}`);
+    const runId = body.run_id || body.runId;
+    if (runId && AGENT_RUNS_ENABLED) {
+      await getAgentRunService().updateState(runId, 'running');
+    }
+
+    console.log(`[Chat] user=${user.username} primary_provider=${route.providerId} model=${catSettings.model_name || 'default'} runId=${runId || 'none'}`);
 
     let lastError = null;
     let finalProviderId = route.providerId;
@@ -243,13 +257,31 @@ class ChatService {
               if (event.type === 'delta') {
                 const chunk = currentProvider.buildChunk(catSettings.model_name, event.text);
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+                
+                if (runId && AGENT_RUNS_ENABLED) {
+                  getAgentRunService().emitEvent(runId, 'model.delta', { content: event.text, role: 'assistant' });
+                }
               } else if (event.type === 'tool_call') {
                 const chunk = currentProvider.buildChunk(catSettings.model_name, null, null, event.toolCall);
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`);
+
+                if (runId && AGENT_RUNS_ENABLED) {
+                  getAgentRunService().emitEvent(runId, 'tool.call_started', { 
+                    toolName: event.toolCall.function?.name,
+                    arguments: event.toolCall.function?.arguments
+                  });
+                }
               } else if (event.type === 'done') {
                 const chunk = currentProvider.buildChunk(catSettings.model_name, '', event.finishReason || 'stop');
                 res.write(`data: ${JSON.stringify(chunk)}\n\n`);
                 res.write('data: [DONE]\n\n');
+                
+                if (runId && AGENT_RUNS_ENABLED) {
+                   getAgentRunService().emitEvent(runId, 'model.step_completed', { 
+                     finishReason: event.finishReason || 'stop',
+                     usage: event.usage 
+                   });
+                }
               } else if (event.type === 'error') {
                 const errorPayload = {
                   error: {
@@ -282,6 +314,15 @@ class ChatService {
             const responseData = currentProvider.buildResponse(catSettings.model_name, fullText, finalUsage);
             responseData.choices[0].finish_reason = finalFinishReason;
 
+            if (runId && AGENT_RUNS_ENABLED) {
+              const ars = getAgentRunService();
+              ars.emitEvent(runId, 'model.delta', { content: fullText, role: 'assistant' });
+              ars.emitEvent(runId, 'model.step_completed', { 
+                finishReason: finalFinishReason,
+                usage: finalUsage 
+              });
+            }
+
             // Semantic Layer: analyze response (non-streaming only, behind flag)
             if (SEMANTIC_LAYER_ENABLED && fullText) {
               try {
@@ -310,6 +351,9 @@ class ChatService {
           }
 
           // Successfully completed, break the retry loop
+          if (runId && AGENT_RUNS_ENABLED) {
+            await getAgentRunService().updateState(runId, 'completed');
+          }
           lastError = null;
           break;
 
@@ -373,6 +417,11 @@ class ChatService {
     const errorPayload = {
       error: { code, message, details }
     };
+
+    const runId = res.req?.body?.run_id || res.req?.body?.runId;
+    if (runId && AGENT_RUNS_ENABLED) {
+      getAgentRunService().updateState(runId, 'failed', { error: errorPayload.error }).catch(console.error);
+    }
 
     if (res.headersSent) {
       res.write(`data: ${JSON.stringify(errorPayload)}\n\n`);

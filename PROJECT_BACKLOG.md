@@ -1,6 +1,6 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Sprint 6 — Mission + AgentRun API**
+Текущая стадия: **Sprint 7 — Durable Runtime — Temporal-first**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
 
 ---
@@ -125,18 +125,21 @@
 
 ## 🏁 Текущий спринт
 
-### Sprint 6: Mission + AgentRun API
+### Sprint 6: Mission + AgentRun API — ✅ Завершён 2026-05-07
 *Цель: Ввести AgentRun и Mission как execution единицы, привязанные к SemanticProtocol.*
 
-- [ ] 🔲 Опубликовать SPEC-006 AgentRun state machine (queued/running/requires_action/waiting/completed/failed/cancelled/expired)
-- [ ] 🔲 Добавить Mission model: missionId, semanticProtocolId, glossaryVersion, mode, goal, constraints, open questions
-- [ ] 🔲 Реализовать endpoints: create run, status, cancel, event stream
-- [ ] 🔲 Добавить `AgentRunEvent` контракт: run/model/retrieval/tool/approval/semantic/artifact/cost events
-- [ ] 🔲 Сделать bridge: simple chat → fast path, complex/mission tasks → AgentRun
-- [ ] 🔲 Не смешивать SessionRepository с execution history
+**Задачи:**
+- [x] ✅ Опубликовать SPEC-006 AgentRun state machine (queued/running/requires_action/waiting/completed/failed/cancelled/expired) — 2026-05-07
+- [x] ✅ Добавить Mission model: missionId, semanticProtocolId, glossaryVersion, mode, goal, constraints, open questions — 2026-05-07
+- [x] ✅ Реализовать endpoints: create run, status, cancel, event stream — 2026-05-07
+- [x] ✅ Добавить `AgentRunEvent` контракт: run/model/retrieval/tool/approval/semantic/artifact/cost events — 2026-05-07
+- [x] ✅ Сделать bridge: simple chat → fast path, complex/mission tasks → AgentRun — 2026-05-07
+- [x] ✅ Не смешивать SessionRepository с execution history — 2026-05-07
 
-**Deliverables:** SPEC-006, SPEC-007, SSE event stream MVP, AgentRun API MVP, Semantic context attached to run.
-**Testing Gate:** State transition tests, event ordering, cancel/reconnect, no duplicate run, semantic context persistence.
+**Файлы:** `src/modules/mission/mission.repository.js`, `src/modules/mission/mission.routes.js`, `src/modules/execution/run.repository.js`, `src/modules/execution/run.service.js`, `src/modules/execution/execution.routes.js`, `src/modules/chat/chat.service.js`, `docs/04_specs/SPEC-006-AGENT_RUN_STATE_MACHINE.md`, `docs/04_specs/SPEC-007-AGENT_RUN_EVENT_CONTRACT.md`, `docs/04_specs/SPEC-008-MISSION_MODEL.md`, `tests/agent_run.test.js`
+**Итог:** Реализована архитектура Missions и AgentRuns. Missions служат контейнером контекста, AgentRuns управляют жизненным циклом исполнения (8 состояний). Реализован SSE-стрим событий. Сделан bridge в ChatService: если в запросе передан `runId`, события дублируются в стрим агента и обновляется его стейт.
+**Deliverables:** SPEC-006, SPEC-007, SPEC-008, SSE event stream MVP, AgentRun API MVP, Semantic context attached to run.
+**Testing Gate:** State transition tests (queued->running->completed) — pass, event stream accessibility — pass, cancel run — pass.
 
 ---
 

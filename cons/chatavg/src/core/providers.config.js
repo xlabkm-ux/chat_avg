@@ -112,6 +112,16 @@ const providersConfig = {
     "models": {
       "default": { "name": "Модель по умолчанию", "extra_params": {} }
     }
+  },
+  "test": {
+    "name": "Test Deterministic Provider",
+    "adapter": "deterministic",
+    "endpoint_url": "http://localhost:8201",
+    "allow_local": true,
+    "api_key": "test",
+    "models": {
+      "mock": { "name": "Mock Model" }
+    }
   }
 };
 

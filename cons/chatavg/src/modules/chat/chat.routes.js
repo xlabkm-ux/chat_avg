@@ -37,6 +37,8 @@ const chatCompletionSchema = z.object({
   repeat_penalty: z.number().min(0).max(2).optional().nullable(),
   n_predict: z.number().int().positive().optional().nullable(),
   extra_params: z.record(z.any()).optional().nullable(),
+  run_id: z.string().optional().nullable(),
+  runId: z.string().optional().nullable(),
 }).refine(data => {
   const lastMsg = data.messages[data.messages.length - 1];
   return lastMsg.role !== 'system';

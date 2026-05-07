@@ -75,13 +75,17 @@ const chatLimiter = process.env.NODE_ENV === 'test' ? (req, res, next) => next()
   message: 'Превышен лимит запросов'
 });
 
+const { authenticate } = require('./src/modules/auth/auth.middleware');
+
 // ── API Routes ──────────────────────────────────────────
 app.use('/api/auth', authLimiter, require('./src/modules/auth/auth.routes'));
 app.use('/api/users',      require('./src/modules/auth/users.routes'));
 app.use('/api/admin',      require('./src/modules/admin/admin.routes'));
-app.use('/api/sessions',   require('./src/modules/chat/sessions.routes'));
-app.use('/api/chat', chatLimiter, require('./src/modules/chat/chat.routes'));
+app.use('/api/sessions',   authenticate, require('./src/modules/chat/sessions.routes'));
+app.use('/api/chat', chatLimiter, authenticate, require('./src/modules/chat/chat.routes'));
 app.use('/api/providers',  require('./src/modules/providers/providers.routes'));
+app.use('/api/missions',   authenticate, require('./src/modules/mission/mission.routes'));
+app.use('/api/runs',       authenticate, require('./src/modules/execution/execution.routes'));
 
 // ── Health Checks ──────────────────────────────────────
 app.get('/health', (req, res) => res.status(200).json({ status: 'ok' }));

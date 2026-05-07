@@ -23,6 +23,18 @@ for (const p of builtins) {
   adapters[p.id] = p;
 }
 
+// Register testing mocks
+if (process.env.NODE_ENV === 'test') {
+  try {
+    const { DeterministicProvider } = require('../../../tests/mocks/deterministic_provider');
+    const mock = new DeterministicProvider();
+    mock.id = 'deterministic'; // Ensure ID matches
+    adapters['deterministic'] = mock;
+  } catch (err) {
+    console.warn('[ProviderFactory] Could not load DeterministicProvider for tests:', err.message);
+  }
+}
+
 /**
  * Get provider adapter by provider ID from config
  * @param {string} configProviderId - Provider ID from providers.config.js
