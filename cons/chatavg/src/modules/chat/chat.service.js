@@ -171,13 +171,13 @@ class ChatService {
         }
 
         if (event.type === 'delta') {
-          const chunk = this._buildChunk(modelName, event.text);
+          const chunk = mapper.buildChunk(modelName, event.text);
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
           if (runId && AGENT_RUNS_ENABLED) {
             getAgentRunService().emitEvent(runId, 'model.delta', { content: event.text, role: 'assistant' });
           }
         } else if (event.type === 'tool_call') {
-          const chunk = this._buildChunk(modelName, null, null, event.toolCall);
+          const chunk = mapper.buildChunk(modelName, null, null, event.toolCall);
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
           if (runId && AGENT_RUNS_ENABLED) {
             getAgentRunService().emitEvent(runId, 'tool.call_started', { 
@@ -186,7 +186,7 @@ class ChatService {
             });
           }
         } else if (event.type === 'done') {
-          const chunk = this._buildChunk(modelName, '', event.finishReason || 'stop');
+          const chunk = mapper.buildChunk(modelName, '', event.finishReason || 'stop');
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
           res.write('data: [DONE]\n\n');
           if (runId && AGENT_RUNS_ENABLED) {
@@ -207,7 +207,7 @@ class ChatService {
     }
 
     if (!isStreaming) {
-      const responseData = this._buildResponse(modelName, fullText, finalUsage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
+      const responseData = mapper.buildResponse(modelName, fullText, finalUsage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
       responseData.choices[0].finish_reason = finalFinishReason;
 
       if (runId && AGENT_RUNS_ENABLED) {
@@ -279,39 +279,11 @@ class ChatService {
       getAgentRunService().emitEvent(runId, 'model.delta', { content: refusalMessage, role: 'assistant' });
       getAgentRunService().updateState(runId, 'completed').catch(console.error);
     }
+    const response = mapper.buildResponse(null, refusalMessage, { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
     return res.json({
-      choices: [{ message: { role: 'assistant', content: refusalMessage }, finish_reason: 'stop' }],
+      ...response,
       _retrieval: retrievalResult
     });
-  }
-
-  _buildChunk(model, text, finishReason = null, toolCall = null) {
-    return {
-      id: `chatcmpl-${Date.now()}`,
-      object: 'chat.completion.chunk',
-      created: Math.floor(Date.now() / 1000),
-      model: model || 'default',
-      choices: [{
-        index: 0,
-        delta: toolCall ? { tool_calls: [toolCall] } : (text !== null ? { content: text } : {}),
-        finish_reason: finishReason
-      }]
-    };
-  }
-
-  _buildResponse(model, text, usage) {
-    return {
-      id: `chatcmpl-${Date.now()}`,
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model: model || 'default',
-      choices: [{
-        index: 0,
-        message: { role: 'assistant', content: text },
-        finish_reason: 'stop'
-      }],
-      usage: usage
-    };
   }
 
   _handleError(err, providerId, res, runId) {

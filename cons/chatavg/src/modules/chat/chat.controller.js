@@ -3,6 +3,7 @@ const categoryRepository = require('../admin/category.repository');
 const chatService = require('./chat.service');
 const fastChatService = require('./fast_chat.service');
 const missionBinding = require('./mission_binding.service');
+const mapper = require('./chat_completion.mapper');
 const { AGENT_RUNS_ENABLED } = require('../../core/config');
 
 function getAgentRunService() {
@@ -71,13 +72,13 @@ class ChatController {
           }
 
           if (event.type === 'delta') {
-            const chunk = this._buildChunk(modelName, event.text);
+            const chunk = mapper.buildChunk(modelName, event.text);
             res.write(`data: ${JSON.stringify(chunk)}\n\n`);
           } else if (event.type === 'tool_call') {
-            const chunk = this._buildChunk(modelName, null, null, event.toolCall);
+            const chunk = mapper.buildChunk(modelName, null, null, event.toolCall);
             res.write(`data: ${JSON.stringify(chunk)}\n\n`);
           } else if (event.type === 'done') {
-            const chunk = this._buildChunk(modelName, '', event.finishReason || 'stop');
+            const chunk = mapper.buildChunk(modelName, '', event.finishReason || 'stop');
             res.write(`data: ${JSON.stringify(chunk)}\n\n`);
             res.write('data: [DONE]\n\n');
           }
@@ -93,7 +94,7 @@ class ChatController {
       }
 
       if (!isStreaming) {
-        const responseData = this._buildResponse(modelName, fullText, finalUsage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
+        const responseData = mapper.buildResponse(modelName, fullText, finalUsage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
         responseData.choices[0].finish_reason = finalFinishReason;
         res.json(responseData);
       } else {
@@ -104,35 +105,6 @@ class ChatController {
     } finally {
       res.req.off('close', reqCloseHandler);
     }
-  }
-
-  _buildChunk(model, text, finishReason = null, toolCall = null) {
-    return {
-      id: `chatcmpl-${Date.now()}`,
-      object: 'chat.completion.chunk',
-      created: Math.floor(Date.now() / 1000),
-      model: model || 'default',
-      choices: [{
-        index: 0,
-        delta: toolCall ? { tool_calls: [toolCall] } : (text !== null ? { content: text } : {}),
-        finish_reason: finishReason
-      }]
-    };
-  }
-
-  _buildResponse(model, text, usage) {
-    return {
-      id: `chatcmpl-${Date.now()}`,
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model: model || 'default',
-      choices: [{
-        index: 0,
-        message: { role: 'assistant', content: text },
-        finish_reason: 'stop'
-      }],
-      usage: usage
-    };
   }
 
   _handleError(err, res, providerId = 'unknown') {

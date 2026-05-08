@@ -85,6 +85,41 @@ class ChatCompletionMapper {
     return { options, mergedSettings };
   }
 
+  /**
+   * Builds an OpenAI-compatible chunk for streaming.
+   */
+  buildChunk(model, text, finishReason = null, toolCall = null) {
+    return {
+      id: `chatcmpl-${Date.now()}`,
+      object: 'chat.completion.chunk',
+      created: Math.floor(Date.now() / 1000),
+      model: model || 'default',
+      choices: [{
+        index: 0,
+        delta: toolCall ? { tool_calls: [toolCall] } : (text !== null ? { content: text } : {}),
+        finish_reason: finishReason
+      }]
+    };
+  }
+
+  /**
+   * Builds an OpenAI-compatible full response.
+   */
+  buildResponse(model, text, usage) {
+    return {
+      id: `chatcmpl-${Date.now()}`,
+      object: 'chat.completion',
+      created: Math.floor(Date.now() / 1000),
+      model: model || 'default',
+      choices: [{
+        index: 0,
+        message: { role: 'assistant', content: text },
+        finish_reason: 'stop'
+      }],
+      usage: usage
+    };
+  }
+
   _pickAllowedExtraParams(input, allowed) {
     const out = {};
     if (!input || typeof input !== 'object') return out;
