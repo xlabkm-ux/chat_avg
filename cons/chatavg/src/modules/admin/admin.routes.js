@@ -342,6 +342,10 @@ router.get('/audit', asyncHandler(async (req, res) => {
 router.get('/dashboard/mvp', asyncHandler(async (req, res) => {
   const db = require('../../core/sqlite');
   const traceBus = require('../observability/trace.bus');
+  const metricsService = require('../observability/metrics.service');
+  const { sandboxManager } = require('../sandbox/sandbox.routes');
+  const fs = require('fs');
+  const path = require('path');
   
   const runStatusRows = db.prepare('SELECT state, count(*) as count FROM agent_runs GROUP BY state').all();
   const runStatus = {};
@@ -352,13 +356,25 @@ router.get('/dashboard/mvp', asyncHandler(async (req, res) => {
   const semanticEvents = db.prepare('SELECT count(*) as count FROM audit_logs WHERE action = @action').get({ action: 'semantic' }).count;
   const approvalEvents = db.prepare('SELECT count(*) as count FROM approval_requests').get().count;
   
-  // Approximate cost from cost audit logs
-  let totalCostUsd = 0;
+  // Real metrics from MetricsService
+  const metrics = metricsService.getMetrics();
+  
+  // Real sandbox metrics
+  const sandboxMetrics = sandboxManager.getMetrics();
+
+  // Try to load latest eval results
+  let semanticQualityScore = 0.845; // Default/baseline
+  let ragQualityScore = 1.0;
+  
   try {
-    const costRow = db.prepare('SELECT SUM(json_extract(details, "$.costUsd")) as total FROM audit_logs WHERE action = @action').get({ action: 'cost' });
-    totalCostUsd = costRow.total || 0;
+    const evalPath = path.join(process.cwd(), 'docs/06_testing/EVALS_REPORT.json');
+    if (fs.existsSync(evalPath)) {
+      const report = JSON.parse(fs.readFileSync(evalPath, 'utf8'));
+      semanticQualityScore = report.semantic_accuracy || semanticQualityScore;
+      ragQualityScore = report.rag_score || ragQualityScore;
+    }
   } catch (e) {
-    // ignore if json_extract is missing or error
+    // fallback to placeholders if file missing or corrupt
   }
 
   // Feature flags
@@ -371,13 +387,15 @@ router.get('/dashboard/mvp', asyncHandler(async (req, res) => {
     run_status: runStatus,
     semantic_events: semanticEvents,
     approval_events: approvalEvents,
-    total_cost_usd: totalCostUsd,
+    total_cost_usd: metrics.costUsd,
     feature_flags: FEATURE_FLAGS,
-    latency_p95: 0.69, // from baseline metrics
-    sandbox_warm_count: 0, // Placeholder for sprint 16
-    sandbox_cold_count: 0, // Placeholder for sprint 16
-    rag_quality_score: 1.0, // Placeholder
-    semantic_quality_score: 0.845, // Placeholder from MVP
+    latency_p95: metrics.latency.p95,
+    latency_p50: metrics.latency.p50,
+    error_rate: metrics.errorRate,
+    sandbox_warm_count: sandboxMetrics.warm,
+    sandbox_cold_count: sandboxMetrics.cold,
+    rag_quality_score: ragQualityScore,
+    semantic_quality_score: semanticQualityScore,
     recent_traces: traces
   });
 }));

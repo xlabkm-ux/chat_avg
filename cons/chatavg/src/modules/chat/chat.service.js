@@ -46,7 +46,12 @@ class ChatService {
 
     // 1. Resolve Route
     const route = policyRouter.resolveRoute(catSettings);
-    
+    const startTimestamp = Date.now();
+    traceBus.emitTrace('ChatService', 'model.requested', { 
+      providerId: route.providerId, 
+      modelName: catSettings.model_name,
+      runId 
+    });
     // 2. Prepare Messages & Options
     const { messages: baseMessages, injectionDetected } = mapper.prepareMessages({ 
       messages: body.messages, 
@@ -129,7 +134,10 @@ class ChatService {
       });
 
       // 7. Stream Response & Intercept Events
-      await this._processHeavyStream({ stream, res, modelName: catSettings.model_name, isStreaming: options.stream, runId, missionId, retrievalResult, body, user });
+      await this._processHeavyStream({ 
+        stream, res, modelName: catSettings.model_name, isStreaming: options.stream, 
+        runId, missionId, retrievalResult, body, user, startTimestamp 
+      });
 
     } catch (err) {
       if (err.message !== 'Client disconnected') {
@@ -141,7 +149,7 @@ class ChatService {
     }
   }
 
-  async _processHeavyStream({ stream, res, modelName, isStreaming, runId, missionId, retrievalResult, body, user }) {
+  async _processHeavyStream({ stream, res, modelName, isStreaming, runId, missionId, retrievalResult, body, user, startTimestamp }) {
     let fullText = '';
     let finalUsage = null;
     let finalFinishReason = 'stop';
@@ -223,6 +231,13 @@ class ChatService {
     if (runId && AGENT_RUNS_ENABLED) {
       await getAgentRunService().updateState(runId, 'completed');
     }
+
+    traceBus.emitTrace('ChatService', 'model.completed', { 
+      providerId, 
+      modelName, 
+      latencyMs: Date.now() - startTimestamp,
+      runId 
+    });
   }
 
   async _applySemanticAnalysis(text, responseData, missionId, sessionId, user) {

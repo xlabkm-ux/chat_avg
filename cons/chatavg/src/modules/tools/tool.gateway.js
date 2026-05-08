@@ -89,6 +89,8 @@ class ToolCall {
   }
 }
 
+const traceBus = require('../observability/trace.bus');
+
 class ToolGateway {
   constructor(toolRegistry) {
     this.registry = toolRegistry;
@@ -98,13 +100,17 @@ class ToolGateway {
    * Dispatches a tool call, managing its state and idempotency.
    */
   async executeTool(cacheKey, args, runId, idempotencyKey = null, mcpExecutorFn = null) {
+    const startTime = Date.now();
     const definition = this.registry.getTool(cacheKey);
     if (!definition) {
       throw new ProviderError(`Tool not found in registry: ${cacheKey}`, 404, 'NOT_FOUND');
     }
 
+    traceBus.emitTrace('ToolGateway', 'tool.requested', { toolName: definition.toolName, runId });
+
     const call = new ToolCall(definition, args, runId, idempotencyKey);
     if (call.state === ToolCallState.FAILED) {
+      traceBus.emitTrace('ToolGateway', 'tool.failed', { toolName: definition.toolName, error: call.error.message, runId });
       throw call.error;
     }
 
@@ -123,6 +129,7 @@ class ToolGateway {
 
       if (definition.approvalPolicyId) {
         call.transition(ToolCallState.PENDING_APPROVAL);
+        traceBus.emitTrace('ToolGateway', 'tool.waiting_approval', { toolName: definition.toolName, runId });
         // Wait for external approval signal...
         // For MVP, we throw or wait
         throw new ProviderError('Tool call requires approval', 403, 'APPROVAL_REQUIRED', { toolCallId: call.id });
@@ -144,10 +151,21 @@ class ToolGateway {
       const result = await Promise.race([executePromise, timeoutPromise]);
 
       call.transition(ToolCallState.COMPLETED, { result });
+      traceBus.emitTrace('ToolGateway', 'tool.completed', { 
+        toolName: definition.toolName, 
+        latencyMs: Date.now() - startTime,
+        runId 
+      });
       return call;
 
     } catch (err) {
       call.transition(ToolCallState.FAILED, { error: err });
+      traceBus.emitTrace('ToolGateway', 'tool.failed', { 
+        toolName: definition.toolName, 
+        error: err.message, 
+        latencyMs: Date.now() - startTime,
+        runId 
+      });
       throw err;
     }
   }

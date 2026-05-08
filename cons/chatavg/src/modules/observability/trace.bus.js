@@ -28,10 +28,7 @@ class TraceBus extends EventEmitter {
 
     this.emit('trace', trace);
     
-    // For specific observability overlays we can emit sub-events
-    if (metadata.error) {
-      this.emit('error', trace);
-    }
+    // Sub-events can be added here if needed, but must be handled to avoid ERR_UNHANDLED_ERROR
   }
 
   getRecentTraces(limit = 100) {

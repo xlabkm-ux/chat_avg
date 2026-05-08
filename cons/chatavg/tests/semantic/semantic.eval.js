@@ -161,6 +161,27 @@ if (require.main === module) {
         }
       }
       console.log('\n=======================================\n');
+
+      // Save report for dashboard
+      const fs = require('fs');
+      const path = require('path');
+      const reportPath = path.join(process.cwd(), 'docs/06_testing/EVALS_REPORT.json');
+      
+      let existingReport = {};
+      if (fs.existsSync(reportPath)) {
+        try { existingReport = JSON.parse(fs.readFileSync(reportPath, 'utf8')); } catch (e) {}
+      }
+      
+      const newReport = {
+        ...existingReport,
+        semantic_accuracy: parseFloat(report.accuracy) / 100,
+        semantic_last_run: new Date().toISOString()
+      };
+      
+      fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+      fs.writeFileSync(reportPath, JSON.stringify(newReport, null, 2));
+      console.log(`Report saved to ${reportPath}`);
+
       process.exit(report.failed > 0 ? 1 : 0);
     } catch (e) {
       console.error('Eval runner failed:', e);

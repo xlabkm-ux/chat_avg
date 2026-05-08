@@ -1,11 +1,12 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Sprint R8 — QA, observability and release readiness**
+Текущая стадия: **Remediation Track Completed — Ready for RC Sign-off**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
 
 ---
 
 ## ✅ Завершённые спринты
+
 
 ### Sprint 0: Repo Hygiene and Architecture Lock — ✅ Завершён 2026-05-07
 *Цель: Очистить репозиторий, зафиксировать v2.3 и убрать конфликтующие направления.*
@@ -474,3 +475,20 @@
 **Итог:** Монолит `ChatService` успешно декомпозирован. Внедрены чистые границы между HTTP, оркестрацией и провайдерами. "Быстрый путь" изолирован и не нагружен тяжелыми зависимостями.
 **Deliverables:** `ChatController`, `ModelGateway`, `FastChatService`, `MissionBindingService`, `Sprint_R7_Implementation_Plan.md`.
 **Testing Gate:** `npm test` all pass, `npm run test:latency` TTFT P95 < 200ms — pass.
+
+---
+
+### Sprint R8: QA, observability and release readiness — ✅ Завершён 2026-05-08
+*Цель: Перейти от placeholders к реальным метрикам, нагрузочному тестированию и проверке готовности к релизу.*
+
+**Задачи:**
+- [x] ✅ Реальный дашборд: замена placeholders на данные из `MetricsService` и `SandboxManager` — 2026-05-08
+- [x] ✅ Trace Bus hardening: инъекция трейсов во все ключевые компоненты (Model, RAG, Tools, Sandbox) — 2026-05-08
+- [x] ✅ Load testing harness: скрипты для симуляции нагрузки и проверки сбора метрик — 2026-05-08
+- [x] ✅ Chaos testing harness: симуляция сбоев и проверка устойчивости observability — 2026-05-08
+- [x] ✅ Eval reporting: автоматическое сохранение результатов в `EVALS_REPORT.json` — 2026-05-08
+- [x] ✅ Release Readiness: создание `SPEC-024` (Checklist) и `RUNBOOK-003` (Rollback) — 2026-05-08
+
+**Итог:** Система полностью наблюдаема. Дашборд показывает реальные P95 latency, error rate и состояние песочниц. Проведены нагрузочные тесты, подтвердившие корректность сбора телеметрии.
+**Deliverables:** `MetricsService`, `LoadHarness`, `ChaosHarness`, `SPEC-024`, `RUNBOOK-003`, `EVALS_REPORT.json`.
+**Testing Gate:** `node verify_dashboard.js` — pass.

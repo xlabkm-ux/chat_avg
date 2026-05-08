@@ -5,6 +5,8 @@ const knowledgeCache = require('./knowledge.cache');
 const { KNOWLEDGE_GATEWAY_ENABLED } = require('../../core/config');
 const SQLiteFTSRetriever = require('./adapters/sqlite_fts.adapter');
 
+const traceBus = require('../observability/trace.bus');
+
 class KnowledgeGateway {
   constructor() {
     this.retrievers = new Map();
@@ -17,11 +19,15 @@ class KnowledgeGateway {
    * @param {Object} options { settings, sessionId }
    */
   async retrieve(query, options = {}) {
+    const startTime = Date.now();
+    traceBus.emitTrace('KnowledgeGateway', 'retrieval.started', { query: query.substring(0, 100) });
+
     if (!KNOWLEDGE_GATEWAY_ENABLED) {
-      return new RetrievalResult({ query, mode: 'no_retrieval' });
+      const res = new RetrievalResult({ query, mode: 'no_retrieval' });
+      traceBus.emitTrace('KnowledgeGateway', 'retrieval.completed', { mode: 'no_retrieval', latencyMs: Date.now() - startTime });
+      return res;
     }
 
-    const startTime = Date.now();
     const { settings = {} } = options;
     
     // 1. Resolve mode (Router)
@@ -30,7 +36,9 @@ class KnowledgeGateway {
     const routerMs = Date.now() - routerStart;
     
     if (mode === 'no_retrieval') {
-      return new RetrievalResult({ query, mode, metadata: { routerMs, latencyMs: Date.now() - startTime } });
+      const res = new RetrievalResult({ query, mode, metadata: { routerMs, latencyMs: Date.now() - startTime } });
+      traceBus.emitTrace('KnowledgeGateway', 'retrieval.completed', { mode: 'no_retrieval', latencyMs: Date.now() - startTime });
+      return res;
     }
 
     // 1.1 Check Cache
@@ -39,6 +47,7 @@ class KnowledgeGateway {
       console.log(`[KnowledgeGW] Cache HIT for query="${query.substring(0, 50)}..."`);
       cachedResult.metadata.cacheHit = true;
       cachedResult.metadata.latencyMs = Date.now() - startTime;
+      traceBus.emitTrace('KnowledgeGateway', 'retrieval.completed', { mode: cachedResult.mode, cacheHit: true, latencyMs: Date.now() - startTime });
       return cachedResult;
     }
 
@@ -84,10 +93,17 @@ class KnowledgeGateway {
         knowledgeCache.set(query, finalResult);
       }
 
+      traceBus.emitTrace('KnowledgeGateway', 'retrieval.completed', { 
+        mode: finalResult.mode, 
+        chunkCount: finalResult.chunks.length, 
+        latencyMs: finalResult.metadata.latencyMs 
+      });
+
       return finalResult;
 
     } catch (error) {
       console.error(`[KnowledgeGW] Retrieval failed: ${error.message}`);
+      traceBus.emitTrace('KnowledgeGateway', 'retrieval.failed', { error: error.message, latencyMs: Date.now() - startTime });
       // Fallback to empty result instead of crashing the chat
       return new RetrievalResult({
         query,

@@ -1,6 +1,8 @@
 const db = require('../../core/sqlite');
 const { v4: uuidv4 } = require('uuid');
 
+const traceBus = require('../observability/trace.bus');
+
 class ApprovalService {
   /**
    * Creates an approval request with enriched metadata for the preview.
@@ -38,6 +40,8 @@ class ApprovalService {
       created_at: now,
       updated_at: now
     });
+
+    traceBus.emitTrace('ApprovalService', 'approval.requested', { id, actionType, runId, riskScore: metadata.riskScore });
 
     return this.getRequest(id);
   }
@@ -82,6 +86,8 @@ class ApprovalService {
       id
     });
 
+    traceBus.emitTrace('ApprovalService', 'approval.resolved', { id, resolution: finalState, runId: request.run_id });
+
     return this.getRequest(id);
   }
 
@@ -95,6 +101,7 @@ class ApprovalService {
       SET state = 'expired', updated_at = ? 
       WHERE id = ?
     `).run(Date.now(), id);
+    traceBus.emitTrace('ApprovalService', 'approval.expired', { id });
   }
 }
 

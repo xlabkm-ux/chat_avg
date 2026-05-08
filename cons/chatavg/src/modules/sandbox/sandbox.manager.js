@@ -24,6 +24,8 @@ const DEFAULT_IDLE_TIMEOUT  = 60_000;  // 1 min
 
 const { scanArtifacts, estimateCost, MAX_OUTPUT_BYTES } = require('./sandbox.utils');
 
+const traceBus = require('../observability/trace.bus');
+
 class SandboxManager {
   /**
    * @param {Object} options
@@ -74,6 +76,9 @@ class SandboxManager {
       return { skipped: true, reason: 'EXECUTION_CLASS_NO_SANDBOX_REQUIRED', executionClass };
     }
 
+    const startTime = Date.now();
+    traceBus.emitTrace('SandboxManager', 'sandbox.assign_started', { runId, executionClass });
+
     const sandboxId = `sbx_${crypto.randomBytes(8).toString('hex')}`;
     const adapter   = this._selectAdapter();
     const egress    = new EgressPolicy({
@@ -104,9 +109,11 @@ class SandboxManager {
       session = await adapter.provision(session);
       this._sessions.set(sandboxId, session);
       this._emit('sandbox.provisioned', { sandboxId, adapter: adapter.name });
+      traceBus.emitTrace('SandboxManager', 'sandbox.provisioned', { sandboxId, runId, latencyMs: Date.now() - startTime });
     } catch (err) {
       session = { ...session, state: SandboxState.ERROR };
       this._sessions.set(sandboxId, session);
+      traceBus.emitTrace('SandboxManager', 'sandbox.failed', { sandboxId, runId, error: err.message, latencyMs: Date.now() - startTime });
       throw err;
     }
 
@@ -125,7 +132,10 @@ class SandboxManager {
   async run(sandboxId, command, { timeoutMs = 30_000, egressUrls = [] } = {}) {
     if (!this.enabled) return this._skipped('run');
 
+    const startTime = Date.now();
     const session = this._requireSession(sandboxId, SandboxState.RUNNING);
+
+    traceBus.emitTrace('SandboxManager', 'sandbox.command.requested', { sandboxId, runId: session.runId });
 
     // Egress pre-check
     for (const url of egressUrls) {
@@ -135,16 +145,33 @@ class SandboxManager {
         { sandboxId, url, tier: decision.tier, reason: decision.reason }
       );
       if (!decision.allowed) {
+        traceBus.emitTrace('SandboxManager', 'sandbox.egress.denied', { sandboxId, url, runId: session.runId });
         throw Object.assign(new Error(`Egress denied: ${url} — ${decision.reason}`), { code: 'EGRESS_DENIED' });
       }
     }
 
     session.lastActivityAt = Date.now();
     const adapter = this._adapters[session.adapter];
-    const result  = await adapter.runCommand(session, command, timeoutMs);
-
-    this._emit('sandbox.command.run', { sandboxId, exitCode: result.exitCode });
-    return result;
+    
+    try {
+      const result  = await adapter.runCommand(session, command, timeoutMs);
+      this._emit('sandbox.command.run', { sandboxId, exitCode: result.exitCode });
+      traceBus.emitTrace('SandboxManager', 'sandbox.command.completed', { 
+        sandboxId, 
+        runId: session.runId, 
+        exitCode: result.exitCode,
+        latencyMs: Date.now() - startTime 
+      });
+      return result;
+    } catch (err) {
+      traceBus.emitTrace('SandboxManager', 'sandbox.command.failed', { 
+        sandboxId, 
+        runId: session.runId, 
+        error: err.message,
+        latencyMs: Date.now() - startTime 
+      });
+      throw err;
+    }
   }
 
   /**
@@ -264,6 +291,19 @@ class SandboxManager {
     // Strip non-serialisable adapter handle
     const { egressPolicy, adapterHandle, ...rest } = s;
     return rest;
+  }
+
+  /**
+   * Get sandbox pool metrics.
+   */
+  getMetrics() {
+    let warm = 0;
+    let cold = 0;
+    for (const session of this._sessions.values()) {
+      if (session.state === SandboxState.RUNNING) warm++;
+      else if (session.state === SandboxState.PROVISIONING) cold++;
+    }
+    return { warm, cold };
   }
 
   // ── Internal helpers ─────────────────────────────────────────────────────
