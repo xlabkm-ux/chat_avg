@@ -1,6 +1,6 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Sprint R6 — Policy / Tool / Approval control plane**
+Текущая стадия: **Sprint R8 — QA, observability and release readiness**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
 
 ---
@@ -461,3 +461,16 @@
 **Deliverables:** `KNOWLEDGE_GATEWAY_DESIGN.md`, `knowledge_mvp.test.js`, `rag_dataset.json` (30 cases).
 **Testing Gate:** `node --test tests/knowledge/knowledge_mvp.test.js` — pass.
 
+### Sprint R7: Architecture boundary refactor — ✅ Завершён 2026-05-08
+*Цель: Декомпозировать монолит ChatService, выделить ModelGateway и изолировать Fast Path.*
+
+**Задачи:**
+- [x] ✅ Split ChatService: выделение `ChatController`, `ModelGateway`, `FastChatService` — 2026-05-08
+- [x] ✅ ModelGateway boundary: централизованный шлюз для провайдеров с fallback и routing — 2026-05-08
+- [x] ✅ Fast Path Isolation: гарантированный низкий latency для простых запросов — 2026-05-08
+- [x] ✅ MissionBindingService: абстракция жизненного цикла миссий — 2026-05-08
+- [x] ✅ Regression tests: contract (18), integration (14), latency (6) — all pass — 2026-05-08
+
+**Итог:** Монолит `ChatService` успешно декомпозирован. Внедрены чистые границы между HTTP, оркестрацией и провайдерами. "Быстрый путь" изолирован и не нагружен тяжелыми зависимостями.
+**Deliverables:** `ChatController`, `ModelGateway`, `FastChatService`, `MissionBindingService`, `Sprint_R7_Implementation_Plan.md`.
+**Testing Gate:** `npm test` all pass, `npm run test:latency` TTFT P95 < 200ms — pass.

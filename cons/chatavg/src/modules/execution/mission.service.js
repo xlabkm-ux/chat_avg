@@ -16,6 +16,8 @@ class MissionService {
     const mission = {
       id: data.id || uuidv4(),
       goal: data.goal || 'General Analysis',
+      sessionId: data.sessionId,
+      username: data.username,
       context: data.context || '',
       distinctions: [], // Significant semantic insights
       conflicts: [],    // Semantic conflicts or boundary violations

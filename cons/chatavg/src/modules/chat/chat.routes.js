@@ -7,7 +7,7 @@ const { Router } = require('express');
 const { z } = require('zod');
 const { authenticate } = require('../auth/auth.middleware');
 const { asyncHandler } = require('../../core/errors');
-const chatService = require('./chat.service');
+const chatController = require('./chat.controller');
 
 const router = Router();
 
@@ -51,11 +51,7 @@ router.post('/completions', authenticate, asyncHandler(async (req, res) => {
     return res.status(400).json({ error: 'Неверный формат запроса', details: parseResult.error.errors });
   }
 
-  await chatService.handleCompletion({
-    user: req.user,
-    body: parseResult.data,
-    res,
-  });
+  await chatController.handleCompletion(req, res);
 }));
 
 module.exports = router;
