@@ -1,15 +1,15 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-08 01:26:06`
+> Автоматически сгенерировано: `2026-05-08 01:39:36`
 > Скрипт: `node dev_studio/refresh.js`
 
 ## 📊 Telemetry / Context Health
 | Metric | Value | Note |
 |---|---|---|
-| **Total Files** | `125` | Только JS/TS исходники |
-| **Total Lines** | `13731` | Суммарно по проекту |
-| **Project Weight** | `~113 025 tokens` | Оценка (4 символа/токен) |
-| **Context Pressure** | `88.3%` | Нагрузка на окно 128k (Full Scan) |
-| **Map Efficiency** | `~85%` | Экономия контекста через карту |
+| **Total Files** | `132` | Только JS/TS исходники |
+| **Total Lines** | `14331` | Суммарно по проекту |
+| **Project Weight** | `~117 448 tokens` | Оценка (4 символа/токен) |
+| **Context Pressure** | `91.8%` | Нагрузка на окно 128k (Full Scan) |
+| **Map Efficiency** | `~84%` | Экономия контекста через карту |
 
 ---
 
@@ -29,8 +29,8 @@ graph LR
   H8["chatavg/src/modules/observability"]
   H9["chatavg/src/modules/policy"]
   H10["chatavg/src/modules/semantic"]
-  H11["chatavg/src/modules/execution"]
-  H12["chatavg/src/modules/mission"]
+  H11["chatavg/src/modules/mission"]
+  H12["chatavg/src/modules/execution"]
   H13["chatavg/src/modules/temporal"]
   H14["chatavg/src/modules/knowledge/adapters"]
   H15["chatavg/src/modules/knowledge"]
@@ -62,20 +62,21 @@ graph LR
   H7 --> H9
   H2 --> H1
   H2 --> H7
-  H5 --> H2
-  H5 --> H1
   H5 --> H4
-  H5 --> H6
-  H5 --> H10
+  H5 --> H1
+  H5 --> H2
   H5 --> H8
-  H11 --> H1
-  H11 --> H9
-  H11 --> H12
-  H11 --> H13
+  H5 --> H10
+  H5 --> H6
+  H5 --> H11
+  H12 --> H1
+  H12 --> H9
+  H12 --> H11
+  H12 --> H13
   H14 --> H15
   H15 --> H1
   H15 --> H14
-  H12 --> H1
+  H11 --> H1
   H9 --> H1
   H9 --> H7
   H16 --> H6
@@ -92,15 +93,16 @@ graph LR
   H3 --> H7
   H3 --> H9
   H10 --> H1
-  H13 --> H11
   H13 --> H12
+  H13 --> H11
   H13 --> H9
   H13 --> H1
   H19 --> H6
+  H19 --> H1
   H20 --> H0
   H20 --> H1
   H20 --> H13
-  H20 --> H11
+  H20 --> H12
   H21 --> H5
   H20 --> H17
   H20 --> H6
@@ -110,7 +112,7 @@ graph LR
   H22 --> H15
   H22 --> H4
   H22 --> H6
-  H23 --> H11
+  H23 --> H12
   H23 --> H5
   H23 --> H4
   H24 --> H15
@@ -122,16 +124,16 @@ graph LR
   H17 --> H6
   H26 --> H9
   H26 --> H1
-  H26 --> H11
+  H26 --> H12
   H27 --> H13
   H27 --> H1
-  H27 --> H11
   H27 --> H12
+  H27 --> H11
   H27 --> H20
   H28 --> H3
   H20 --> H3
   H20 --> H19
-  H20 --> H12
+  H20 --> H11
   H29 --> H10
   H29 --> H1
   H30 --> H19
@@ -173,177 +175,184 @@ graph LR
       N23["users.routes.js"]
     end
     subgraph N24["src/modules/chat"]
-      N25["chat.routes.js"]
-      N26["chat.service.js"]
-      N27["fallbackPolicy.js"]
-      N28["policyRouter.js"]
-      N29["session.repository.js"]
-      N30["sessions.routes.js"]
+      N25["chat.controller.js"]
+      N26["chat.routes.js"]
+      N27["chat.service.js"]
+      N28["chat_completion.mapper.js"]
+      N29["fallbackPolicy.js"]
+      N30["fast_chat.service.js"]
+      N31["mission_binding.service.js"]
+      N32["model.gateway.js"]
+      N33["policyRouter.js"]
+      N34["session.repository.js"]
+      N35["sessions.routes.js"]
     end
-    subgraph N31["src/modules/execution"]
-      N32["artifact.service.js"]
-      N33["cost.service.js"]
-      N34["execution.routes.js"]
-      N35["mission.service.js"]
-      N36["role_pass.js"]
-      N37["run.repository.js"]
-      N38["run.service.js"]
+    subgraph N36["src/modules/execution"]
+      N37["artifact.service.js"]
+      N38["cost.service.js"]
+      N39["execution.routes.js"]
+      N40["mission.service.js"]
+      N41["role_pass.js"]
+      N42["run.repository.js"]
+      N43["run.service.js"]
     end
-    subgraph N39["src/modules/knowledge/adapters"]
-      N40["sqlite_fts.adapter.js"]
+    subgraph N44["src/modules/knowledge/adapters"]
+      N45["sqlite_fts.adapter.js"]
     end
-    subgraph N41["src/modules/knowledge"]
-      N42["ingestion.service.js"]
-      N43["knowledge.cache.js"]
-      N44["knowledge.gateway.js"]
-      N45["knowledge.repository.js"]
-      N46["knowledge.router.js"]
-      N47["knowledge.types.js"]
+    subgraph N46["src/modules/knowledge"]
+      N47["ingestion.service.js"]
+      N48["knowledge.cache.js"]
+      N49["knowledge.gateway.js"]
+      N50["knowledge.repository.js"]
+      N51["knowledge.router.js"]
+      N52["knowledge.types.js"]
     end
-    subgraph N48["src/modules/mission"]
-      N49["mission.repository.js"]
-      N50["mission.routes.js"]
+    subgraph N53["src/modules/mission"]
+      N54["mission.repository.js"]
+      N55["mission.routes.js"]
     end
-    subgraph N51["src/modules/observability"]
-      N52["trace.bus.js"]
+    subgraph N56["src/modules/observability"]
+      N57["trace.bus.js"]
     end
-    subgraph N53["src/modules/policy"]
-      N54["approval.service.js"]
-      N55["policy.engine.js"]
-      N56["policy.guard.js"]
-      N57["redaction.service.js"]
+    subgraph N58["src/modules/policy"]
+      N59["approval.service.js"]
+      N60["cost.service.js"]
+      N61["policy.engine.js"]
+      N62["policy.guard.js"]
+      N63["redaction.service.js"]
     end
-    subgraph N58["src/modules/providers/adapters"]
-      N59["deepseek.js"]
-      N60["google.js"]
-      N61["grok.js"]
-      N62["grok_responses.js"]
-      N63["llamacpp.js"]
-      N64["mcp.js"]
-      N65["openai.js"]
-      N66["openai_compat.js"]
-      N67["openai_responses.js"]
-      N68["openai_responses_compat.js"]
-      N69["qwen.js"]
+    subgraph N64["src/modules/providers/adapters"]
+      N65["deepseek.js"]
+      N66["google.js"]
+      N67["grok.js"]
+      N68["grok_responses.js"]
+      N69["llamacpp.js"]
+      N70["mcp.js"]
+      N71["openai.js"]
+      N72["openai_compat.js"]
+      N73["openai_responses.js"]
+      N74["openai_responses_compat.js"]
+      N75["qwen.js"]
     end
-    subgraph N70["src/modules/providers"]
-      N71["base.provider.js"]
-      N72["provider.factory.js"]
-      N73["providerErrors.js"]
-      N74["providerEvents.js"]
-      N75["providers.routes.js"]
+    subgraph N76["src/modules/providers"]
+      N77["base.provider.js"]
+      N78["provider.factory.js"]
+      N79["providerErrors.js"]
+      N80["providerEvents.js"]
+      N81["providers.routes.js"]
     end
-    subgraph N76["src/modules/sandbox/adapters"]
-      N77["e2b.adapter.js"]
-      N78["local.adapter.js"]
+    subgraph N82["src/modules/sandbox/adapters"]
+      N83["e2b.adapter.js"]
+      N84["local.adapter.js"]
     end
-    subgraph N79["src/modules/sandbox"]
-      N80["egress.policy.js"]
-      N81["sandbox.manager.js"]
-      N82["sandbox.routes.js"]
-      N83["sandbox.types.js"]
-      N84["sandbox.utils.js"]
+    subgraph N85["src/modules/sandbox"]
+      N86["egress.policy.js"]
+      N87["sandbox.manager.js"]
+      N88["sandbox.routes.js"]
+      N89["sandbox.types.js"]
+      N90["sandbox.utils.js"]
     end
-    subgraph N85["src/modules/semantic"]
-      N86["claim.extractor.js"]
-      N87["claim.ledger.js"]
-      N88["domain.boundary.js"]
-      N89["semantic.events.js"]
-      N90["semantic.protocol.js"]
-      N91["semantic.repository.js"]
+    subgraph N91["src/modules/semantic"]
+      N92["claim.extractor.js"]
+      N93["claim.ledger.js"]
+      N94["domain.boundary.js"]
+      N95["semantic.events.js"]
+      N96["semantic.protocol.js"]
+      N97["semantic.repository.js"]
     end
-    subgraph N92["src/modules/temporal"]
-      N93["activities.js"]
-      N94["client.js"]
-      N95["durable.interface.js"]
-      N96["worker.js"]
-      N97["workflows.js"]
+    subgraph N98["src/modules/temporal"]
+      N99["activities.js"]
+      N100["client.js"]
+      N101["durable.interface.js"]
+      N102["worker.js"]
+      N103["workflows.js"]
     end
-    subgraph N98["src/modules/tools"]
-      N99["tool.gateway.js"]
-      N100["tool.registry.js"]
+    subgraph N104["src/modules/tools"]
+      N105["tool.gateway.js"]
+      N106["tool.registry.js"]
     end
-    subgraph N101["src/providers"]
-      N102["base.ts"]
-      N103["openai-responses.provider.ts"]
+    subgraph N107["src/providers"]
+      N108["base.ts"]
+      N109["openai-responses.provider.ts"]
     end
-    subgraph N104["src/types"]
-      N105["chat.ts"]
+    subgraph N110["src/types"]
+      N111["chat.ts"]
     end
-    subgraph N106["tests"]
-      N107["agent_run.test.js"]
-      N108["agent_run_durability.test.js"]
-      N109["agent_run_routes.test.js"]
-      N110["api.test.js"]
-      N111["baseline_security.test.js"]
-      N112["contract_canonical_event.test.js"]
-      N113["deterministic_provider.test.js"]
-      N114["e2e_mvp_gate.test.js"]
-      N115["errors.test.js"]
-      N116["fast_path_guardrail.test.js"]
-      N117["health.test.js"]
-      N118["latency_baseline.test.js"]
-      N119["provider_events.test.js"]
-      N120["security.test.js"]
-      N121["security_assertions.test.js"]
-      N122["security_red_team.test.js"]
-      N123["setup_fixtures.js"]
-      N124["signal.js"]
+    subgraph N112["tests"]
+      N113["agent_run.test.js"]
+      N114["agent_run_durability.test.js"]
+      N115["agent_run_routes.test.js"]
+      N116["api.test.js"]
+      N117["baseline_security.test.js"]
+      N118["contract_canonical_event.test.js"]
+      N119["deterministic_provider.test.js"]
+      N120["e2e_mvp_gate.test.js"]
+      N121["errors.test.js"]
+      N122["fast_path_guardrail.test.js"]
+      N123["health.test.js"]
+      N124["latency_baseline.test.js"]
+      N125["provider_events.test.js"]
+      N126["security.test.js"]
+      N127["security_assertions.test.js"]
+      N128["security_red_team.test.js"]
+      N129["setup_fixtures.js"]
+      N130["signal.js"]
+      N131["sprint_r6_verification.test.js"]
     end
-    subgraph N125["tests/chaos"]
-      N126["chaos.test.js"]
+    subgraph N132["tests/chaos"]
+      N133["chaos.test.js"]
     end
-    subgraph N127["tests/evals"]
-      N128["rag.eval.js"]
+    subgraph N134["tests/evals"]
+      N135["rag.eval.js"]
     end
-    subgraph N129["tests/execution"]
-      N130["mission_artifacts.test.js"]
+    subgraph N136["tests/execution"]
+      N137["mission_artifacts.test.js"]
     end
-    subgraph N131["tests/knowledge"]
-      N132["knowledge_gateway.test.js"]
-      N133["knowledge_mvp.test.js"]
-      N134["performance.test.js"]
-      N135["rag_integration.test.js"]
+    subgraph N138["tests/knowledge"]
+      N139["knowledge_gateway.test.js"]
+      N140["knowledge_mvp.test.js"]
+      N141["performance.test.js"]
+      N142["rag_integration.test.js"]
     end
-    subgraph N136["tests/load"]
-      N137["load_harness.test.js"]
+    subgraph N143["tests/load"]
+      N144["load_harness.test.js"]
     end
-    subgraph N138["tests/mocks"]
-      N139["deterministic_provider.js"]
+    subgraph N145["tests/mocks"]
+      N146["deterministic_provider.js"]
     end
-    subgraph N140["tests/policy"]
-      N141["approval.service.test.js"]
-      N142["cost.service.test.js"]
-      N143["policy.engine.test.js"]
-      N144["redaction.service.test.js"]
+    subgraph N147["tests/policy"]
+      N148["approval.service.test.js"]
+      N149["cost.service.test.js"]
+      N150["policy.engine.test.js"]
+      N151["redaction.service.test.js"]
     end
-    subgraph N145["tests/remediation"]
-      N146["production_safety.test.js"]
-      N147["temporal_v2_3.test.js"]
+    subgraph N152["tests/remediation"]
+      N153["production_safety.test.js"]
+      N154["temporal_v2_3.test.js"]
     end
-    subgraph N148["tests/sandbox"]
-      N149["sandbox_manager.test.js"]
+    subgraph N155["tests/sandbox"]
+      N156["sandbox_manager.test.js"]
     end
-    subgraph N150["tests/semantic"]
-      N151["claim_extraction.test.js"]
-      N152["domain_boundary.test.js"]
-      N153["expand_golden_set.js"]
-      N154["semantic.eval.js"]
-      N155["semantic_v2.test.js"]
+    subgraph N157["tests/semantic"]
+      N158["claim_extraction.test.js"]
+      N159["domain_boundary.test.js"]
+      N160["expand_golden_set.js"]
+      N161["semantic.eval.js"]
+      N162["semantic_v2.test.js"]
     end
-    subgraph N156["tests/tools"]
-      N157["tool_gateway.test.js"]
+    subgraph N163["tests/tools"]
+      N164["tool_gateway.test.js"]
     end
   end
-  subgraph N158["mcp_gateway"]
-    N159["server.js"]
+  subgraph N165["mcp_gateway"]
+    N166["server.js"]
   end
   N2 --> N12
   N3 --> N7
   N3 --> N9
   N3 --> N12
   N3 --> N20
-  N3 --> N82
+  N3 --> N88
   N8 --> N7
   N10 --> N12
   N10 --> N7
@@ -354,18 +363,18 @@ graph LR
   N15 --> N13
   N15 --> N22
   N15 --> N16
-  N15 --> N29
-  N15 --> N72
+  N15 --> N34
+  N15 --> N78
   N15 --> N18
   N15 --> N8
   N15 --> N7
   N15 --> N11
   N15 --> N12
-  N15 --> N52
+  N15 --> N57
   N16 --> N12
   N16 --> N8
   N18 --> N12
-  N18 --> N57
+  N18 --> N63
   N20 --> N7
   N20 --> N22
   N20 --> N9
@@ -377,213 +386,241 @@ graph LR
   N23 --> N22
   N23 --> N20
   N23 --> N9
-  N25 --> N20
-  N25 --> N9
-  N25 --> N26
-  N26 --> N16
-  N26 --> N28
-  N26 --> N27
-  N26 --> N72
-  N26 --> N11
-  N26 --> N7
-  N26 --> N13
-  N26 --> N90
-  N26 --> N52
-  N26 --> N74
-  N27 --> N73
-  N28 --> N72
-  N29 --> N12
-  N30 --> N20
-  N30 --> N9
-  N30 --> N29
-  N32 --> N36
-  N34 --> N38
-  N34 --> N7
-  N34 --> N56
-  N34 --> N37
-  N37 --> N12
-  N38 --> N37
-  N38 --> N49
-  N38 --> N94
-  N38 --> N7
-  N40 --> N45
-  N42 --> N45
-  N44 --> N46
-  N44 --> N47
-  N44 --> N43
-  N44 --> N7
-  N44 --> N40
-  N45 --> N12
-  N49 --> N12
-  N50 --> N49
+  N25 --> N16
+  N25 --> N27
+  N25 --> N30
+  N25 --> N31
+  N25 --> N7
+  N26 --> N20
+  N26 --> N9
+  N26 --> N25
+  N27 --> N16
+  N27 --> N33
+  N27 --> N32
+  N27 --> N28
+  N27 --> N31
+  N27 --> N11
+  N27 --> N7
+  N27 --> N13
+  N27 --> N57
+  N27 --> N96
+  N28 --> N13
+  N28 --> N7
+  N29 --> N79
+  N30 --> N32
+  N30 --> N28
+  N30 --> N33
+  N30 --> N13
+  N30 --> N11
+  N31 --> N54
+  N32 --> N78
+  N32 --> N11
+  N32 --> N7
+  N32 --> N13
+  N32 --> N29
+  N32 --> N57
+  N32 --> N80
+  N33 --> N78
+  N34 --> N12
+  N35 --> N20
+  N35 --> N9
+  N35 --> N34
+  N37 --> N41
+  N39 --> N43
+  N39 --> N7
+  N39 --> N62
+  N39 --> N42
+  N42 --> N12
+  N43 --> N42
+  N43 --> N54
+  N43 --> N100
+  N43 --> N7
+  N45 --> N50
+  N47 --> N50
+  N49 --> N51
+  N49 --> N52
+  N49 --> N48
+  N49 --> N7
+  N49 --> N45
+  N50 --> N12
   N54 --> N12
-  N55 --> N57
-  N56 --> N55
-  N56 --> N18
-  N59 --> N66
-  N60 --> N71
-  N60 --> N74
-  N60 --> N73
-  N61 --> N66
-  N62 --> N68
-  N63 --> N71
-  N63 --> N74
-  N63 --> N73
-  N64 --> N71
-  N64 --> N74
-  N64 --> N73
-  N65 --> N66
-  N66 --> N71
-  N66 --> N74
-  N66 --> N73
-  N67 --> N68
-  N68 --> N71
+  N55 --> N54
+  N59 --> N12
+  N60 --> N12
+  N61 --> N63
+  N62 --> N61
+  N62 --> N18
+  N65 --> N72
+  N66 --> N77
+  N66 --> N80
+  N66 --> N79
+  N67 --> N72
   N68 --> N74
-  N68 --> N73
-  N69 --> N66
-  N72 --> N11
-  N72 --> N63
-  N72 --> N65
-  N72 --> N67
-  N72 --> N59
-  N72 --> N60
-  N72 --> N69
-  N72 --> N61
-  N72 --> N62
-  N72 --> N64
-  N72 --> N139
-  N75 --> N20
+  N69 --> N77
+  N69 --> N80
+  N69 --> N79
+  N70 --> N77
+  N70 --> N80
+  N70 --> N79
+  N71 --> N72
+  N72 --> N77
+  N72 --> N80
+  N72 --> N79
+  N73 --> N74
+  N74 --> N77
+  N74 --> N80
+  N74 --> N79
   N75 --> N72
-  N75 --> N56
-  N75 --> N16
-  N75 --> N11
-  N77 --> N83
-  N78 --> N83
-  N81 --> N80
-  N81 --> N77
+  N78 --> N11
+  N78 --> N69
+  N78 --> N71
+  N78 --> N73
+  N78 --> N65
+  N78 --> N66
+  N78 --> N75
+  N78 --> N67
+  N78 --> N68
+  N78 --> N70
+  N78 --> N146
+  N81 --> N20
   N81 --> N78
-  N81 --> N84
-  N82 --> N20
-  N82 --> N9
-  N82 --> N7
-  N82 --> N81
-  N82 --> N18
-  N82 --> N56
-  N87 --> N91
-  N87 --> N12
-  N88 --> N86
-  N88 --> N89
-  N90 --> N86
-  N90 --> N88
-  N90 --> N87
-  N90 --> N89
-  N90 --> N91
-  N91 --> N12
-  N93 --> N37
-  N93 --> N49
-  N93 --> N54
-  N94 --> N7
+  N81 --> N62
+  N81 --> N16
+  N81 --> N11
+  N83 --> N89
+  N84 --> N89
+  N87 --> N86
+  N87 --> N83
+  N87 --> N84
+  N87 --> N90
+  N88 --> N20
+  N88 --> N9
+  N88 --> N7
+  N88 --> N87
+  N88 --> N18
+  N88 --> N62
+  N93 --> N97
+  N93 --> N12
+  N94 --> N92
   N94 --> N95
-  N96 --> N7
+  N96 --> N92
+  N96 --> N94
   N96 --> N93
-  N99 --> N73
-  N99 --> N100
-  N107 --> N3
-  N107 --> N12
-  N107 --> N94
-  N108 --> N3
-  N108 --> N12
-  N108 --> N37
-  N108 --> N38
-  N109 --> N3
-  N109 --> N12
-  N110 --> N3
-  N110 --> N12
-  N111 --> N3
-  N111 --> N12
-  N126 --> N26
-  N126 --> N27
-  N112 --> N139
-  N112 --> N74
-  N113 --> N139
+  N96 --> N95
+  N96 --> N97
+  N97 --> N12
+  N99 --> N42
+  N99 --> N54
+  N99 --> N59
+  N100 --> N7
+  N100 --> N101
+  N102 --> N7
+  N102 --> N99
+  N105 --> N79
+  N105 --> N106
+  N105 --> N12
+  N113 --> N3
+  N113 --> N12
+  N113 --> N100
   N114 --> N3
   N114 --> N12
-  N114 --> N54
-  N114 --> N86
-  N114 --> N88
-  N115 --> N9
-  N128 --> N26
-  N128 --> N44
-  N128 --> N16
-  N128 --> N72
-  N130 --> N36
-  N130 --> N32
-  N130 --> N35
-  N130 --> N26
-  N130 --> N16
+  N114 --> N42
+  N114 --> N43
+  N115 --> N3
+  N115 --> N12
+  N116 --> N3
+  N116 --> N12
   N117 --> N3
   N117 --> N12
-  N132 --> N44
-  N132 --> N46
-  N132 --> N47
-  N133 --> N44
-  N133 --> N42
-  N133 --> N45
-  N133 --> N12
-  N134 --> N44
-  N134 --> N43
-  N135 --> N26
-  N135 --> N44
-  N135 --> N16
-  N118 --> N139
-  N137 --> N26
-  N137 --> N27
-  N137 --> N52
-  N139 --> N71
-  N139 --> N74
-  N141 --> N54
-  N141 --> N12
-  N142 --> N33
-  N143 --> N55
-  N144 --> N57
-  N119 --> N74
-  N147 --> N94
-  N147 --> N93
-  N147 --> N12
-  N147 --> N37
-  N147 --> N49
-  N147 --> N123
-  N149 --> N81
-  N149 --> N83
-  N149 --> N80
-  N149 --> N84
-  N120 --> N13
+  N133 --> N27
+  N133 --> N29
+  N118 --> N146
+  N118 --> N80
+  N119 --> N146
   N120 --> N3
   N120 --> N12
-  N121 --> N13
-  N122 --> N80
-  N122 --> N99
-  N122 --> N100
-  N122 --> N49
-  N122 --> N12
-  N151 --> N86
-  N152 --> N88
-  N152 --> N86
-  N152 --> N90
-  N152 --> N12
-  N154 --> N90
-  N154 --> N86
-  N154 --> N12
-  N154 --> N88
-  N155 --> N90
-  N155 --> N91
-  N155 --> N12
-  N155 --> N88
+  N120 --> N59
+  N120 --> N92
+  N120 --> N94
+  N121 --> N9
+  N135 --> N27
+  N135 --> N49
+  N135 --> N16
+  N135 --> N78
+  N137 --> N41
+  N137 --> N37
+  N137 --> N40
+  N137 --> N27
+  N137 --> N16
+  N123 --> N3
   N123 --> N12
-  N124 --> N94
-  N157 --> N100
-  N157 --> N99
-  N157 --> N73
+  N139 --> N49
+  N139 --> N51
+  N139 --> N52
+  N140 --> N49
+  N140 --> N47
+  N140 --> N50
+  N140 --> N12
+  N141 --> N49
+  N141 --> N48
+  N142 --> N27
+  N142 --> N49
+  N142 --> N16
+  N124 --> N146
+  N144 --> N27
+  N144 --> N29
+  N144 --> N57
+  N146 --> N77
+  N146 --> N80
+  N148 --> N59
+  N148 --> N12
+  N149 --> N38
+  N150 --> N61
+  N151 --> N63
+  N125 --> N80
+  N154 --> N100
+  N154 --> N99
+  N154 --> N12
+  N154 --> N42
+  N154 --> N54
+  N154 --> N129
+  N156 --> N87
+  N156 --> N89
+  N156 --> N86
+  N156 --> N90
+  N126 --> N13
+  N126 --> N3
+  N126 --> N12
+  N127 --> N13
+  N128 --> N86
+  N128 --> N105
+  N128 --> N106
+  N128 --> N54
+  N128 --> N12
+  N158 --> N92
+  N159 --> N94
+  N159 --> N92
+  N159 --> N96
+  N159 --> N12
+  N161 --> N96
+  N161 --> N92
+  N161 --> N12
+  N161 --> N94
+  N162 --> N96
+  N162 --> N97
+  N162 --> N12
+  N162 --> N94
+  N129 --> N12
+  N130 --> N100
+  N131 --> N61
+  N131 --> N105
+  N131 --> N106
+  N131 --> N59
+  N131 --> N60
+  N131 --> N12
+  N164 --> N106
+  N164 --> N105
+  N164 --> N79
 ```
 
 ## Компонент: `chatavg`
@@ -599,7 +636,7 @@ graph LR
 | `src/core/errors.js` | 87 | 2.2 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
 | `src/core/providers.config.js` | 129 | 4.7 KB | — |
-| `src/core/sqlite.js` | 414 | 12.8 KB | — |
+| `src/core/sqlite.js` | 459 | 14.2 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
 | `src/modules/admin/admin.routes.js` | 386 | 14.2 KB | — |
 | `src/modules/admin/category.repository.js` | 74 | 3.0 KB | Класс: CategoryRepository |
@@ -608,16 +645,21 @@ graph LR
 | `src/modules/auth/auth.routes.js` | 67 | 2.3 KB | Routes: Authentication |
 | `src/modules/auth/user.repository.js` | 70 | 2.5 KB | Класс: UserRepository |
 | `src/modules/auth/users.routes.js` | 49 | 1.4 KB | Routes: User Profile |
-| `src/modules/chat/chat.routes.js` | 62 | 2.4 KB | Routes: Chat Completions |
-| `src/modules/chat/chat.service.js` | 595 | 23.5 KB | Класс: ChatService |
+| `src/modules/chat/chat.controller.js` | 160 | 5.2 KB | Класс: ChatController |
+| `src/modules/chat/chat.routes.js` | 58 | 2.4 KB | Routes: Chat Completions |
+| `src/modules/chat/chat.service.js` | 326 | 11.5 KB | Класс: ChatService |
+| `src/modules/chat/chat_completion.mapper.js` | 101 | 3.4 KB | Prepares messages for the LLM by adding system prompts and covenants. |
 | `src/modules/chat/fallbackPolicy.js` | 49 | 1.6 KB | Класс: FallbackPolicy |
+| `src/modules/chat/fast_chat.service.js` | 49 | 1.5 KB | Optimized path for simple chat completions. |
+| `src/modules/chat/mission_binding.service.js` | 76 | 2.4 KB | Ensures a mission exists for the given ID or creates a new one. |
+| `src/modules/chat/model.gateway.js` | 160 | 5.7 KB | Main entry point for LLM orchestration. |
 | `src/modules/chat/policyRouter.js` | 39 | 1.1 KB | Класс: PolicyRouter |
 | `src/modules/chat/session.repository.js` | 59 | 1.7 KB | Класс: SessionRepository |
 | `src/modules/chat/sessions.routes.js` | 105 | 3.3 KB | Routes: Sessions CRUD |
 | `src/modules/execution/artifact.service.js` | 85 | 1.9 KB | ArtifactService — manages versioned artifacts and patches. |
 | `src/modules/execution/cost.service.js` | 36 | 1.0 KB | Calculate cost for a model call. |
 | `src/modules/execution/execution.routes.js` | 123 | 3.4 KB | POST /api/runs |
-| `src/modules/execution/mission.service.js` | 64 | 1.4 KB | MissionService — tracks goals, distinctions, and conflicts. |
+| `src/modules/execution/mission.service.js` | 66 | 1.5 KB | MissionService — tracks goals, distinctions, and conflicts. |
 | `src/modules/execution/role_pass.js` | 82 | 1.7 KB | RolePass — capability-based authorization system. |
 | `src/modules/execution/run.repository.js` | 146 | 4.3 KB | Класс: AgentRunRepository |
 | `src/modules/execution/run.service.js` | 140 | 4.1 KB | Класс: AgentRunService |
@@ -631,8 +673,9 @@ graph LR
 | `src/modules/mission/mission.repository.js` | 92 | 2.9 KB | Класс: MissionRepository |
 | `src/modules/mission/mission.routes.js` | 85 | 2.1 KB | POST /api/missions |
 | `src/modules/observability/trace.bus.js` | 47 | 1.0 KB | Emit a trace event. |
-| `src/modules/policy/approval.service.js` | 83 | 2.2 KB | Класс: ApprovalService |
-| `src/modules/policy/policy.engine.js` | 106 | 3.7 KB | Evaluates an action and returns a PolicyDecision. |
+| `src/modules/policy/approval.service.js` | 102 | 2.9 KB | Creates an approval request with enriched metadata for the preview. |
+| `src/modules/policy/cost.service.js` | 83 | 2.3 KB | Records a cost event in the database. |
+| `src/modules/policy/policy.engine.js` | 128 | 4.5 KB | Evaluates an action and returns a PolicyDecision. |
 | `src/modules/policy/policy.guard.js` | 68 | 2.0 KB | PolicyGuard middleware. |
 | `src/modules/policy/redaction.service.js` | 33 | 1.1 KB | Redacts sensitive information from a string or object payload. |
 | `src/modules/providers/adapters/deepseek.js` | 19 | 0.4 KB | Provider: DeepSeek |
@@ -669,7 +712,7 @@ graph LR
 | `src/modules/temporal/durable.interface.js` | 52 | 1.4 KB | DurableRuntime Interface Specification (v2.3) |
 | `src/modules/temporal/worker.js` | 23 | 0.6 KB | — |
 | `src/modules/temporal/workflows.js` | 201 | 5.5 KB | — |
-| `src/modules/tools/tool.gateway.js` | 121 | 3.6 KB | ToolCall states for the state machine. |
+| `src/modules/tools/tool.gateway.js` | 161 | 5.4 KB | ToolCall states for the state machine. |
 | `src/modules/tools/tool.registry.js` | 106 | 2.4 KB | Risk classes for Tool executions. |
 | `src/providers/base.ts` | 95 | 2.3 KB | — |
 | `src/providers/openai-responses.provider.ts` | 128 | 4.1 KB | — |
@@ -713,6 +756,7 @@ graph LR
 | `tests/semantic/semantic_v2.test.js` | 97 | 4.9 KB | — |
 | `tests/setup_fixtures.js` | 104 | 3.3 KB | — |
 | `tests/signal.js` | 18 | 0.5 KB | — |
+| `tests/sprint_r6_verification.test.js` | 116 | 4.2 KB | — |
 | `tests/tools/tool_gateway.test.js` | 101 | 3.5 KB | — |
 
 ### `server.js`
@@ -856,6 +900,16 @@ graph LR
   - `./auth.middleware` → authenticate
   - `../../core/errors` → asyncHandler
 
+### `src/modules/chat/chat.controller.js`
+- **Класс**: `ChatController`
+- **Экспорт**: `new ChatController()`
+- **Зависимости**:
+  - `../admin/category.repository` → categoryRepository
+  - `./chat.service` → chatService
+  - `./fast_chat.service` → fastChatService
+  - `./mission_binding.service` → missionBinding
+  - `../../core/config` → AGENT_RUNS_ENABLED
+
 ### `src/modules/chat/chat.routes.js`
 - **Экспорт**: `router`
 - **Роуты**:
@@ -863,7 +917,7 @@ graph LR
 - **Зависимости**:
   - `../auth/auth.middleware` → authenticate
   - `../../core/errors` → asyncHandler
-  - `./chat.service` → chatService
+  - `./chat.controller` → chatController
 
 ### `src/modules/chat/chat.service.js`
 - **Класс**: `ChatService`
@@ -871,20 +925,55 @@ graph LR
 - **Зависимости**:
   - `../admin/category.repository` → categoryRepository
   - `./policyRouter` → policyRouter
-  - `./fallbackPolicy` → fallbackPolicy
-  - `../providers/provider.factory` → getProvider, adapters
+  - `./model.gateway` → modelGateway
+  - `./chat_completion.mapper` → mapper
+  - `./mission_binding.service` → missionBinding
   - `../../core/providers.config` → providersConfig
-  - `../../core/config` → ALLOWED_EXTRA_PARAMS, PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED, KNOWLEDGE_GATEWAY_ENABLED
-  - `../../core/utils` → validateProviderUrl, sanitizePromptText
-  - `../semantic/semantic.protocol` → SemanticProtocol
+  - `../../core/config` → PROVIDER_TIMEOUT, SEMANTIC_LAYER_ENABLED, AGENT_RUNS_ENABLED, KNOWLEDGE_GATEWAY_ENABLED
+  - `../../core/utils` → validateProviderUrl
   - `../observability/trace.bus` → traceBus
-  - `../providers/providerEvents` → ProviderEvents
+  - `../semantic/semantic.protocol` → SemanticProtocol
+
+### `src/modules/chat/chat_completion.mapper.js`
+- **Класс**: `ChatCompletionMapper`
+- **Экспорт**: `new ChatCompletionMapper()`
+- **Зависимости**:
+  - `../../core/utils` → sanitizePromptText
+  - `../../core/config` → ALLOWED_EXTRA_PARAMS
 
 ### `src/modules/chat/fallbackPolicy.js`
 - **Класс**: `FallbackPolicy`
 - **Экспорт**: `new FallbackPolicy()`
 - **Зависимости**:
   - `../providers/providerErrors` → ProviderError
+
+### `src/modules/chat/fast_chat.service.js`
+- **Класс**: `FastChatService`
+- **Экспорт**: `new FastChatService()`
+- **Зависимости**:
+  - `./model.gateway` → modelGateway
+  - `./chat_completion.mapper` → mapper
+  - `./policyRouter` → policyRouter
+  - `../../core/utils` → validateProviderUrl
+  - `../../core/providers.config` → providersConfig
+
+### `src/modules/chat/mission_binding.service.js`
+- **Класс**: `MissionBindingService`
+- **Экспорт**: `new MissionBindingService()`
+- **Зависимости**:
+  - `../mission/mission.repository` → missionRepository
+
+### `src/modules/chat/model.gateway.js`
+- **Класс**: `ModelGateway`
+- **Экспорт**: `new ModelGateway()`
+- **Зависимости**:
+  - `../providers/provider.factory` → getProvider, adapters
+  - `../../core/providers.config` → providersConfig
+  - `../../core/config` → PROVIDER_TIMEOUT
+  - `../../core/utils` → validateProviderUrl
+  - `./fallbackPolicy` → fallbackPolicy
+  - `../observability/trace.bus` → traceBus
+  - `../providers/providerEvents` → ProviderEvents
 
 ### `src/modules/chat/policyRouter.js`
 - **Класс**: `PolicyRouter`
@@ -1024,6 +1113,12 @@ graph LR
 ### `src/modules/policy/approval.service.js`
 - **Класс**: `ApprovalService`
 - **Экспорт**: `{ ApprovalService }`, `ApprovalService`
+- **Зависимости**:
+  - `../../core/sqlite` → db
+
+### `src/modules/policy/cost.service.js`
+- **Класс**: `CostService`
+- **Экспорт**: `{ CostService }`, `CostService`
 - **Зависимости**:
   - `../../core/sqlite` → db
 
@@ -1278,6 +1373,7 @@ graph LR
 - **Зависимости**:
   - `../providers/providerErrors` → ProviderError
   - `./tool.registry` → isSideEffectRiskClass
+  - `../../core/sqlite` → db
 
 ### `src/modules/tools/tool.registry.js`
 - **Класс**: `ToolDefinitionVersion`
@@ -1433,9 +1529,14 @@ auth.middleware.js → config, user.repository, errors
 auth.routes.js → auth.middleware, user.repository, errors, audit.service
 user.repository.js → sqlite
 users.routes.js → user.repository, auth.middleware, errors
-chat.routes.js → auth.middleware, errors, chat.service
-chat.service.js → category.repository, policyRouter, fallbackPolicy, provider.factory, providers.config, config, utils, semantic.protocol, trace.bus, providerEvents
+chat.controller.js → category.repository, chat.service, fast_chat.service, mission_binding.service, config
+chat.routes.js → auth.middleware, errors, chat.controller
+chat.service.js → category.repository, policyRouter, model.gateway, chat_completion.mapper, mission_binding.service, providers.config, config, utils, trace.bus, semantic.protocol
+chat_completion.mapper.js → utils, config
 fallbackPolicy.js → providerErrors
+fast_chat.service.js → model.gateway, chat_completion.mapper, policyRouter, utils, providers.config
+mission_binding.service.js → mission.repository
+model.gateway.js → provider.factory, providers.config, config, utils, fallbackPolicy, trace.bus, providerEvents
 policyRouter.js → provider.factory
 session.repository.js → sqlite
 sessions.routes.js → auth.middleware, errors, session.repository
@@ -1450,6 +1551,7 @@ knowledge.repository.js → sqlite
 mission.repository.js → sqlite
 mission.routes.js → mission.repository
 approval.service.js → sqlite
+cost.service.js → sqlite
 policy.engine.js → redaction.service
 policy.guard.js → policy.engine, audit.service
 deepseek.js → openai_compat
@@ -1476,7 +1578,7 @@ semantic.repository.js → sqlite
 activities.js → run.repository, mission.repository, approval.service
 client.js → config, durable.interface
 worker.js → config, activities
-tool.gateway.js → providerErrors, tool.registry
+tool.gateway.js → providerErrors, tool.registry, sqlite
 base.ts → chat
 openai-responses.provider.ts → base, chat
 agent_run.test.js → server, sqlite, client
@@ -1516,6 +1618,7 @@ semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json, sqlite
 semantic_v2.test.js → semantic.protocol, semantic.repository, sqlite, domain.boundary
 setup_fixtures.js → sqlite
 signal.js → client
+sprint_r6_verification.test.js → policy.engine, tool.gateway, tool.registry, approval.service, cost.service, sqlite
 tool_gateway.test.js → tool.registry, tool.gateway, providerErrors
 ```
 

@@ -1,5 +1,7 @@
 const { ProviderError } = require('../providers/providerErrors');
 const { isSideEffectRiskClass } = require('./tool.registry');
+const db = require('../../core/sqlite');
+const { v4: uuidv4 } = require('uuid');
 
 /**
  * ToolCall states for the state machine.
@@ -15,23 +17,54 @@ const ToolCallState = {
 };
 
 class ToolCall {
-  constructor(definition, args, idempotencyKey = null) {
+  constructor(definition, args, runId, idempotencyKey = null) {
+    this.id = uuidv4();
+    this.runId = runId;
     this.definition = definition;
     this.args = args;
     this.idempotencyKey = idempotencyKey;
     this.state = ToolCallState.REQUESTED;
+    this.policyDecision = null;
+    this.approvalId = null;
     this.result = null;
     this.error = null;
     this.attempts = 0;
+    this.createdAt = Date.now();
+    this.updatedAt = Date.now();
     
     // Idempotency check
     if (isSideEffectRiskClass(this.definition.riskClass) && !this.idempotencyKey) {
       this.state = ToolCallState.FAILED;
       this.error = new ProviderError('IdempotencyKey is required for side-effect tools', 400, 'BAD_REQUEST');
     }
+
+    this.save();
   }
 
-  transition(newState) {
+  save() {
+    const stmt = db.prepare(`
+      INSERT OR REPLACE INTO tool_calls (id, run_id, tool_name, args, state, idempotency_key, policy_decision, approval_id, result_ref, error, created_at, updated_at)
+      VALUES (@id, @run_id, @tool_name, @args, @state, @idempotency_key, @policy_decision, @approval_id, @result_ref, @error, @created_at, @updated_at)
+    `);
+
+    stmt.run({
+      id: this.id,
+      run_id: this.runId,
+      tool_name: this.definition.toolName,
+      args: JSON.stringify(this.args),
+      state: this.state,
+      idempotency_key: this.idempotencyKey,
+      policy_decision: this.policyDecision ? JSON.stringify(this.policyDecision) : null,
+      approval_id: this.approvalId,
+      result_ref: this.result ? JSON.stringify(this.result) : null,
+      error: this.error ? (this.error.message || String(this.error)) : null,
+      created_at: this.createdAt,
+      updated_at: Date.now()
+    });
+    this.updatedAt = Date.now();
+  }
+
+  transition(newState, metadata = {}) {
     const validTransitions = {
       [ToolCallState.REQUESTED]: [ToolCallState.VALIDATING, ToolCallState.FAILED],
       [ToolCallState.VALIDATING]: [ToolCallState.PENDING_APPROVAL, ToolCallState.EXECUTING, ToolCallState.FAILED],
@@ -47,6 +80,12 @@ class ToolCall {
     }
 
     this.state = newState;
+    if (metadata.policyDecision) this.policyDecision = metadata.policyDecision;
+    if (metadata.approvalId) this.approvalId = metadata.approvalId;
+    if (metadata.result) this.result = metadata.result;
+    if (metadata.error) this.error = metadata.error;
+    
+    this.save();
   }
 }
 
@@ -58,35 +97,44 @@ class ToolGateway {
   /**
    * Dispatches a tool call, managing its state and idempotency.
    */
-  async executeTool(cacheKey, args, idempotencyKey = null, mcpExecutorFn = null) {
+  async executeTool(cacheKey, args, runId, idempotencyKey = null, mcpExecutorFn = null) {
     const definition = this.registry.getTool(cacheKey);
     if (!definition) {
       throw new ProviderError(`Tool not found in registry: ${cacheKey}`, 404, 'NOT_FOUND');
     }
 
-    const call = new ToolCall(definition, args, idempotencyKey);
+    const call = new ToolCall(definition, args, runId, idempotencyKey);
     if (call.state === ToolCallState.FAILED) {
       throw call.error;
     }
 
     try {
       call.transition(ToolCallState.VALIDATING);
-      // Here we could add schema validation (AJV etc)
+      
+      // Basic Schema Validation Placeholder
+      if (definition.schema) {
+        // In a real implementation, use Ajv or Zod here
+        // For now, we assume validation passes or fails with error
+      }
+
+      // Policy Evaluation Integration (simplified for now)
+      // const decision = PolicyEngine.evaluateAction({ type: 'tool_call', payload: { name: definition.toolName } });
+      // call.transition(ToolCallState.VALIDATING, { policyDecision: decision });
 
       if (definition.approvalPolicyId) {
         call.transition(ToolCallState.PENDING_APPROVAL);
-        // Simulation of approval check
+        // Wait for external approval signal...
+        // For MVP, we throw or wait
+        throw new ProviderError('Tool call requires approval', 403, 'APPROVAL_REQUIRED', { toolCallId: call.id });
       }
 
       call.transition(ToolCallState.EXECUTING);
       call.attempts += 1;
 
-      // Ensure executor function is provided
       if (!mcpExecutorFn) {
         throw new Error('mcpExecutorFn is required to execute the tool.');
       }
 
-      // Execute with timeout
       const executePromise = mcpExecutorFn(definition, args);
       
       const timeoutPromise = new Promise((_, reject) => {
@@ -95,19 +143,11 @@ class ToolGateway {
 
       const result = await Promise.race([executePromise, timeoutPromise]);
 
-      call.result = result;
-      call.transition(ToolCallState.COMPLETED);
+      call.transition(ToolCallState.COMPLETED, { result });
       return call;
 
     } catch (err) {
-      call.error = err;
-      // Basic retry logic simulation
-      if (definition.retryPolicyId && call.attempts < 3) {
-        call.transition(ToolCallState.RETRYING);
-        // Retry logic could be implemented here or delegated
-      } else {
-        call.transition(ToolCallState.FAILED);
-      }
+      call.transition(ToolCallState.FAILED, { error: err });
       throw err;
     }
   }
