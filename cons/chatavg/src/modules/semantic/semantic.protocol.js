@@ -55,6 +55,8 @@ class SemanticProtocol {
 
     const allEvents = [...creationEvents, ...boundaryEvents];
 
+    const traceBus = require('../observability/trace.bus');
+    
     // 6. Persist events
     semanticRepository.logEvents(allEvents.map(evt => ({
       ...evt,
@@ -67,8 +69,29 @@ class SemanticProtocol {
     for (const evt of allEvents) {
       if (evt.type === 'authority.blocked') {
         console.warn(`[Semantic] BLOCKED: ${evt.violationType} — "${evt.claim.text.substring(0, 80)}..."`);
+        traceBus.emitTrace('SemanticProtocol', 'semantic.authority_blocked', { 
+          claim: evt.claim.text.substring(0, 50),
+          violationType: evt.violationType,
+          sessionId,
+          runId: options.runId
+        });
       } else if (evt.type === 'claim.downgraded') {
         console.log(`[Semantic] Downgrade: ${evt.fromStrength} → ${evt.toStrength} (${evt.reason})`);
+        traceBus.emitTrace('SemanticProtocol', 'semantic.claim_downgraded', { 
+          claim: evt.claim.text.substring(0, 50),
+          fromStrength: evt.fromStrength,
+          toStrength: evt.toStrength,
+          reason: evt.reason,
+          sessionId,
+          runId: options.runId
+        });
+      } else if (evt.type === 'claim.created') {
+        traceBus.emitTrace('SemanticProtocol', 'semantic.claim_created', { 
+          claimType: evt.claim.claimType,
+          strength: evt.claim.strength,
+          sessionId,
+          runId: options.runId
+        });
       }
     }
 

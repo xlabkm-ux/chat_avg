@@ -125,6 +125,13 @@ class ModelGateway {
       } catch (err) {
         activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
         
+        traceBus.emitTrace('ModelGateway', 'model.failed', { 
+          providerId: currentProviderId, 
+          model: settings.model_name,
+          error: err.message,
+          latencyMs: Date.now() - startTimeMs
+        });
+
         if (err.message === 'Client disconnected') throw err;
         
         lastError = err;

@@ -11,7 +11,17 @@ class CostService {
    */
   static calculateModelCost(model, promptTokens, completionTokens) {
     const rates = this.PRICING[model] || this.PRICING['default'];
-    return (promptTokens * rates.prompt) + (completionTokens * rates.completion);
+    const cost = (promptTokens * rates.prompt) + (completionTokens * rates.completion);
+    
+    const traceBus = require('../observability/trace.bus');
+    traceBus.emitTrace('CostService', 'cost.recorded', { 
+      model, 
+      promptTokens, 
+      completionTokens, 
+      costUsd: cost 
+    });
+    
+    return cost;
   }
 
   /**
@@ -28,6 +38,13 @@ class CostService {
       estimate.estimatedTokens = 10000;
       estimate.maxCostUsd = 0.50; // default safe limit
     }
+    
+    const traceBus = require('../observability/trace.bus');
+    traceBus.emitTrace('CostService', 'cost.estimated', { 
+      missionMode, 
+      maxCostUsd: estimate.maxCostUsd 
+    });
+    
     return estimate;
   }
 }
