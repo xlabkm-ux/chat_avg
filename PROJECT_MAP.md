@@ -1,15 +1,15 @@
 # 🗺️ PROJECT MAP — agsys
-> Автоматически сгенерировано: `2026-05-07 21:25:41`
+> Автоматически сгенерировано: `2026-05-08 01:26:06`
 > Скрипт: `node dev_studio/refresh.js`
 
 ## 📊 Telemetry / Context Health
 | Metric | Value | Note |
 |---|---|---|
-| **Total Files** | `117` | Только JS/TS исходники |
-| **Total Lines** | `12451` | Суммарно по проекту |
-| **Project Weight** | `~102 977 tokens` | Оценка (4 символа/токен) |
-| **Context Pressure** | `80.5%` | Нагрузка на окно 128k (Full Scan) |
-| **Map Efficiency** | `~84%` | Экономия контекста через карту |
+| **Total Files** | `125` | Только JS/TS исходники |
+| **Total Lines** | `13731` | Суммарно по проекту |
+| **Project Weight** | `~113 025 tokens` | Оценка (4 символа/токен) |
+| **Context Pressure** | `88.3%` | Нагрузка на окно 128k (Full Scan) |
+| **Map Efficiency** | `~85%` | Экономия контекста через карту |
 
 ---
 
@@ -32,21 +32,23 @@ graph LR
   H11["chatavg/src/modules/execution"]
   H12["chatavg/src/modules/mission"]
   H13["chatavg/src/modules/temporal"]
-  H14["chatavg/src/modules/knowledge"]
-  H15["chatavg/src/modules/providers/adapters"]
-  H16["chatavg/tests/mocks"]
-  H17["chatavg/src/modules/sandbox/adapters"]
-  H18["chatavg/src/modules/tools"]
-  H19["chatavg/tests"]
-  H20["chatavg/tests/chaos"]
-  H21["chatavg/tests/evals"]
-  H22["chatavg/tests/execution"]
-  H23["chatavg/tests/knowledge"]
-  H24["chatavg/tests/load"]
-  H25["chatavg/tests/policy"]
-  H26["chatavg/tests/sandbox"]
-  H27["chatavg/tests/semantic"]
-  H28["chatavg/tests/tools"]
+  H14["chatavg/src/modules/knowledge/adapters"]
+  H15["chatavg/src/modules/knowledge"]
+  H16["chatavg/src/modules/providers/adapters"]
+  H17["chatavg/tests/mocks"]
+  H18["chatavg/src/modules/sandbox/adapters"]
+  H19["chatavg/src/modules/tools"]
+  H20["chatavg/tests"]
+  H21["chatavg/tests/chaos"]
+  H22["chatavg/tests/evals"]
+  H23["chatavg/tests/execution"]
+  H24["chatavg/tests/knowledge"]
+  H25["chatavg/tests/load"]
+  H26["chatavg/tests/policy"]
+  H27["chatavg/tests/remediation"]
+  H28["chatavg/tests/sandbox"]
+  H29["chatavg/tests/semantic"]
+  H30["chatavg/tests/tools"]
   H0 --> H1
   H0 --> H2
   H0 --> H3
@@ -70,58 +72,70 @@ graph LR
   H11 --> H9
   H11 --> H12
   H11 --> H13
-  H14 --> H1
+  H14 --> H15
+  H15 --> H1
+  H15 --> H14
   H12 --> H1
   H9 --> H1
   H9 --> H7
-  H15 --> H6
+  H16 --> H6
   H6 --> H1
-  H6 --> H15
   H6 --> H16
+  H6 --> H17
   H6 --> H2
   H6 --> H9
   H6 --> H4
-  H17 --> H3
-  H3 --> H17
+  H18 --> H3
+  H3 --> H18
   H3 --> H2
   H3 --> H1
   H3 --> H7
   H3 --> H9
+  H10 --> H1
   H13 --> H11
+  H13 --> H12
+  H13 --> H9
   H13 --> H1
-  H18 --> H6
-  H19 --> H0
-  H19 --> H1
-  H19 --> H13
-  H19 --> H11
-  H20 --> H5
-  H19 --> H16
   H19 --> H6
-  H19 --> H9
-  H19 --> H10
+  H20 --> H0
+  H20 --> H1
+  H20 --> H13
+  H20 --> H11
   H21 --> H5
-  H21 --> H14
-  H21 --> H4
-  H21 --> H6
-  H22 --> H11
+  H20 --> H17
+  H20 --> H6
+  H20 --> H9
+  H20 --> H10
   H22 --> H5
+  H22 --> H15
   H22 --> H4
-  H23 --> H14
+  H22 --> H6
+  H23 --> H11
   H23 --> H5
   H23 --> H4
+  H24 --> H15
+  H24 --> H1
   H24 --> H5
-  H24 --> H8
-  H16 --> H6
-  H25 --> H9
-  H25 --> H1
-  H25 --> H11
-  H26 --> H3
-  H19 --> H3
-  H19 --> H18
-  H19 --> H12
-  H27 --> H10
-  H28 --> H18
-  H28 --> H6
+  H24 --> H4
+  H25 --> H5
+  H25 --> H8
+  H17 --> H6
+  H26 --> H9
+  H26 --> H1
+  H26 --> H11
+  H27 --> H13
+  H27 --> H1
+  H27 --> H11
+  H27 --> H12
+  H27 --> H20
+  H28 --> H3
+  H20 --> H3
+  H20 --> H19
+  H20 --> H12
+  H29 --> H10
+  H29 --> H1
+  H30 --> H19
+  H30 --> H6
 ```
 
 ## Детальная карта компонентов
@@ -175,151 +189,161 @@ graph LR
       N37["run.repository.js"]
       N38["run.service.js"]
     end
-    subgraph N39["src/modules/knowledge"]
-      N40["knowledge.cache.js"]
-      N41["knowledge.gateway.js"]
-      N42["knowledge.router.js"]
-      N43["knowledge.types.js"]
+    subgraph N39["src/modules/knowledge/adapters"]
+      N40["sqlite_fts.adapter.js"]
     end
-    subgraph N44["src/modules/mission"]
-      N45["mission.repository.js"]
-      N46["mission.routes.js"]
+    subgraph N41["src/modules/knowledge"]
+      N42["ingestion.service.js"]
+      N43["knowledge.cache.js"]
+      N44["knowledge.gateway.js"]
+      N45["knowledge.repository.js"]
+      N46["knowledge.router.js"]
+      N47["knowledge.types.js"]
     end
-    subgraph N47["src/modules/observability"]
-      N48["trace.bus.js"]
+    subgraph N48["src/modules/mission"]
+      N49["mission.repository.js"]
+      N50["mission.routes.js"]
     end
-    subgraph N49["src/modules/policy"]
-      N50["approval.service.js"]
-      N51["policy.engine.js"]
-      N52["policy.guard.js"]
-      N53["redaction.service.js"]
+    subgraph N51["src/modules/observability"]
+      N52["trace.bus.js"]
     end
-    subgraph N54["src/modules/providers/adapters"]
-      N55["deepseek.js"]
-      N56["google.js"]
-      N57["grok.js"]
-      N58["grok_responses.js"]
-      N59["llamacpp.js"]
-      N60["mcp.js"]
-      N61["openai.js"]
-      N62["openai_compat.js"]
-      N63["openai_responses.js"]
-      N64["openai_responses_compat.js"]
-      N65["qwen.js"]
+    subgraph N53["src/modules/policy"]
+      N54["approval.service.js"]
+      N55["policy.engine.js"]
+      N56["policy.guard.js"]
+      N57["redaction.service.js"]
     end
-    subgraph N66["src/modules/providers"]
-      N67["base.provider.js"]
-      N68["provider.factory.js"]
-      N69["providerErrors.js"]
-      N70["providerEvents.js"]
-      N71["providers.routes.js"]
+    subgraph N58["src/modules/providers/adapters"]
+      N59["deepseek.js"]
+      N60["google.js"]
+      N61["grok.js"]
+      N62["grok_responses.js"]
+      N63["llamacpp.js"]
+      N64["mcp.js"]
+      N65["openai.js"]
+      N66["openai_compat.js"]
+      N67["openai_responses.js"]
+      N68["openai_responses_compat.js"]
+      N69["qwen.js"]
     end
-    subgraph N72["src/modules/sandbox/adapters"]
-      N73["e2b.adapter.js"]
-      N74["local.adapter.js"]
+    subgraph N70["src/modules/providers"]
+      N71["base.provider.js"]
+      N72["provider.factory.js"]
+      N73["providerErrors.js"]
+      N74["providerEvents.js"]
+      N75["providers.routes.js"]
     end
-    subgraph N75["src/modules/sandbox"]
-      N76["egress.policy.js"]
-      N77["sandbox.manager.js"]
-      N78["sandbox.routes.js"]
-      N79["sandbox.types.js"]
-      N80["sandbox.utils.js"]
+    subgraph N76["src/modules/sandbox/adapters"]
+      N77["e2b.adapter.js"]
+      N78["local.adapter.js"]
     end
-    subgraph N81["src/modules/semantic"]
-      N82["claim.extractor.js"]
-      N83["claim.ledger.js"]
-      N84["domain.boundary.js"]
-      N85["semantic.events.js"]
-      N86["semantic.protocol.js"]
+    subgraph N79["src/modules/sandbox"]
+      N80["egress.policy.js"]
+      N81["sandbox.manager.js"]
+      N82["sandbox.routes.js"]
+      N83["sandbox.types.js"]
+      N84["sandbox.utils.js"]
     end
-    subgraph N87["src/modules/temporal"]
-      N88["activities.js"]
-      N89["client.js"]
-      N90["worker.js"]
-      N91["workflows.js"]
+    subgraph N85["src/modules/semantic"]
+      N86["claim.extractor.js"]
+      N87["claim.ledger.js"]
+      N88["domain.boundary.js"]
+      N89["semantic.events.js"]
+      N90["semantic.protocol.js"]
+      N91["semantic.repository.js"]
     end
-    subgraph N92["src/modules/tools"]
-      N93["tool.gateway.js"]
-      N94["tool.registry.js"]
+    subgraph N92["src/modules/temporal"]
+      N93["activities.js"]
+      N94["client.js"]
+      N95["durable.interface.js"]
+      N96["worker.js"]
+      N97["workflows.js"]
     end
-    subgraph N95["src/providers"]
-      N96["base.ts"]
-      N97["openai-responses.provider.ts"]
+    subgraph N98["src/modules/tools"]
+      N99["tool.gateway.js"]
+      N100["tool.registry.js"]
     end
-    subgraph N98["src/types"]
-      N99["chat.ts"]
+    subgraph N101["src/providers"]
+      N102["base.ts"]
+      N103["openai-responses.provider.ts"]
     end
-    subgraph N100["tests"]
-      N101["agent_run.test.js"]
-      N102["agent_run_durability.test.js"]
-      N103["agent_run_routes.test.js"]
-      N104["api.test.js"]
-      N105["baseline_security.test.js"]
-      N106["contract_canonical_event.test.js"]
-      N107["deterministic_provider.test.js"]
-      N108["e2e_mvp_gate.test.js"]
-      N109["errors.test.js"]
-      N110["fast_path_guardrail.test.js"]
-      N111["health.test.js"]
-      N112["latency_baseline.test.js"]
-      N113["provider_events.test.js"]
-      N114["security.test.js"]
-      N115["security_assertions.test.js"]
-      N116["security_red_team.test.js"]
-      N117["setup_fixtures.js"]
-      N118["signal.js"]
+    subgraph N104["src/types"]
+      N105["chat.ts"]
     end
-    subgraph N119["tests/chaos"]
-      N120["chaos.test.js"]
+    subgraph N106["tests"]
+      N107["agent_run.test.js"]
+      N108["agent_run_durability.test.js"]
+      N109["agent_run_routes.test.js"]
+      N110["api.test.js"]
+      N111["baseline_security.test.js"]
+      N112["contract_canonical_event.test.js"]
+      N113["deterministic_provider.test.js"]
+      N114["e2e_mvp_gate.test.js"]
+      N115["errors.test.js"]
+      N116["fast_path_guardrail.test.js"]
+      N117["health.test.js"]
+      N118["latency_baseline.test.js"]
+      N119["provider_events.test.js"]
+      N120["security.test.js"]
+      N121["security_assertions.test.js"]
+      N122["security_red_team.test.js"]
+      N123["setup_fixtures.js"]
+      N124["signal.js"]
     end
-    subgraph N121["tests/evals"]
-      N122["rag.eval.js"]
+    subgraph N125["tests/chaos"]
+      N126["chaos.test.js"]
     end
-    subgraph N123["tests/execution"]
-      N124["mission_artifacts.test.js"]
+    subgraph N127["tests/evals"]
+      N128["rag.eval.js"]
     end
-    subgraph N125["tests/knowledge"]
-      N126["knowledge_gateway.test.js"]
-      N127["performance.test.js"]
-      N128["rag_integration.test.js"]
+    subgraph N129["tests/execution"]
+      N130["mission_artifacts.test.js"]
     end
-    subgraph N129["tests/load"]
-      N130["load_harness.test.js"]
+    subgraph N131["tests/knowledge"]
+      N132["knowledge_gateway.test.js"]
+      N133["knowledge_mvp.test.js"]
+      N134["performance.test.js"]
+      N135["rag_integration.test.js"]
     end
-    subgraph N131["tests/mocks"]
-      N132["deterministic_provider.js"]
+    subgraph N136["tests/load"]
+      N137["load_harness.test.js"]
     end
-    subgraph N133["tests/policy"]
-      N134["approval.service.test.js"]
-      N135["cost.service.test.js"]
-      N136["policy.engine.test.js"]
-      N137["redaction.service.test.js"]
+    subgraph N138["tests/mocks"]
+      N139["deterministic_provider.js"]
     end
-    subgraph N138["tests/remediation"]
-      N139["production_safety.test.js"]
+    subgraph N140["tests/policy"]
+      N141["approval.service.test.js"]
+      N142["cost.service.test.js"]
+      N143["policy.engine.test.js"]
+      N144["redaction.service.test.js"]
     end
-    subgraph N140["tests/sandbox"]
-      N141["sandbox_manager.test.js"]
+    subgraph N145["tests/remediation"]
+      N146["production_safety.test.js"]
+      N147["temporal_v2_3.test.js"]
     end
-    subgraph N142["tests/semantic"]
-      N143["claim_extraction.test.js"]
-      N144["domain_boundary.test.js"]
-      N145["expand_golden_set.js"]
-      N146["semantic.eval.js"]
+    subgraph N148["tests/sandbox"]
+      N149["sandbox_manager.test.js"]
     end
-    subgraph N147["tests/tools"]
-      N148["tool_gateway.test.js"]
+    subgraph N150["tests/semantic"]
+      N151["claim_extraction.test.js"]
+      N152["domain_boundary.test.js"]
+      N153["expand_golden_set.js"]
+      N154["semantic.eval.js"]
+      N155["semantic_v2.test.js"]
+    end
+    subgraph N156["tests/tools"]
+      N157["tool_gateway.test.js"]
     end
   end
-  subgraph N149["mcp_gateway"]
-    N150["server.js"]
+  subgraph N158["mcp_gateway"]
+    N159["server.js"]
   end
   N2 --> N12
   N3 --> N7
   N3 --> N9
   N3 --> N12
   N3 --> N20
-  N3 --> N78
+  N3 --> N82
   N8 --> N7
   N10 --> N12
   N10 --> N7
@@ -331,17 +355,17 @@ graph LR
   N15 --> N22
   N15 --> N16
   N15 --> N29
-  N15 --> N68
+  N15 --> N72
   N15 --> N18
   N15 --> N8
   N15 --> N7
   N15 --> N11
   N15 --> N12
-  N15 --> N48
+  N15 --> N52
   N16 --> N12
   N16 --> N8
   N18 --> N12
-  N18 --> N53
+  N18 --> N57
   N20 --> N7
   N20 --> N22
   N20 --> N9
@@ -359,15 +383,15 @@ graph LR
   N26 --> N16
   N26 --> N28
   N26 --> N27
-  N26 --> N68
+  N26 --> N72
   N26 --> N11
   N26 --> N7
   N26 --> N13
-  N26 --> N86
-  N26 --> N48
-  N26 --> N70
-  N27 --> N69
-  N28 --> N68
+  N26 --> N90
+  N26 --> N52
+  N26 --> N74
+  N27 --> N73
+  N28 --> N72
   N29 --> N12
   N30 --> N20
   N30 --> N9
@@ -375,163 +399,191 @@ graph LR
   N32 --> N36
   N34 --> N38
   N34 --> N7
-  N34 --> N52
+  N34 --> N56
   N34 --> N37
   N37 --> N12
   N38 --> N37
-  N38 --> N45
-  N38 --> N89
+  N38 --> N49
+  N38 --> N94
   N38 --> N7
-  N41 --> N42
-  N41 --> N43
-  N41 --> N40
-  N41 --> N7
+  N40 --> N45
+  N42 --> N45
+  N44 --> N46
+  N44 --> N47
+  N44 --> N43
+  N44 --> N7
+  N44 --> N40
   N45 --> N12
-  N46 --> N45
-  N50 --> N12
-  N51 --> N53
-  N52 --> N51
-  N52 --> N18
-  N55 --> N62
-  N56 --> N67
-  N56 --> N70
-  N56 --> N69
-  N57 --> N62
-  N58 --> N64
-  N59 --> N67
-  N59 --> N70
-  N59 --> N69
-  N60 --> N67
-  N60 --> N70
-  N60 --> N69
-  N61 --> N62
-  N62 --> N67
-  N62 --> N70
-  N62 --> N69
-  N63 --> N64
-  N64 --> N67
-  N64 --> N70
-  N64 --> N69
-  N65 --> N62
-  N68 --> N11
-  N68 --> N59
-  N68 --> N61
-  N68 --> N63
-  N68 --> N55
-  N68 --> N56
-  N68 --> N65
-  N68 --> N57
-  N68 --> N58
-  N68 --> N60
-  N68 --> N132
-  N71 --> N20
-  N71 --> N68
-  N71 --> N52
-  N71 --> N16
-  N71 --> N11
-  N73 --> N79
-  N74 --> N79
-  N77 --> N76
-  N77 --> N73
-  N77 --> N74
-  N77 --> N80
-  N78 --> N20
-  N78 --> N9
-  N78 --> N7
-  N78 --> N77
-  N78 --> N18
-  N78 --> N52
-  N84 --> N82
-  N84 --> N85
-  N86 --> N82
-  N86 --> N84
-  N86 --> N83
-  N86 --> N85
-  N88 --> N37
-  N89 --> N7
-  N90 --> N7
+  N49 --> N12
+  N50 --> N49
+  N54 --> N12
+  N55 --> N57
+  N56 --> N55
+  N56 --> N18
+  N59 --> N66
+  N60 --> N71
+  N60 --> N74
+  N60 --> N73
+  N61 --> N66
+  N62 --> N68
+  N63 --> N71
+  N63 --> N74
+  N63 --> N73
+  N64 --> N71
+  N64 --> N74
+  N64 --> N73
+  N65 --> N66
+  N66 --> N71
+  N66 --> N74
+  N66 --> N73
+  N67 --> N68
+  N68 --> N71
+  N68 --> N74
+  N68 --> N73
+  N69 --> N66
+  N72 --> N11
+  N72 --> N63
+  N72 --> N65
+  N72 --> N67
+  N72 --> N59
+  N72 --> N60
+  N72 --> N69
+  N72 --> N61
+  N72 --> N62
+  N72 --> N64
+  N72 --> N139
+  N75 --> N20
+  N75 --> N72
+  N75 --> N56
+  N75 --> N16
+  N75 --> N11
+  N77 --> N83
+  N78 --> N83
+  N81 --> N80
+  N81 --> N77
+  N81 --> N78
+  N81 --> N84
+  N82 --> N20
+  N82 --> N9
+  N82 --> N7
+  N82 --> N81
+  N82 --> N18
+  N82 --> N56
+  N87 --> N91
+  N87 --> N12
+  N88 --> N86
+  N88 --> N89
+  N90 --> N86
   N90 --> N88
-  N93 --> N69
-  N93 --> N94
-  N101 --> N3
-  N101 --> N12
-  N101 --> N89
-  N102 --> N3
-  N102 --> N12
-  N102 --> N37
-  N102 --> N38
-  N103 --> N3
-  N103 --> N12
-  N104 --> N3
-  N104 --> N12
-  N105 --> N3
-  N105 --> N12
-  N120 --> N26
-  N120 --> N27
-  N106 --> N132
-  N106 --> N70
-  N107 --> N132
+  N90 --> N87
+  N90 --> N89
+  N90 --> N91
+  N91 --> N12
+  N93 --> N37
+  N93 --> N49
+  N93 --> N54
+  N94 --> N7
+  N94 --> N95
+  N96 --> N7
+  N96 --> N93
+  N99 --> N73
+  N99 --> N100
+  N107 --> N3
+  N107 --> N12
+  N107 --> N94
   N108 --> N3
   N108 --> N12
-  N108 --> N50
-  N108 --> N82
-  N108 --> N84
-  N109 --> N9
-  N122 --> N26
-  N122 --> N41
-  N122 --> N16
-  N122 --> N68
-  N124 --> N36
-  N124 --> N32
-  N124 --> N35
-  N124 --> N26
-  N124 --> N16
+  N108 --> N37
+  N108 --> N38
+  N109 --> N3
+  N109 --> N12
+  N110 --> N3
+  N110 --> N12
   N111 --> N3
   N111 --> N12
-  N126 --> N41
-  N126 --> N42
-  N126 --> N43
-  N127 --> N41
-  N127 --> N40
-  N128 --> N26
-  N128 --> N41
-  N128 --> N16
-  N112 --> N132
-  N130 --> N26
-  N130 --> N27
-  N130 --> N48
-  N132 --> N67
-  N132 --> N70
-  N134 --> N50
-  N134 --> N12
-  N135 --> N33
-  N136 --> N51
-  N137 --> N53
-  N113 --> N70
-  N141 --> N77
-  N141 --> N79
-  N141 --> N76
-  N141 --> N80
-  N114 --> N13
+  N126 --> N26
+  N126 --> N27
+  N112 --> N139
+  N112 --> N74
+  N113 --> N139
   N114 --> N3
   N114 --> N12
-  N115 --> N13
-  N116 --> N76
-  N116 --> N93
-  N116 --> N94
-  N116 --> N45
-  N116 --> N12
-  N143 --> N82
-  N144 --> N84
-  N144 --> N82
-  N144 --> N86
-  N146 --> N86
-  N146 --> N82
+  N114 --> N54
+  N114 --> N86
+  N114 --> N88
+  N115 --> N9
+  N128 --> N26
+  N128 --> N44
+  N128 --> N16
+  N128 --> N72
+  N130 --> N36
+  N130 --> N32
+  N130 --> N35
+  N130 --> N26
+  N130 --> N16
+  N117 --> N3
   N117 --> N12
-  N118 --> N89
-  N148 --> N94
-  N148 --> N93
-  N148 --> N69
+  N132 --> N44
+  N132 --> N46
+  N132 --> N47
+  N133 --> N44
+  N133 --> N42
+  N133 --> N45
+  N133 --> N12
+  N134 --> N44
+  N134 --> N43
+  N135 --> N26
+  N135 --> N44
+  N135 --> N16
+  N118 --> N139
+  N137 --> N26
+  N137 --> N27
+  N137 --> N52
+  N139 --> N71
+  N139 --> N74
+  N141 --> N54
+  N141 --> N12
+  N142 --> N33
+  N143 --> N55
+  N144 --> N57
+  N119 --> N74
+  N147 --> N94
+  N147 --> N93
+  N147 --> N12
+  N147 --> N37
+  N147 --> N49
+  N147 --> N123
+  N149 --> N81
+  N149 --> N83
+  N149 --> N80
+  N149 --> N84
+  N120 --> N13
+  N120 --> N3
+  N120 --> N12
+  N121 --> N13
+  N122 --> N80
+  N122 --> N99
+  N122 --> N100
+  N122 --> N49
+  N122 --> N12
+  N151 --> N86
+  N152 --> N88
+  N152 --> N86
+  N152 --> N90
+  N152 --> N12
+  N154 --> N90
+  N154 --> N86
+  N154 --> N12
+  N154 --> N88
+  N155 --> N90
+  N155 --> N91
+  N155 --> N12
+  N155 --> N88
+  N123 --> N12
+  N124 --> N94
+  N157 --> N100
+  N157 --> N99
+  N157 --> N73
 ```
 
 ## Компонент: `chatavg`
@@ -547,7 +599,7 @@ graph LR
 | `src/core/errors.js` | 87 | 2.2 KB | Centralized Error Handling |
 | `src/core/migrate.js` | 108 | 4.1 KB | Chat AVG — JSON to SQLite Migration Utility |
 | `src/core/providers.config.js` | 129 | 4.7 KB | — |
-| `src/core/sqlite.js` | 293 | 8.5 KB | — |
+| `src/core/sqlite.js` | 414 | 12.8 KB | — |
 | `src/core/utils.js` | 91 | 2.5 KB | Helper Utilities |
 | `src/modules/admin/admin.routes.js` | 386 | 14.2 KB | — |
 | `src/modules/admin/category.repository.js` | 74 | 3.0 KB | Класс: CategoryRepository |
@@ -569,8 +621,11 @@ graph LR
 | `src/modules/execution/role_pass.js` | 82 | 1.7 KB | RolePass — capability-based authorization system. |
 | `src/modules/execution/run.repository.js` | 146 | 4.3 KB | Класс: AgentRunRepository |
 | `src/modules/execution/run.service.js` | 140 | 4.1 KB | Класс: AgentRunService |
+| `src/modules/knowledge/adapters/sqlite_fts.adapter.js` | 28 | 0.7 KB | Search for relevant chunks. |
+| `src/modules/knowledge/ingestion.service.js` | 117 | 3.1 KB | Ingests a file or directory. |
 | `src/modules/knowledge/knowledge.cache.js` | 68 | 1.3 KB | KnowledgeCache — simple in-memory cache for RetrievalResults. |
-| `src/modules/knowledge/knowledge.gateway.js` | 161 | 4.9 KB | Main retrieval entry point. |
+| `src/modules/knowledge/knowledge.gateway.js` | 163 | 5.0 KB | Main retrieval entry point. |
+| `src/modules/knowledge/knowledge.repository.js` | 112 | 2.9 KB | Sources |
 | `src/modules/knowledge/knowledge.router.js` | 74 | 2.1 KB | KnowledgeRouter |
 | `src/modules/knowledge/knowledge.types.js` | 55 | 1.6 KB | Canonical types for the Knowledge Module. |
 | `src/modules/mission/mission.repository.js` | 92 | 2.9 KB | Класс: MissionRepository |
@@ -603,15 +658,17 @@ graph LR
 | `src/modules/sandbox/sandbox.routes.js` | 156 | 4.8 KB | Routes: Sandbox / Forge API |
 | `src/modules/sandbox/sandbox.types.js` | 126 | 3.3 KB | Canonical types for the Sandbox / Forge module. |
 | `src/modules/sandbox/sandbox.utils.js` | 66 | 2.0 KB | Scans artifacts for suspicious content and applies size limits. |
-| `src/modules/semantic/claim.extractor.js` | 155 | 5.3 KB | ClaimExtractor — pipeline извлечения утверждений из текста. |
-| `src/modules/semantic/claim.ledger.js` | 118 | 2.6 KB | ClaimLedger — реестр всех извлечённых claims per session. |
-| `src/modules/semantic/domain.boundary.js` | 209 | 9.5 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
+| `src/modules/semantic/claim.extractor.js` | 200 | 6.9 KB | ClaimExtractor — pipeline извлечения утверждений из текста. |
+| `src/modules/semantic/claim.ledger.js` | 95 | 2.6 KB | ClaimLedger — реестр всех извлечённых claims per session. |
+| `src/modules/semantic/domain.boundary.js` | 250 | 10.4 KB | DomainBoundary — детектор границ области определения и strength downgrade engine. |
 | `src/modules/semantic/semantic.events.js` | 53 | 2.1 KB | Semantic Events — канонические типы событий семантического слоя. |
-| `src/modules/semantic/semantic.protocol.js` | 116 | 3.6 KB | SemanticProtocol v0 — оркестратор смыслового слоя. |
-| `src/modules/temporal/activities.js` | 24 | 0.7 KB | — |
-| `src/modules/temporal/client.js` | 41 | 1.0 KB | — |
+| `src/modules/semantic/semantic.protocol.js` | 121 | 3.7 KB | Основной pipeline: извлечь claims → проверить boundaries → сохранить в ledger. |
+| `src/modules/semantic/semantic.repository.js` | 172 | 5.0 KB | SemanticRepository — персистенция для ClaimLedger и SemanticProtocol. |
+| `src/modules/temporal/activities.js` | 131 | 3.6 KB | — |
+| `src/modules/temporal/client.js` | 89 | 2.4 KB | Класс: TemporalAdapter |
+| `src/modules/temporal/durable.interface.js` | 52 | 1.4 KB | DurableRuntime Interface Specification (v2.3) |
 | `src/modules/temporal/worker.js` | 23 | 0.6 KB | — |
-| `src/modules/temporal/workflows.js` | 43 | 1.3 KB | — |
+| `src/modules/temporal/workflows.js` | 201 | 5.5 KB | — |
 | `src/modules/tools/tool.gateway.js` | 121 | 3.6 KB | ToolCall states for the state machine. |
 | `src/modules/tools/tool.registry.js` | 106 | 2.4 KB | Risk classes for Tool executions. |
 | `src/providers/base.ts` | 95 | 2.3 KB | — |
@@ -632,6 +689,7 @@ graph LR
 | `tests/fast_path_guardrail.test.js` | 131 | 4.7 KB | Fast Path Guardrail Tests |
 | `tests/health.test.js` | 50 | 1.4 KB | — |
 | `tests/knowledge/knowledge_gateway.test.js` | 72 | 2.7 KB | — |
+| `tests/knowledge/knowledge_mvp.test.js` | 82 | 2.9 KB | — |
 | `tests/knowledge/performance.test.js` | 53 | 2.1 KB | — |
 | `tests/knowledge/rag_integration.test.js` | 70 | 2.3 KB | — |
 | `tests/latency_baseline.test.js` | 138 | 5.0 KB | Latency Measurement Utility |
@@ -643,15 +701,17 @@ graph LR
 | `tests/policy/redaction.service.test.js` | 29 | 1.0 KB | — |
 | `tests/provider_events.test.js` | 60 | 2.0 KB | — |
 | `tests/remediation/production_safety.test.js` | 99 | 3.9 KB | These tests verify the "Production Safety Hardening" requirements. |
+| `tests/remediation/temporal_v2_3.test.js` | 118 | 4.1 KB | — |
 | `tests/sandbox/sandbox_manager.test.js` | 384 | 13.5 KB | SandboxManager Integration Tests |
 | `tests/security.test.js` | 43 | 1.7 KB | — |
 | `tests/security_assertions.test.js` | 187 | 6.0 KB | CORS, SSRF, JSON Limit, and Prompt Sanitization assertion tests. |
 | `tests/security_red_team.test.js` | 105 | 4.1 KB | Red-Team Security Suite for Sprint 17 Release Candidate. |
-| `tests/semantic/claim_extraction.test.js` | 113 | 5.2 KB | Tests: ClaimExtractor — извлечение утверждений из текста. |
-| `tests/semantic/domain_boundary.test.js` | 174 | 8.2 KB | Tests: DomainBoundary — проверка границ и strength downgrade. |
+| `tests/semantic/claim_extraction.test.js` | 113 | 5.3 KB | Tests: ClaimExtractor — извлечение утверждений из текста. |
+| `tests/semantic/domain_boundary.test.js` | 159 | 7.1 KB | Tests: DomainBoundary — проверка границ и strength downgrade. |
 | `tests/semantic/expand_golden_set.js` | 355 | 12.1 KB | — |
-| `tests/semantic/semantic.eval.js` | 163 | 6.2 KB | Semantic Eval Runner — запуск golden set тестов. |
-| `tests/setup_fixtures.js` | 101 | 3.2 KB | — |
+| `tests/semantic/semantic.eval.js` | 173 | 6.1 KB | Semantic Eval Runner v0.2 — запуск golden set тестов. |
+| `tests/semantic/semantic_v2.test.js` | 97 | 4.9 KB | — |
+| `tests/setup_fixtures.js` | 104 | 3.3 KB | — |
 | `tests/signal.js` | 18 | 0.5 KB | — |
 | `tests/tools/tool_gateway.test.js` | 101 | 3.5 KB | — |
 
@@ -899,6 +959,18 @@ graph LR
   - `../temporal/client` → temporalClient
   - `../../core/config` → TEMPORAL_RUNTIME_ENABLED
 
+### `src/modules/knowledge/adapters/sqlite_fts.adapter.js`
+- **Класс**: `SQLiteFTSRetriever`
+- **Экспорт**: `SQLiteFTSRetriever`
+- **Зависимости**:
+  - `../knowledge.repository` → knowledgeRepository
+
+### `src/modules/knowledge/ingestion.service.js`
+- **Класс**: `IngestionService`
+- **Экспорт**: `new IngestionService()`
+- **Зависимости**:
+  - `./knowledge.repository` → knowledgeRepository
+
 ### `src/modules/knowledge/knowledge.cache.js`
 - **Класс**: `KnowledgeCache`
 - **Экспорт**: `new KnowledgeCache()`
@@ -911,6 +983,13 @@ graph LR
   - `./knowledge.types` → RetrievalResult
   - `./knowledge.cache` → knowledgeCache
   - `../../core/config` → KNOWLEDGE_GATEWAY_ENABLED
+  - `./adapters/sqlite_fts.adapter` → SQLiteFTSRetriever
+
+### `src/modules/knowledge/knowledge.repository.js`
+- **Класс**: `KnowledgeRepository`
+- **Экспорт**: `new KnowledgeRepository()`
+- **Зависимости**:
+  - `../../core/sqlite` → db
 
 ### `src/modules/knowledge/knowledge.router.js`
 - **Класс**: `KnowledgeRouter`
@@ -1138,10 +1217,15 @@ graph LR
 ### `src/modules/semantic/claim.ledger.js`
 - **Класс**: `ClaimLedger`
 - **Экспорт**: `{ ClaimLedger }`, `ClaimLedger`
+- **Зависимости**:
+  - `./semantic.repository` → semanticRepository
+  - `../../core/sqlite` → rows
+  - `../../core/sqlite` → rows
+  - `../../core/sqlite` → (side-effect)
 
 ### `src/modules/semantic/domain.boundary.js`
 - **Класс**: `DomainBoundary`
-- **Экспорт**: `{ DomainBoundary, DEFAULT_BOUNDARIES }`, `DomainBoundary`, `DEFAULT_BOUNDARIES`
+- **Экспорт**: `{ DomainBoundary, DEFAULT_BOUNDARIES, REALITY_LEVELS, STRENGTH_POLICY }`, `DomainBoundary`, `DEFAULT_BOUNDARIES`, `REALITY_LEVELS`, `STRENGTH_POLICY`
 - **Зависимости**:
   - `./claim.extractor` → ClaimExtractor
   - `./semantic.events` → SemanticEvents
@@ -1154,19 +1238,34 @@ graph LR
 - **Экспорт**: `{ SemanticProtocol, PROTOCOL_VERSION }`, `SemanticProtocol`, `PROTOCOL_VERSION`
 - **Зависимости**:
   - `./claim.extractor` → ClaimExtractor
-  - `./domain.boundary` → DomainBoundary
+  - `./domain.boundary` → DomainBoundary, REALITY_LEVELS, STRENGTH_POLICY
   - `./claim.ledger` → ClaimLedger
   - `./semantic.events` → SemanticEvents
+  - `./semantic.repository` → semanticRepository
+
+### `src/modules/semantic/semantic.repository.js`
+- **Класс**: `SemanticRepository`
+- **Экспорт**: `new SemanticRepository()`
+- **Зависимости**:
+  - `../../core/sqlite` → db
 
 ### `src/modules/temporal/activities.js`
 - **Экспорт**: `{`
 - **Зависимости**:
   - `../execution/run.repository` → runRepository
+  - `../mission/mission.repository` → missionRepository
+  - `../policy/approval.service` → ApprovalService
 
 ### `src/modules/temporal/client.js`
-- **Экспорт**: `{`
+- **Класс**: `TemporalAdapter` extends `DurableRuntime`
+- **Экспорт**: `new TemporalAdapter()`
 - **Зависимости**:
   - `../../core/config` → TEMPORAL_URL
+  - `./durable.interface` → DurableRuntime
+
+### `src/modules/temporal/durable.interface.js`
+- **Класс**: `DurableRuntime`
+- **Экспорт**: `DurableRuntime`
 
 ### `src/modules/temporal/workflows.js`
 - **Экспорт**: `{`
@@ -1216,6 +1315,8 @@ graph LR
   - `../../src/modules/semantic/semantic.protocol` → SemanticProtocol
   - `../../src/modules/semantic/claim.extractor` → ClaimExtractor
   - `./golden_set.json` → goldenSet
+  - `../../src/core/sqlite` → db
+  - `../../src/modules/semantic/domain.boundary` → DEFAULT_BOUNDARIES
 
 ### `tests/setup_fixtures.js`
 - **Экспорт**: `{ loadFixtures }`, `loadFixtures`
@@ -1243,13 +1344,15 @@ graph LR
 |---|---|
 | `ALLOW_CUSTOM_PROVIDER_URLS` | chatavg/utils.js |
 | `CHATAVG_ADMIN_PASSWORD` | chatavg/sqlite.js |
-| `CHATAVG_SECRET` | chatavg/agent_run.test.js, chatavg/agent_run_durability.test.js, chatavg/agent_run_routes.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `CHATAVG_SECRET` | chatavg/agent_run.test.js, chatavg/agent_run_durability.test.js, chatavg/agent_run_routes.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/knowledge_mvp.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `DEBUG_PROVIDER_PAYLOADS` | chatavg/grok.js, chatavg/openai_compat.js |
 | `E2B_API_KEY` | chatavg/e2b.adapter.js, chatavg/sandbox.manager.js, chatavg/production_safety.test.js |
 | `E2B_TEMPLATE` | chatavg/sandbox.manager.js |
-| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/sqlite.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/sandbox.manager.js, chatavg/agent_run.test.js, chatavg/agent_run_durability.test.js, chatavg/agent_run_routes.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/production_safety.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
+| `KNOWLEDGE_GATEWAY_ENABLED` | chatavg/knowledge_mvp.test.js |
+| `NODE_ENV` | chatavg/server.js, chatavg/errors.js, chatavg/sqlite.js, chatavg/grok.js, chatavg/openai_compat.js, chatavg/provider.factory.js, chatavg/sandbox.manager.js, chatavg/agent_run.test.js, chatavg/agent_run_durability.test.js, chatavg/agent_run_routes.test.js, chatavg/api.test.js, chatavg/contract_canonical_event.test.js, chatavg/deterministic_provider.test.js, chatavg/e2e_mvp_gate.test.js, chatavg/errors.test.js, chatavg/fast_path_guardrail.test.js, chatavg/health.test.js, chatavg/knowledge_mvp.test.js, chatavg/latency_baseline.test.js, chatavg/provider_events.test.js, chatavg/production_safety.test.js, chatavg/security_assertions.test.js, chatavg/setup_fixtures.js |
 | `PORT` | mcp_gateway/server.js |
 | `SEMANTIC_LAYER_ENABLED` | chatavg/mission_artifacts.test.js |
+| `SEMANTIC_LLM_EXTRACTOR_ENABLED` | chatavg/claim.extractor.js |
 
 ## API Реестр
 
@@ -1340,7 +1443,10 @@ artifact.service.js → role_pass
 execution.routes.js → run.service, config, policy.guard, run.repository
 run.repository.js → sqlite
 run.service.js → run.repository, mission.repository, client, config
-knowledge.gateway.js → knowledge.router, knowledge.types, knowledge.cache, config
+sqlite_fts.adapter.js → knowledge.repository
+ingestion.service.js → knowledge.repository
+knowledge.gateway.js → knowledge.router, knowledge.types, knowledge.cache, config, sqlite_fts.adapter
+knowledge.repository.js → sqlite
 mission.repository.js → sqlite
 mission.routes.js → mission.repository
 approval.service.js → sqlite
@@ -1363,10 +1469,12 @@ e2b.adapter.js → sandbox.types
 local.adapter.js → sandbox.types
 sandbox.manager.js → egress.policy, e2b.adapter, local.adapter, sandbox.utils
 sandbox.routes.js → auth.middleware, errors, config, sandbox.manager, audit.service, policy.guard
+claim.ledger.js → semantic.repository, sqlite, sqlite, sqlite
 domain.boundary.js → claim.extractor, semantic.events
-semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events
-activities.js → run.repository
-client.js → config
+semantic.protocol.js → claim.extractor, domain.boundary, claim.ledger, semantic.events, semantic.repository
+semantic.repository.js → sqlite
+activities.js → run.repository, mission.repository, approval.service
+client.js → config, durable.interface
 worker.js → config, activities
 tool.gateway.js → providerErrors, tool.registry
 base.ts → chat
@@ -1385,6 +1493,7 @@ rag.eval.js → chat.service, knowledge.gateway, category.repository, provider.f
 mission_artifacts.test.js → role_pass, artifact.service, mission.service, chat.service, category.repository
 health.test.js → server, sqlite
 knowledge_gateway.test.js → knowledge.gateway, knowledge.router, knowledge.types
+knowledge_mvp.test.js → knowledge.gateway, ingestion.service, knowledge.repository, sqlite
 performance.test.js → knowledge.gateway, knowledge.cache
 rag_integration.test.js → chat.service, knowledge.gateway, category.repository
 latency_baseline.test.js → deterministic_provider
@@ -1396,13 +1505,15 @@ policy.engine.test.js → policy.engine
 redaction.service.test.js → redaction.service
 provider_events.test.js → providerEvents
 production_safety.test.js → sandbox.manager, sandbox.types
+temporal_v2_3.test.js → client, activities, sqlite, run.repository, mission.repository, setup_fixtures
 sandbox_manager.test.js → sandbox.manager, sandbox.types, egress.policy, sandbox.utils
 security.test.js → utils, server, sqlite
 security_assertions.test.js → utils
 security_red_team.test.js → egress.policy, tool.gateway, tool.registry, mission.repository, sqlite
 claim_extraction.test.js → claim.extractor
-domain_boundary.test.js → domain.boundary, claim.extractor, semantic.protocol
-semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json
+domain_boundary.test.js → domain.boundary, claim.extractor, semantic.protocol, sqlite, domain.boundary
+semantic.eval.js → semantic.protocol, claim.extractor, golden_set.json, sqlite, domain.boundary
+semantic_v2.test.js → semantic.protocol, semantic.repository, sqlite, domain.boundary
 setup_fixtures.js → sqlite
 signal.js → client
 tool_gateway.test.js → tool.registry, tool.gateway, providerErrors

@@ -1,6 +1,6 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Sprint R4 — Semantic Layer v0.2**
+Текущая стадия: **Sprint R6 — Policy / Tool / Approval control plane**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
 
 ---
@@ -426,3 +426,38 @@
 - [x] ✅ DurableRuntime interface: абстракция над Temporal — 2026-05-08
 
 **Итог:** Temporal workflow теперь является полноценным Durable Runtime для AgentRun. Поддерживаются сигналы одобрения/отмены и внешние запросы состояния.
+
+---
+
+### Sprint R4: Semantic Layer v0.2 — ✅ Завершён 2026-05-08
+*Цель: Превратить SemanticProtocol из PoC в устойчивый, персистентный слой.*
+
+**Задачи:**
+- [x] ✅ Persisted Claim Ledger: таблицы для claims, boundaries, events — 2026-05-08
+- [x] ✅ Source spans: привязка к смещениям в исходном тексте (offsets) — 2026-05-08
+- [x] ✅ Hybrid extractor: архитектура с LLM fallback и rule-based (offsets) — 2026-05-08
+- [x] ✅ Domain Boundary v0.2: reality levels (7) и strength policy (v0.2) — 2026-05-08
+- [x] ✅ Semantic eval seed: 30-50 golden cases (golden_set.json) — 2026-05-08
+- [x] ✅ Опубликовать SPEC-020 (Protocol v0.2) и SPEC-021 (Ledger) — 2026-05-08
+
+**Итог:** Семантический слой теперь полностью персистентен. Все утверждения и события сохраняются в SQLite. Реализована расширенная типология уровней реальности и политика понижения силы утверждений.
+**Deliverables:** SPEC-020, SPEC-021, golden_set.json (30 cases), SemanticRepository.
+**Testing Gate:** `node --test tests/semantic/*.test.js` (24 tests) — all pass. Full eval Accuracy: ~30-40% (Rule-based baseline).
+
+---
+
+### Sprint R5: KnowledgeGateway MVP — ✅ Завершён 2026-05-08
+*Цель: Заменить mock retrieval на реальный KnowledgeGateway MVP с provenance и answerability policy.*
+
+**Задачи:**
+- [x] ✅ Real retriever adapter: SQLite FTS5 — 2026-05-08
+- [x] ✅ Ingestion pipeline: регистрация и чанкинг источников — 2026-05-08
+- [x] ✅ Citation contract: привязка ответов к чанкам через `<context_boundary>` — 2026-05-08
+- [x] ✅ Answerability policy: отказ от ответа при низком качестве контекста — 2026-05-08
+- [x] ✅ RAG eval seed: 30 кейсов (rag_dataset.json) — 2026-05-08
+- [x] ✅ Опубликовать `KNOWLEDGE_GATEWAY_DESIGN.md` — 2026-05-08
+
+**Итог:** KnowledgeGateway теперь использует реальный поиск через SQLite FTS5. Реализован пайплайн индексации документов и строгая политика цитирования.
+**Deliverables:** `KNOWLEDGE_GATEWAY_DESIGN.md`, `knowledge_mvp.test.js`, `rag_dataset.json` (30 cases).
+**Testing Gate:** `node --test tests/knowledge/knowledge_mvp.test.js` — pass.
+

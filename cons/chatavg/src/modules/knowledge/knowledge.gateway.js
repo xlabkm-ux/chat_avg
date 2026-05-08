@@ -3,6 +3,7 @@ const knowledgeRouter = require('./knowledge.router');
 const { RetrievalResult } = require('./knowledge.types');
 const knowledgeCache = require('./knowledge.cache');
 const { KNOWLEDGE_GATEWAY_ENABLED } = require('../../core/config');
+const SQLiteFTSRetriever = require('./adapters/sqlite_fts.adapter');
 
 class KnowledgeGateway {
   constructor() {
@@ -46,10 +47,11 @@ class KnowledgeGateway {
     try {
       // 2. Execute retrieval (Retriever)
       const retrieverId = settings.retriever_id || 'default';
-      const retriever = this.retrievers.get(retrieverId);
+      let retriever = this.retrievers.get(retrieverId);
       
       if (!retriever) {
-        throw new Error(`Retriever not found: ${retrieverId}`);
+        console.warn(`[KnowledgeGW] Retriever not found: ${retrieverId}. Falling back to default.`);
+        retriever = this.retrievers.get('default');
       }
 
       const retrieverStart = Date.now();
@@ -75,7 +77,7 @@ class KnowledgeGateway {
       result.metadata.validationMs = validationMs;
       result.metadata.latencyMs = Date.now() - startTime;
       
-      const finalResult = this._applyPolicy(result, settings.rag_answerability_policy);
+      const finalResult = this._applyPolicy(result, settings.rag_answerability_policy || 'balanced');
       
       // 5. Cache Result (only if not an error)
       if (!finalResult.metadata.error) {
@@ -103,17 +105,13 @@ class KnowledgeGateway {
   }
 
   /**
-   * Internal mock retriever for testing and initial development.
+   * Setup default retriever (SQLite FTS5).
    * @private
    */
   _setupDefaultRetriever() {
-    this.registerRetriever('default', {
-      search: async (query, config) => {
-        // Simple mock behavior: return a "no results" or "simulated result"
-        // In a real implementation, this would call a Vector DB.
-        console.log(`[KnowledgeGW] Mock search executed with config:`, config);
-        return [];
-      }
+    this.registerRetriever('default', new SQLiteFTSRetriever());
+    this.registerRetriever('mock', {
+      search: async () => []
     });
   }
 
@@ -122,13 +120,17 @@ class KnowledgeGateway {
    * @private
    */
   _applyPolicy(result, policy = 'balanced') {
-    const RAG_MIN_SCORE = 0.4;
+    const RAG_MIN_SCORE = 0.3; // Lowered for FTS5 MVP
     const maxScore = result.chunks.length > 0 ? Math.max(...result.chunks.map(c => c.score)) : 0;
     
     if (result.chunks.length === 0 || maxScore < RAG_MIN_SCORE) {
       result.metadata.policyAction = result.chunks.length === 0 ? 'empty_context' : 'low_quality_context';
+      
       if (policy === 'refusal') {
         result.metadata.shouldRefuse = true;
+      } else if (policy === 'fast') {
+        // Fast policy might allow answering even with low quality if mode is fast
+        result.metadata.shouldRefuse = false;
       }
     }
     return result;

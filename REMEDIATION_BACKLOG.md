@@ -30,17 +30,18 @@
 - [x] Real activities: замена моков на реальную логику.
 - [x] Replay safety & failure semantics.
 
-## Sprint R4: Semantic Layer v0.2 (P1)
-- [ ] Persisted Claim Ledger: таблицы для claims, boundaries, events.
-- [ ] Source spans: привязка к конкретным участкам текста.
-- [ ] Hybrid extractor: LLM + rule-based.
-- [ ] Semantic eval seed: 30-50 golden cases.
+## Sprint R4: Semantic Layer v0.2 (P1) — ✅ Завершён 2026-05-08
+- [x] Persisted Claim Ledger: таблицы для claims, boundaries, events.
+- [x] Source spans: привязка к конкретным участкам текста (offsets).
+- [x] Hybrid extractor: LLM (skeleton/flag) + rule-based (offsets).
+- [x] Domain Boundary v0.2: reality levels и strength policy.
+- [x] Semantic eval seed: 30-50 golden cases (golden_set.json).
 
-## Sprint R5: KnowledgeGateway MVP (P1)
-- [ ] Real retriever adapter: SQLite FTS5 или локальный индекс.
-- [ ] Ingestion pipeline: регистрация и чанкинг источников.
-- [ ] Citation contract: строгая привязка ответов к чанкам.
-- [ ] Answerability policy: отказ от ответа при пустом контексте.
+## Sprint R5: KnowledgeGateway MVP (P1) — ✅ Завершён 2026-05-08
+- [x] Real retriever adapter: SQLite FTS5.
+- [x] Ingestion pipeline: регистрация и чанкинг источников.
+- [x] Citation contract: привязка ответов к чанкам через `<context_boundary>`.
+- [x] Answerability policy: отказ от ответа при низком качестве контекста.
 
 ## Sprint R6: Policy / Tool / Approval control plane (P1)
 - [ ] Policy input/output spec: расширение `PolicyDecision`.
