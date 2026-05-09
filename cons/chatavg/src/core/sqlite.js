@@ -402,10 +402,10 @@ runMigrations();
  * Seeding (Clean Install Only)
  */
 function seed() {
-  const checkUsers = db.prepare('SELECT COUNT(*) as count FROM users').get();
-  if (checkUsers.count > 0) return;
+  const checkAdmin = db.prepare('SELECT COUNT(*) as count FROM users WHERE username = ?').get('admin');
+  if (checkAdmin.count > 0) return;
 
-  console.log('[SQLite] No users found. Seeding initial data...');
+  console.log('[SQLite] Admin user missing. Seeding initial data...');
   
   const { DEFAULT_CATEGORY_PARAMS, DEFAULT_SYSTEM_PROMPT } = require('./config');
   const crypto = require('crypto');
@@ -414,7 +414,7 @@ function seed() {
   db.transaction(() => {
     // 1. Seed Default Categories
     const insertCat = db.prepare(`
-      INSERT INTO categories (name, provider, model_name, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt)
+      INSERT OR IGNORE INTO categories (name, provider, model_name, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt)
       VALUES (@name, @provider, @model_name, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt)
     `);
 
@@ -445,7 +445,7 @@ function seed() {
     }
 
     db.prepare(`
-      INSERT INTO users (username, password_hash, category, expiration_date, n_ctx, system_prompt, must_change_password)
+      INSERT OR IGNORE INTO users (username, password_hash, category, expiration_date, n_ctx, system_prompt, must_change_password)
       VALUES (@username, @password_hash, @category, @expiration_date, @n_ctx, @system_prompt, @must_change_password)
     `).run({
       username: 'admin',

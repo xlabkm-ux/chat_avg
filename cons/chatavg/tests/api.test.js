@@ -34,13 +34,6 @@ test('API Integration Tests', async (t) => {
       done();
     }
     db.close();
-    // Optionally remove the test database file
-    const dataTestDir = path.join(__dirname, '..', 'data_test');
-    if (fs.existsSync(dataTestDir)) {
-      try {
-        fs.rmSync(dataTestDir, { recursive: true, force: true });
-      } catch (e) {}
-    }
   });
 
   await t.test('POST /api/auth/login - should fail with invalid credentials', async () => {
