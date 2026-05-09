@@ -181,7 +181,7 @@ export const SessionManager = {
 
     return rows.map(r =>
       r.map(cell => '"' + String(cell).replace(/"/g, '""').replace(/\n/g, ' ') + '"')
-        .join(',')
+        .join(';')
     ).join('\r\n');
   },
 
@@ -265,7 +265,7 @@ export const SessionManager = {
 
       const csvContent = allRows.map(r =>
         r.map(cell => '"' + String(cell).replace(/"/g, '""').replace(/\n/g, ' ') + '"')
-          .join(',')
+          .join(';')
       ).join('\r\n');
 
       const safeName = groupName.replace(/\s+/g, '_');
