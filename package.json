@@ -1,0 +1,16 @@
+{
+  "name": "chatavg-platform",
+  "version": "2.3.0",
+  "description": "ChatAVG: Semantic Agent Platform",
+  "private": true,
+  "scripts": {
+    "start": "npm run start --prefix cons/chatavg",
+    "gateway": "npm run start --prefix cons/mcp_gateway",
+    "worker": "npm run worker --prefix cons/chatavg",
+    "test": "npm run test:release --prefix cons/chatavg",
+    "setup": "npm install --prefix cons/chatavg && npm install --prefix cons/mcp_gateway"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,7 +1,7 @@
-# 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
+﻿# 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
-Текущая стадия: **Remediation Track Completed — Ready for RC Sign-off**
-Эталонный план: [`workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md`](workdoc/ChatAVG_v2.3_Optimized_Delivery_Plan_Sprints_Testing.md)
+Текущая стадия: **Finalizing Core & Security (Sprint F1)**
+Эталонный план: [`workdoc/ChatAVG_v2.3_Final_Release_Path.md`](workdoc/ChatAVG_v2.3_Final_Release_Path.md)
 
 ---
 
@@ -537,4 +537,69 @@
 
 **Deliverables:** Обновлённый UI Категорий, вкладка «Отладка», debug API endpoints, debug-логирование в адаптере, `SPRINT_R9_TEST_REPORT.md`.
 **Testing Gate:** `npm run test:unit`, `npm run test:contract`, `scratch/test_debug_api.js` — all pass.
+
+
+---
+
+## 🏁 Финальная траектория релиза (Sprint F-Series)
+*Подробный план с описанием каждой задачи: [workdoc/ChatAVG_v2.3_Final_Release_Path.md](workdoc/ChatAVG_v2.3_Final_Release_Path.md)*
+
+### Sprint F1: Критические баги кода (P0)
+- [ ] F1.1: sandbox.routes.js — operation устанавливается после policyGuard
+- [ ] F1.2: Streaming — соединение зависает (нет res.end() после [DONE])
+- [ ] F1.3: AgentRun — нелегальный переход requires_action → completed
+- [ ] F1.4: openai_responses_compat — дублирующаяся ветка reasoning_summary
+- [ ] F1.5: LocalAdapter — выполнение sh -c без env-guard
+
+### Sprint F2: Безопасность ядра (P0 Security)
+- [ ] F2.1: Secure Admin Boot (fail-fast при старте без пароля)
+- [ ] F2.2: Sandbox fail-closed в production (LocalAdapter запрещён)
+- [ ] F2.3: SSRF Guard — аудит и unit-тест validateProviderUrl
+- [ ] F2.4: Idempotency keys TTL (очистка устаревших ключей)
+
+### Sprint F3: Проектная гигиена и тестовый контур
+- [ ] F3.1: ROOT package.json (точка входа проекта)
+- [ ] F3.2: npm test scripts — добавить policy/knowledge/execution/tools/remediation
+- [ ] F3.3: README.md Quick Start секция
+- [ ] F3.4: README для cons/chatavg
+
+### Sprint F4: MCP Gateway hardening
+- [ ] F4.1: SSE Streaming в ai.chat и ai.responses
+- [ ] F4.2: Tool Call события (file_search, web_search) в ответе
+- [ ] F4.3: Системные сообщения — не теряются при system role
+- [ ] F4.4: web_search_call обработка в openai_prompt_file_search
+
+### Sprint F5: Durable Runtime (Temporal)
+- [ ] F5.1: Hardened Temporal Activities (замена моков)
+- [ ] F5.2: Workflow Replay Safety (аудит детерминизма)
+- [ ] F5.3: AgentRun Events 100% coverage
+
+### Sprint F6: Knowledge Gateway — реальный RAG
+- [ ] F6.1: Production SQLite FTS5 Retriever
+- [ ] F6.2: Ingestion Pipeline
+- [ ] F6.3: Answerability Policy
+- [ ] F6.4: Citation Validation
+
+### Sprint F7: Semantic Layer стабилизация
+- [ ] F7.1: Persistent Claim Ledger (100% SQLite)
+- [ ] F7.2: Artifact Versioning and Diff
+- [ ] F7.3: Hybrid Extraction stabilization
+
+### Sprint F8: UX/UI доводка
+- [ ] F8.1: Canonical Error UI/UX
+- [ ] F8.2: Latency Optimization (TTFT < 500ms)
+- [ ] F8.3: Admin Dashboard — Cost/Quality charts
+- [ ] F8.4: Mobile Audit (iOS/Android)
+
+### Sprint F9: Full QA and Release Candidate
+- [ ] F9.1: Full Regression Suite (все 12+ категорий тестов)
+- [ ] F9.2: Security Red-Teaming
+- [ ] F9.3: Load and Chaos Testing
+- [ ] F9.4: Release Candidate Report
+
+### Sprint F10: Production Handover
+- [ ] F10.1: MIGRATION-002 выполнение
+- [ ] F10.2: Shadow Deployment and Canary
+- [ ] F10.3: Production Environment Checklist
+- [ ] F10.4: Final Operations Handover
 
