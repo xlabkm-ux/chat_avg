@@ -30,7 +30,6 @@ class ChatController {
     missionId = missionBinding.ensureMission({ ...body, missionId }, user);
 
     if (isFastPath) {
-      console.log(`[ChatController] Routing to Fast Path for user=${user.username}`);
       try {
         const stream = await fastChatService.handleFastCompletion({ user, body, catSettings });
         return this._streamToResponse(stream, res, catSettings.model_name, body.stream);
@@ -40,7 +39,6 @@ class ChatController {
     }
 
     // 3. Heavy Path (AgentRuns, RAG, etc.)
-    console.log(`[ChatController] Routing to Heavy Path for user=${user.username}`);
     return chatService.handleCompletion({ user, body, catSettings, res, missionId });
   }
 

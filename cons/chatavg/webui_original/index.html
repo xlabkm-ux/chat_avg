@@ -235,6 +235,7 @@
                 <button class="admin-tab" data-tab="users" role="tab" aria-selected="false">Пользователи</button>
                 <button class="admin-tab" data-tab="categories" role="tab" aria-selected="false">Категории</button>
                 <button class="admin-tab" data-tab="audit" role="tab" aria-selected="false">Аудит</button>
+                <button class="admin-tab" data-tab="debug" role="tab" aria-selected="false">🐛 Отладка</button>
             </div>
 
             <div class="setup-scroll">
@@ -353,62 +354,36 @@
                         <h4 class="section-subtitle--light mt-sm">Системный промпт <span class="hint-text">(добавляется к промпту пользователя)</span></h4>
                         <textarea id="admin-cat-system-prompt" class="setup-textarea admin-textarea" rows="3" placeholder="Опциональный системный промпт для этой категории..." aria-label="Системный промпт категории"></textarea>
 
-                        <h4 class="section-subtitle--light mt-sm">Параметры генерации</h4>
-                        <div class="param-grid mt-sm">
-                            <div class="param-item">
-                                <div class="param-label">
-                                    <span>Temperature</span>
-                                    <span class="param-value" id="val-temperature">0.7</span>
-                                </div>
-                                <input type="range" id="param-temperature" min="0" max="2" step="0.05" value="0.7" aria-label="Temperature">
-                            </div>
+                        <h4 class="section-subtitle--light mt-sm">Дополнительные параметры (JSON) <span class="hint-text">(например, Managed Prompt: {"prompt": {"id": "pmpt_..."}})</span></h4>
+                        <textarea id="admin-cat-extra-params" class="setup-textarea admin-textarea" rows="3" placeholder='{"prompt": {"id": "pmpt_..."}}' aria-label="Дополнительные параметры (JSON)"></textarea>
 
-                            <div class="param-item">
-                                <div class="param-label">
-                                    <span>Top-P</span>
-                                    <span class="param-value" id="val-top_p">0.9</span>
-                                </div>
-                                <input type="range" id="param-top_p" min="0" max="1" step="0.05" value="0.9" aria-label="Top-P">
-                            </div>
+                        <h4 class="section-subtitle--light mt-sm">Режим отладки провайдера</h4>
+                        <label class="toggle-option">
+                            <span class="toggle-label">🐛 Включить отладочный журнал для этой категории</span>
+                            <input type="checkbox" id="admin-cat-debug-mode">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <p class="hint-text mt-sm">Отладочные сообщения будут отправляться на вкладку <strong>«Отладка»</strong> в Админ-панели. Не включайте на production.</p>
 
-                            <div class="param-item llama-only-param">
-                                <div class="param-label">
-                                    <span>Top-K</span>
-                                    <span class="param-value" id="val-top_k">40</span>
-                                </div>
-                                <input type="range" id="param-top_k" min="0" max="100" step="1" value="40" aria-label="Top-K">
-                            </div>
-
-                            <div class="param-item llama-only-param">
-                                <div class="param-label">
-                                    <span>Min-P</span>
-                                    <span class="param-value" id="val-min_p">0.05</span>
-                                </div>
-                                <input type="range" id="param-min_p" min="0" max="1" step="0.01" value="0.05" aria-label="Min-P">
-                            </div>
-
-                            <div class="param-item llama-only-param">
-                                <div class="param-label">
-                                    <span>Repeat Penalty</span>
-                                    <span class="param-value" id="val-repeat_penalty">1.1</span>
-                                </div>
-                                <input type="range" id="param-repeat_penalty" min="1" max="2" step="0.05" value="1.1" aria-label="Repeat Penalty">
-                            </div>
-
-                            <div class="param-item">
-                                <div class="param-label">
-                                    <span>Максимальное количество выводимых токенов</span>
-                                    <span class="param-value" id="val-max_tokens">1024</span>
-                                </div>
-                                <input type="range" id="param-max_tokens" min="64" max="32768" step="64" value="1024" aria-label="Максимальное количество выводимых токенов">
-                            </div>
-                        </div>
-                        
                         <div class="admin-btn-row">
                             <button type="button" class="save-btn" id="btn-save-cat" aria-label="Сохранить категорию">Сохранить</button>
                             <button type="button" class="nav-btn btn-secondary" id="btn-test-cat" aria-label="Проверить соединение">Проверить соединение</button>
                             <button type="button" class="nav-btn btn-cancel" id="btn-cancel-cat" aria-label="Отменить редактирование">Отмена</button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Debug -->
+                <div id="admin-tab-debug" class="admin-tab-content">
+                    <div class="admin-toolbar">
+                        <div class="setup-card-header mb-0">
+                            <h3>🐛 Журнал отладки провайдера</h3>
+                        </div>
+                        <button type="button" class="nav-btn btn-secondary ml-auto" id="btn-clear-debug" aria-label="Очистить журнал">Очистить</button>
+                        <button type="button" class="nav-btn btn-secondary" id="btn-refresh-debug" aria-label="Обновить журнал">Обновить</button>
+                    </div>
+                    <div class="setup-card mt-sm">
+                        <div id="admin-debug-list" class="admin-list" role="log" aria-label="Журнал отладки" aria-live="polite"></div>
                     </div>
                 </div>
 

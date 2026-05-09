@@ -46,14 +46,6 @@ class OpenAICompatProvider extends BaseProvider {
       Object.assign(params, config.extra_params);
     }
 
-    // Log the full request parameters for debugging and sandbox testing
-    const isProd = process.env.NODE_ENV === 'production';
-    const debugPayloads = process.env.DEBUG_PROVIDER_PAYLOADS === 'true';
-    if (!isProd || debugPayloads) {
-      console.log(`\n[${this.id}] --- OUTGOING REQUEST PAYLOAD ---`);
-      console.log(JSON.stringify(params, null, 2));
-      console.log(`--------------------------------------\n`);
-    }
 
     try {
       if (params.stream) {

@@ -492,3 +492,49 @@
 **Итог:** Система полностью наблюдаема. Дашборд показывает реальные P95 latency, error rate и состояние песочниц. Проведены нагрузочные тесты, подтвердившие корректность сбора телеметрии.
 **Deliverables:** `MetricsService`, `LoadHarness`, `ChaosHarness`, `SPEC-024`, `RUNBOOK-003`, `EVALS_REPORT.json`.
 **Testing Gate:** `node verify_dashboard.js` — pass.
+
+---
+
+### Sprint R9: Provider UX Hardening & Debug Infrastructure — ✅ Завершён (2026-05-09)
+*Цель: Устранить архитектурные несоответствия в UI категорий и создать инфраструктуру отладки провайдеров без вмешательства в production-код.*
+
+#### Задача 1: Убрать слайдеры параметров генерации из формы Категории — ✅ Завершено 2026-05-09
+*Обоснование:* Параметры `temperature`, `top_p` и `max_tokens` представляют собой противоречивый интерфейс в экосистеме мультипровайдерности: OpenAI Responses API с managed prompts не принимает эти параметры, в то время как локальные провайдеры (llamacpp) могут. Слайдеры создают ложное ощущение контроля.
+
+**Что сделано:**
+- Удалены HTML-слайдеры Temperature, Top-P, Top-K, Min-P, Repeat Penalty, Max Tokens из формы редактирования Категории
+- Удалена соответствующая JS-логика (чтение, запись, дефолтные значения при создании)
+- Добавлена подсказка в поле «Дополнительные параметры (JSON)»: `{"prompt": {"id": "pmpt_..."}}`
+- Все параметры генерации теперь управляются через `extra_params` как единую точку конфигурации
+
+**Файлы:** `webui_original/index.html`, `webui_original/js/admin.js`
+
+**Архитектурное правило (для future reference):**
+| Параметр | Действие в OpenAI Responses Adapter |
+|---|---|
+| `temperature`, `top_p` | Прокидываются ТОЛЬКО если нет `prompt.id` |
+| `max_tokens` | Маппится в `max_output_tokens` |
+| `system_prompt` | Маппится в `instructions` (удаляется если есть `prompt.id`) |
+| `top_k`, `min_p`, `repeat_penalty` | Удаляются перед отправкой (только для локальных провайдеров) |
+
+#### Задача 2: Чекбокс «Режим отладки провайдера» + вкладка «Отладка» в Админ-панели — ✅ Завершено 2026-05-09
+*Обоснование:* При разработке и диагностике нового managed RAG провайдера требуется возможность видеть точные параметры запросов к OpenAI без добавления console.log в prod-код и без перезапуска сервера.
+
+**Что сделано:**
+- Добавлен чекбокс `debug_mode` в форму редактирования Категории (сохраняется в БД)
+- Добавлена вкладка **«🐛 Отладка»** в Админ-панели (рядом с Аудитом)
+- Добавлен серверный лог-стор (`debugLogStore[]`, max 500 записей, FIFO) в `admin.routes.js`
+- Добавлены API-эндпоинты: `GET /api/admin/debug/stream`, `POST /api/admin/debug/log`, `DELETE /api/admin/debug/log`
+- Адаптер `openai_prompt_file_search` пишет полные параметры запроса в debug-лог при `config.debug_mode === true`
+- UI вкладки «Отладка»: отображение записей с временными метками, уровнем (DEBUG/WARN/ERROR), именем провайдера и форматированным JSON; кнопки «Обновить» и «Очистить»
+
+**Файлы:** `webui_original/index.html`, `webui_original/js/admin.js`, `src/modules/admin/admin.routes.js`, `src/modules/providers/adapters/openai_prompt_file_search.js`
+
+**Ограничения (security):**
+- Debug-лог хранится только в памяти процесса (очищается при рестарте)
+- Доступ только для `Администратор`-категории (через `authenticate + requireAdmin`)
+- Не рекомендуется включать `debug_mode` на production (содержит сырые параметры запроса)
+
+**Deliverables:** Обновлённый UI Категорий, вкладка «Отладка», debug API endpoints, debug-логирование в адаптере, `SPRINT_R9_TEST_REPORT.md`.
+**Testing Gate:** `npm run test:unit`, `npm run test:contract`, `scratch/test_debug_api.js` — all pass.
+

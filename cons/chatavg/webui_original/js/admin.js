@@ -16,6 +16,7 @@ export function initAdminTabs() {
       else if (target === 'users') loadAdminUsers();
       else if (target === 'categories') loadAdminCategories();
       else if (target === 'audit') loadAuditLogs();
+      else if (target === 'debug') loadDebugLogs();
     });
   });
 
@@ -286,6 +287,30 @@ function updateProviderUI(providerId) {
   document.querySelectorAll('.llama-only-param').forEach(el => {
     el.classList.toggle('hidden', !isLlama);
   });
+
+  const isResponses = cfg.adapter === 'openai_responses' || providerId === 'openai_responses';
+  const modelEl = $('admin-cat-model');
+  if (modelEl) {
+    modelEl.disabled = isResponses;
+    if (isResponses) {
+       // Optionally set a placeholder-like value or clear it
+       modelEl.style.opacity = '0.5';
+    } else {
+       modelEl.style.opacity = '1';
+    }
+  }
+
+  const sysPromptEl = $('admin-cat-system-prompt');
+  if (sysPromptEl) {
+    sysPromptEl.disabled = isResponses;
+    if (isResponses) {
+      sysPromptEl.style.opacity = '0.5';
+      sysPromptEl.placeholder = 'Используется Managed Prompt из OpenAI (инструкция зашита внутри)';
+    } else {
+      sysPromptEl.style.opacity = '1';
+      sysPromptEl.placeholder = '';
+    }
+  }
 }
 
 async function editAdminCategory(name, data) {
@@ -305,22 +330,10 @@ async function editAdminCategory(name, data) {
 
   $('admin-cat-system-prompt').value = data.system_prompt || '';
   $('admin-cat-mcp-gateway').value = data.mcp_gateway || '';
+  $('admin-cat-extra-params').value = data.extra_params ? JSON.stringify(data.extra_params, null, 2) : '';
   
-  const paramMap = {
-    temperature: data.temperature,
-    top_p: data.top_p,
-    top_k: data.top_k,
-    min_p: data.min_p,
-    repeat_penalty: data.repeat_penalty,
-    max_tokens: data.max_tokens || data.n_predict,
-  };
-  Object.entries(paramMap).forEach(([k, v]) => {
-    const el = $('param-' + k);
-    if (el && v !== undefined) {
-      el.value = v;
-      if ($('val-' + k)) $('val-' + k).textContent = v;
-    }
-  });
+  const debugEl = $('admin-cat-debug-mode');
+  if (debugEl) debugEl.checked = !!(data.debug_mode);
 
   $('admin-cat-edit-card').scrollIntoView({ behavior: 'smooth' });
 }
@@ -346,9 +359,7 @@ $('btn-cancel-cat')?.addEventListener('click', (e) => {
 $('btn-create-cat')?.addEventListener('click', (e) => {
   e.preventDefault();
   e.stopPropagation();
-  editAdminCategory('', {
-    temperature: 0.7, top_p: 0.9, top_k: 40, min_p: 0.05, repeat_penalty: 1.1, max_tokens: 1024
-  });
+  editAdminCategory('', {});
 });
 
 $('btn-del-cat')?.addEventListener('click', async (e) => {
@@ -382,15 +393,19 @@ $('btn-save-cat')?.addEventListener('click', async (e) => {
     model_name: $('admin-cat-model').value || null,
     mcp_gateway: $('admin-cat-mcp-gateway').value.trim() || null,
     system_prompt: $('admin-cat-system-prompt').value || null,
+    debug_mode: !!($('admin-cat-debug-mode')?.checked),
+    extra_params: null
   };
-  
-  ['temperature','top_p','top_k','min_p','repeat_penalty','max_tokens'].forEach(k => {
-    const el = $('param-' + k);
-    if (el && el.value !== '') {
-      const val = k === 'top_k' || k === 'max_tokens' ? parseInt(el.value) : parseFloat(el.value);
-      if (!isNaN(val)) payload[k] = val;
+
+  const extraParamsRaw = $('admin-cat-extra-params').value.trim();
+  if (extraParamsRaw) {
+    try {
+      payload.extra_params = JSON.parse(extraParamsRaw);
+    } catch (e) {
+      showToast('Ошибка в JSON дополнительных параметров');
+      return;
     }
-  });
+  }
 
   const r = await fetch('/api/admin/categories/' + encodeURIComponent(catName), {
     method: 'POST',
@@ -499,3 +514,85 @@ $('admin-audit-search')?.addEventListener('keypress', (e) => {
   if (e.key === 'Enter') loadAuditLogs();
 });
 $('admin-audit-action')?.addEventListener('change', loadAuditLogs);
+
+// ── Debug Log ────────────────────────────────────────────
+
+const debugLogBuffer = [];
+const MAX_DEBUG_ENTRIES = 200;
+
+export function appendDebugLog(entry) {
+  debugLogBuffer.unshift(entry);
+  if (debugLogBuffer.length > MAX_DEBUG_ENTRIES) debugLogBuffer.pop();
+  // If debug tab is active, re-render
+  const tab = document.querySelector('.admin-tab[data-tab="debug"]');
+  if (tab && tab.classList.contains('active')) {
+    renderDebugLogs();
+  }
+}
+
+function renderDebugLogs() {
+  const list = $('admin-debug-list');
+  if (!list) return;
+  if (debugLogBuffer.length === 0) {
+    list.innerHTML = '<div class="audit-log-empty">Нет записей. Включите режим отладки в настройках категории.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  debugLogBuffer.forEach(entry => {
+    const el = document.createElement('div');
+    el.className = 'user-item';
+    const ts = new Date(entry.ts).toLocaleTimeString('ru-RU');
+    const levelColor = entry.level === 'error' ? 'var(--color-error)' : entry.level === 'warn' ? 'orange' : 'var(--color-accent)';
+    el.innerHTML = `
+      <div class="user-item-info w-full">
+        <div class="audit-log-header">
+          <span class="user-item-name audit-log-name">${DOMPurify.sanitize(ts)}</span>
+          <span class="status-badge" style="background:${levelColor}">${DOMPurify.sanitize(entry.level?.toUpperCase() || 'DEBUG')}</span>
+          <span class="user-item-cat">${DOMPurify.sanitize(entry.provider || '')}</span>
+        </div>
+        <div class="audit-log-details" style="font-family:monospace;font-size:0.8em;white-space:pre-wrap">${DOMPurify.sanitize(entry.message)}</div>
+      </div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+export function loadDebugLogs() {
+  fetch('/api/admin/debug/stream', {
+    headers: { 'Authorization': 'Bearer ' + state.authToken }
+  }).then(r => r.ok ? r.json() : []).then(entries => {
+    const list = $('admin-debug-list');
+    if (!list) return;
+    if (!entries || entries.length === 0) {
+      list.innerHTML = '<div class="audit-log-empty">Нет записей. Включите режим отладки в настройках категории.</div>';
+      return;
+    }
+    list.innerHTML = '';
+    entries.forEach(entry => {
+      const el = document.createElement('div');
+      el.className = 'user-item';
+      const ts = new Date(entry.ts).toLocaleTimeString('ru-RU');
+      const levelColor = entry.level === 'error' ? 'var(--color-error)' : entry.level === 'warn' ? 'orange' : 'var(--color-accent)';
+      el.innerHTML = `
+        <div class="user-item-info w-full">
+          <div class="audit-log-header">
+            <span class="user-item-name audit-log-name">${DOMPurify.sanitize(ts)}</span>
+            <span class="status-badge" style="background:${levelColor}">${DOMPurify.sanitize(entry.level?.toUpperCase() || 'DEBUG')}</span>
+            <span class="user-item-cat">${DOMPurify.sanitize(entry.provider || '')}</span>
+          </div>
+          <div class="audit-log-details" style="font-family:monospace;font-size:0.8em;white-space:pre-wrap">${DOMPurify.sanitize(entry.message)}</div>
+        </div>
+      `;
+      list.appendChild(el);
+    });
+  }).catch(e => console.error('Debug log load failed', e));
+}
+
+$('btn-refresh-debug')?.addEventListener('click', loadDebugLogs);
+$('btn-clear-debug')?.addEventListener('click', async () => {
+  await fetch('/api/admin/debug/log', {
+    method: 'DELETE',
+    headers: { 'Authorization': 'Bearer ' + state.authToken }
+  });
+  loadDebugLogs();
+});

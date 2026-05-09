@@ -65,14 +65,6 @@ function bindEvents() {
     applyLang();
   }));
 
-  document.querySelectorAll('.param-item input[type="range"]').forEach(slider => {
-    slider.addEventListener('input', () => {
-      const key = slider.id.replace('param-', '');
-      const el = $('val-' + key);
-      if(el) el.textContent = slider.value;
-    });
-  });
-
   $('send-btn')?.addEventListener('click', handleSend);
   $('user-input')?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } });
   $('stop-btn')?.addEventListener('click', stopGeneration);

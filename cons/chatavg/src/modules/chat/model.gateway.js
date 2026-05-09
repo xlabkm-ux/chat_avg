@@ -26,6 +26,7 @@ class ModelGateway {
     const startTimeMs = Date.now();
     const providersToTry = [ { id: route.providerId, provider: route.provider } ];
     
+    
     if (route.fallbackProviderId && route.fallbackProviderId !== route.providerId) {
       const fallbackProvider = getProvider(route.fallbackProviderId);
       if (fallbackProvider) {
@@ -63,7 +64,6 @@ class ModelGateway {
         if (mcpAdapter) {
           const originalModel = settings.model_name || 'default';
           let mcpProviderId = currentProviderId;
-          if (mcpProviderId === 'openai_responses') mcpProviderId = 'openai';
           
           providerMergedSettings.endpoint_url = settings.mcp_gateway;
           providerMergedSettings.model_name = `${mcpProviderId}:${originalModel}`;

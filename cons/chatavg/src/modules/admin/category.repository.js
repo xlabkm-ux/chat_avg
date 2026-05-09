@@ -8,14 +8,15 @@ class CategoryRepository {
     return { 
       ...row, 
       api_key: crypto.decrypt(row.api_key),
-      extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined 
+      extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined,
+      debug_mode: !!row.debug_mode
     };
   }
 
   async save(name, category) {
     db.prepare(`
-      INSERT INTO categories (name, provider, endpoint_url, model_name, api_key, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt, extra_params, routing_mode, fallback_provider, mcp_gateway)
-      VALUES (@name, @provider, @endpoint_url, @model_name, @api_key, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt, @extra_params, @routing_mode, @fallback_provider, @mcp_gateway)
+      INSERT INTO categories (name, provider, endpoint_url, model_name, api_key, temperature, top_p, top_k, min_p, repeat_penalty, max_tokens, system_prompt, extra_params, routing_mode, fallback_provider, mcp_gateway, debug_mode)
+      VALUES (@name, @provider, @endpoint_url, @model_name, @api_key, @temperature, @top_p, @top_k, @min_p, @repeat_penalty, @max_tokens, @system_prompt, @extra_params, @routing_mode, @fallback_provider, @mcp_gateway, @debug_mode)
       ON CONFLICT(name) DO UPDATE SET
         provider=excluded.provider,
         endpoint_url=excluded.endpoint_url,
@@ -31,7 +32,8 @@ class CategoryRepository {
         extra_params=excluded.extra_params,
         routing_mode=excluded.routing_mode,
         fallback_provider=excluded.fallback_provider,
-        mcp_gateway=excluded.mcp_gateway
+        mcp_gateway=excluded.mcp_gateway,
+        debug_mode=excluded.debug_mode
     `).run({
       name,
       provider: category.provider || null,
@@ -49,6 +51,7 @@ class CategoryRepository {
       routing_mode: category.routing_mode || 'direct',
       fallback_provider: category.fallback_provider || null,
       mcp_gateway: category.mcp_gateway || null,
+      debug_mode: category.debug_mode ? 1 : 0
     });
   }
 
@@ -59,7 +62,8 @@ class CategoryRepository {
       result[row.name] = { 
         ...row, 
         api_key: crypto.decrypt(row.api_key),
-        extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined 
+        extra_params: row.extra_params ? JSON.parse(row.extra_params) : undefined,
+        debug_mode: !!row.debug_mode
       };
     }
     return result;

@@ -46,6 +46,7 @@ class ChatService {
 
     // 1. Resolve Route
     const route = policyRouter.resolveRoute(catSettings);
+
     const startTimestamp = Date.now();
     traceBus.emitTrace('ChatService', 'model.requested', { 
       providerId: route.providerId, 

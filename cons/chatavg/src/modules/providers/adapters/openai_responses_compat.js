@@ -56,22 +56,21 @@ class OpenAIResponsesProvider extends BaseProvider {
     // Build Responses API params
     const params = {
       model: config.model_name || this.defaultModel,
-      input,
       stream: !!options.stream,
     };
-
-    // Add instructions (system prompt) if present
-    if (instructions) params.instructions = instructions;
 
     // Standard generation parameters
     if (options.max_tokens) params.max_output_tokens = options.max_tokens;
     if (config.temperature !== undefined) params.temperature = config.temperature;
     if (config.top_p !== undefined) params.top_p = config.top_p;
 
-    // Merge extra_params (tools, reasoning, store, include, etc.)
+    // Merge extra_params (prompt, tools, reasoning, store, include, etc.)
     if (config.extra_params && typeof config.extra_params === 'object') {
       Object.assign(params, config.extra_params);
     }
+
+    if (instructions) params.instructions = instructions;
+    params.input = input;
 
     try {
       if (params.stream) {
@@ -93,6 +92,8 @@ class OpenAIResponsesProvider extends BaseProvider {
               inReasoning = false;
             }
             yield ProviderEvents.delta(text);
+          } else if (event.type === 'response.reasoning_summary_text.delta') {
+            yield ProviderEvents.delta(`<think_summary>\n${event.delta}\n</think_summary>\n\n`);
           } else if (event.type === 'response.tool_call.created') {
             const toolName = event.tool_call.name;
             yield ProviderEvents.delta(`\n<tool name="${toolName}">\n`);
@@ -111,6 +112,8 @@ class OpenAIResponsesProvider extends BaseProvider {
             if (item.type === 'message' && item.content) {
               for (const part of item.content) {
                 if (part.type === 'output_text') text += part.text;
+                if (part.type === 'reasoning_text') text = `<think>\n${part.text}\n</think>\n\n` + text;
+                if (part.type === 'reasoning_summary_text') text = `<think_summary>\n${part.text}\n</think_summary>\n\n` + text;
               }
             }
           }

@@ -44,14 +44,12 @@ class KnowledgeGateway {
     // 1.1 Check Cache
     const cachedResult = knowledgeCache.get(query);
     if (cachedResult) {
-      console.log(`[KnowledgeGW] Cache HIT for query="${query.substring(0, 50)}..."`);
       cachedResult.metadata.cacheHit = true;
       cachedResult.metadata.latencyMs = Date.now() - startTime;
       traceBus.emitTrace('KnowledgeGateway', 'retrieval.completed', { mode: cachedResult.mode, cacheHit: true, latencyMs: Date.now() - startTime });
       return cachedResult;
     }
 
-    console.log(`[KnowledgeGW] Retrieving for query="${query.substring(0, 50)}..." mode=${mode}`);
 
     try {
       // 2. Execute retrieval (Retriever)

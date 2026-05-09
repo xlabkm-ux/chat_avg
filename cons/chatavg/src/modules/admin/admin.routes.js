@@ -116,7 +116,8 @@ router.delete('/users/:username', asyncHandler(async (req, res) => {
 const CATEGORY_FIELDS = [
   'provider', 'model_name',
   'temperature', 'top_p', 'top_k', 'min_p', 'repeat_penalty',
-  'max_tokens', 'system_prompt', 'routing_mode', 'fallback_provider', 'mcp_gateway'
+  'max_tokens', 'system_prompt', 'routing_mode', 'fallback_provider', 'mcp_gateway',
+  'extra_params', 'debug_mode'
 ];
 
 router.get('/categories', asyncHandler(async (req, res) => {
@@ -129,6 +130,17 @@ router.get('/categories', asyncHandler(async (req, res) => {
     }
   }
   res.json(safeCats);
+}));
+
+router.get('/categories/:category_name', asyncHandler(async (req, res) => {
+  const catName = req.params.category_name;
+  const category = await categoryRepository.findByName(catName);
+  if (!category) return res.status(404).json({ detail: 'Категория не найдена' });
+  
+  if (category.api_key) {
+    category.api_key = crypto.maskKey(category.api_key);
+  }
+  res.json(category);
 }));
 
 const categorySchema = z.object({
@@ -144,7 +156,9 @@ const categorySchema = z.object({
   routing_mode: z.string().max(32).optional().nullable(),
   fallback_provider: z.string().max(64).optional().nullable(),
   mcp_gateway: z.string().max(256).optional().nullable(),
-}).strict();
+  extra_params: z.record(z.any()).optional().nullable(),
+  debug_mode: z.boolean().optional().nullable(),
+});
 
 router.post('/categories/:category_name', asyncHandler(async (req, res) => {
   let catName;
@@ -296,7 +310,6 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
 // ── Stats ───────────────────────────────────────────────
 
 router.get('/stats', asyncHandler(async (req, res) => {
-  console.log(`[Admin] Stats requested by ${req.user.username}`);
 
   const totalUsers = await userRepository.countTotal();
   const expiredUsers = await userRepository.countExpired();
@@ -398,6 +411,36 @@ router.get('/dashboard/mvp', asyncHandler(async (req, res) => {
     semantic_quality_score: semanticQualityScore,
     recent_traces: traces
   });
+}));
+
+// ── Debug Log SSE Stream ───────────────────────────────────────
+const debugLogStore = [];
+const MAX_DEBUG_STORE = 500;
+
+function pushDebugLog(entry) {
+  debugLogStore.unshift(entry);
+  if (debugLogStore.length > MAX_DEBUG_STORE) debugLogStore.pop();
+}
+
+// Expose so ModelGateway/adapters can write debug entries
+router.pushDebugLog = pushDebugLog;
+
+router.get('/debug/stream', asyncHandler(async (req, res) => {
+  const since = req.query.since ? parseInt(req.query.since) : 0;
+  const entries = debugLogStore.filter(e => e.ts > since);
+  res.json(entries);
+}));
+
+router.post('/debug/log', asyncHandler(async (req, res) => {
+  const { level, message, provider, ts } = req.body || {};
+  if (!message) return res.status(400).json({ error: 'message required' });
+  pushDebugLog({ level: level || 'debug', message, provider, ts: ts || Date.now() });
+  res.json({ ok: true });
+}));
+
+router.delete('/debug/log', asyncHandler(async (req, res) => {
+  debugLogStore.length = 0;
+  res.json({ ok: true });
 }));
 
 module.exports = router;

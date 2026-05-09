@@ -1,4 +1,21 @@
-const { providerEnv } = require('./config');
+const config = require('./config');
+const providerEnv = config.providerEnv || {
+  LITELLM_URL: process.env.LITELLM_URL,
+  LITELLM_API_KEY: process.env.LITELLM_API_KEY,
+  LLAMACPP_URL: process.env.LLAMACPP_URL,
+  LLAMACPP_API_KEY: process.env.LLAMACPP_API_KEY,
+  OPENAI_URL: process.env.OPENAI_URL,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  DEEPSEEK_URL: process.env.DEEPSEEK_URL,
+  DEEPSEEK_API_KEY: process.env.DEEPSEEK_API_KEY,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  QWEN_URL: process.env.QWEN_URL,
+  QWEN_API_KEY: process.env.QWEN_API_KEY,
+  GROK_URL: process.env.GROK_URL,
+  GROK_API_KEY: process.env.GROK_API_KEY,
+  MCP_GATEWAY_URL: process.env.MCP_GATEWAY_URL,
+  MCP_API_KEY: process.env.MCP_API_KEY,
+};
 
 /**
  * Конфигурация провайдеров и моделей.
@@ -52,8 +69,44 @@ const providersConfig = {
     "api_key": providerEnv.OPENAI_API_KEY || "",
     "extra_params": {},
     "models": {
-      "gpt-4.1": { "name": "GPT-4.1", "extra_params": {} },
-      "gpt-4o": { "name": "GPT-4 Omni", "extra_params": {} }
+      "gpt-4.1": { "name": "GPT-4.1 (Responses API)", "extra_params": {} },
+      "gpt-4.1-mini": { "name": "GPT-4.1 Mini (Responses API)", "extra_params": {} },
+      "gpt-4o": { "name": "GPT-4 Omni (Responses API)", "extra_params": {} },
+      "gpt-4o-mini": { "name": "GPT-4 Omni Mini (Responses API)", "extra_params": {} }
+    }
+  },
+  "openai_prompt_file_search": {
+    "name": "OpenAI Prompt + File Search",
+    "adapter": "openai_prompt_file_search",
+    "endpoint_url": providerEnv.OPENAI_URL || "https://api.openai.com/v1",
+    "api_key": providerEnv.OPENAI_API_KEY || "",
+    "extra_params": {
+      "prompt": {
+        "id": "pmpt_69fe0facab7c8190845f8e803d634d9f0986bd6fdbb91195",
+        "version": "2"
+      },
+      "reasoning": {
+        "summary": "auto"
+      },
+      "tools": [
+        {
+          "type": "file_search",
+          "vector_store_ids": [
+            "vs_69fe0ce2642c819193ff2bc7478ce2bf"
+          ]
+        }
+      ],
+      "store": true,
+      "include": [
+        "reasoning.encrypted_content",
+        "web_search_call.action.sources"
+      ]
+    },
+    "models": {
+      "prompt": {
+        "name": "Stored Prompt v2 + File Search",
+        "extra_params": {}
+      }
     }
   },
   "deepseek": {

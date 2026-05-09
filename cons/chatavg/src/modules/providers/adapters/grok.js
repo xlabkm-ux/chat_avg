@@ -11,7 +11,6 @@ const { OpenAICompatProvider } = require('./openai_compat');
 class GrokProvider extends OpenAICompatProvider {
   async _searchCollections(query, collectionIds, apiKey) {
     const url = 'https://api.x.ai/v1/documents/search';
-    console.log(`[Grok RAG] Searching collections: ${collectionIds.join(', ')} for "${query}"`);
     
     const requestBody = {
       query,
@@ -21,14 +20,6 @@ class GrokProvider extends OpenAICompatProvider {
       retrieval_mode: { type: 'hybrid' }
     };
 
-    const isProd = process.env.NODE_ENV === 'production';
-    const debugPayloads = process.env.DEBUG_PROVIDER_PAYLOADS === 'true';
-    if (!isProd || debugPayloads) {
-      console.log(`\n[Grok RAG] --- OUTGOING SEARCH PAYLOAD ---`);
-      console.log(JSON.stringify(requestBody, null, 2));
-      console.log(`-----------------------------------------\n`);
-    }
-    
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -49,10 +40,8 @@ class GrokProvider extends OpenAICompatProvider {
       const results = data.matches || data.results || data.documents || [];
       
       if (Array.isArray(results) && results.length > 0) {
-        console.log(`[Grok RAG] Найдено документов: ${results.length}`);
         return results.map(r => `[Document ID: ${r.file_id || r.document_id || 'unknown'}]\n${r.chunk_content || r.text || ''}`).join('\n\n');
       }
-      console.log(`[Grok RAG] По запросу ничего не найдено в коллекции.`);
       return "No relevant documents found in the collections.";
     } catch (err) {
       console.error(`[Grok RAG] Search exception:`, err);
@@ -104,7 +93,6 @@ class GrokProvider extends OpenAICompatProvider {
         
         extraParams.tools = tools;
         activeConfig.extra_params = extraParams;
-        console.log(`[Grok] Managed RAG enabled: Injecting 'collections_search' function for ${collectionIds.length} collections`);
       }
     }
 
@@ -121,7 +109,6 @@ class GrokProvider extends OpenAICompatProvider {
         tools.push({ type: 'live_search' });
         extraParams.tools = tools;
         activeConfig.extra_params = extraParams;
-        console.log(`[Grok] Live Search (web) enabled`);
       }
     }
 

@@ -11,6 +11,7 @@ const builtins = [
   require('./adapters/llamacpp'),
   require('./adapters/openai'),
   require('./adapters/openai_responses'),
+  require('./adapters/openai_prompt_file_search'),
   require('./adapters/deepseek'),
   require('./adapters/google'),
   require('./adapters/qwen'),

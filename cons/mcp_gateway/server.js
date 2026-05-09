@@ -54,17 +54,27 @@ function initProviders() {
     
     if (apiKey) {
       console.log(`[Init] Registering provider: ${name} (URL: ${baseURL || 'default'})`);
-      providers.set(name.toLowerCase(), new OpenAI({
+      const client = new OpenAI({
         apiKey,
         baseURL: baseURL || undefined
-      }));
+      });
+      providers.set(name.toLowerCase(), client);
     }
+  }
+
+  // 1.5. Special handling for openai_responses: 
+  // If it wasn't explicitly added via env vars, we can alias it from 'openai' as a fallback
+  if (!providers.has('openai_responses') && providers.has('openai')) {
+    console.log("[Init] Aliasing 'openai_responses' to 'openai' client (no dedicated key found)");
+    providers.set('openai_responses', providers.get('openai'));
   }
 
   // Fallback if no providers configured
   if (providers.size === 0) {
     console.warn("[Init] No MCP providers found in .env. Using default dummy provider.");
-    providers.set('default', new OpenAI({ apiKey: 'sk-dummy' }));
+    const dummyClient = new OpenAI({ apiKey: 'sk-dummy' });
+    providers.set('default', dummyClient);
+    providers.set('openai_responses', dummyClient);
   } else {
     console.log(`[Init] Total providers registered: ${Array.from(providers.keys()).join(', ')}`);
   }
@@ -129,7 +139,109 @@ const TOOLS = [
           ...finalExtraParams
         };
 
-        const response = await client.chat.completions.create(params);
+        let response;
+        if (providerName.toLowerCase() === 'openai_responses' || finalExtraParams.prompt) {
+          console.log(`[ai.chat] Using responses.create API for ${providerName}`);
+          
+          // Build params exactly as OpenAI Responses API expects
+          const respParams = {};
+          
+          // Model (omit if prompt is provided, as model is baked into the prompt)
+          if (modelId && modelId !== 'default' && !finalExtraParams.prompt) {
+            respParams.model = modelId;
+          }
+          
+          // Managed prompt
+          if (finalExtraParams.prompt) {
+            respParams.prompt = finalExtraParams.prompt;
+            delete finalExtraParams.prompt;
+          }
+          
+          // Input: use from extra_params, or convert messages, or empty array
+          if (finalExtraParams.input !== undefined) {
+            respParams.input = finalExtraParams.input;
+            delete finalExtraParams.input;
+          } else if (messages && messages.length > 0) {
+            const instructions = messages.filter(m => m.role === 'system').map(m => m.content).join('\n');
+            const input = messages.filter(m => m.role !== 'system').map(m => {
+              const role = m.role === 'assistant' ? 'assistant' : 'user';
+              return {
+                role,
+                content: [{ 
+                  type: role === 'assistant' ? 'output_text' : 'input_text', 
+                  text: m.content 
+                }]
+              };
+            });
+            if (instructions && !finalExtraParams.prompt) respParams.instructions = instructions;
+            respParams.input = input;
+          } else {
+            respParams.input = [];
+          }
+          
+          // Reasoning
+          if (finalExtraParams.reasoning) {
+            respParams.reasoning = finalExtraParams.reasoning;
+            delete finalExtraParams.reasoning;
+          }
+          
+          // Tools (file_search, web_search, etc.)
+          if (finalExtraParams.tools) {
+            respParams.tools = finalExtraParams.tools;
+            delete finalExtraParams.tools;
+          }
+          
+          // Store
+          if (finalExtraParams.store !== undefined) {
+            respParams.store = finalExtraParams.store;
+            delete finalExtraParams.store;
+          }
+          
+          // Include
+          if (finalExtraParams.include) {
+            respParams.include = finalExtraParams.include;
+            delete finalExtraParams.include;
+          }
+          
+          // Temperature
+          if (temperature !== undefined) respParams.temperature = temperature;
+          
+          // Max tokens
+          if (max_tokens) respParams.max_output_tokens = max_tokens;
+          
+          // Pass through any remaining extra_params
+          delete finalExtraParams.messages;
+          delete finalExtraParams.max_tokens;
+          delete finalExtraParams.stream;
+          delete finalExtraParams.model;
+          Object.assign(respParams, finalExtraParams);
+
+          console.log(`[ai.chat] Responses params:`, JSON.stringify(respParams, null, 2));
+          
+          const rawResponse = await client.responses.create(respParams);
+          
+          // Convert Responses format back to Chat Completion format
+          let text = '';
+          if (rawResponse.output) {
+            for (const item of rawResponse.output) {
+              if (item.type === 'message' && item.content) {
+                for (const part of item.content) {
+                  if (part.type === 'output_text') text += part.text;
+                  if (part.type === 'reasoning_text') text = `<think>\n${part.text}\n</think>\n\n` + text;
+                  if (part.type === 'reasoning_summary_text') text = `<think_summary>\n${part.text}\n</think_summary>\n\n` + text;
+                }
+              }
+            }
+          }
+
+          response = {
+            choices: [{
+              message: { content: text || `Response completed (status: ${rawResponse.status})` }
+            }]
+          };
+        } else {
+          response = await client.chat.completions.create(params);
+        }
 
         console.log(`[ai.chat] Response received from ${providerName}`);
 
@@ -137,7 +249,7 @@ const TOOLS = [
           content: [
             {
               type: "text",
-              text: response.choices[0].message.content
+              text: `[MCP_GATEWAY_DEBUG] Provider: ${providerName} | Model: ${modelId}\n` + response.choices[0].message.content
             }
           ]
         };
@@ -151,6 +263,90 @@ const TOOLS = [
               text: `MCP Gateway Error: ${error.message}`
             }
           ]
+        };
+      }
+    }
+  },
+  {
+    name: 'ai.responses',
+    description: "OpenAI Responses API (supports managed prompts, reasoning, and tools).",
+    schema: {
+      provider: z.string().describe("Provider name (e.g. 'openai' or 'openai_responses')"),
+      model: z.string().optional().describe("Model name"),
+      prompt: z.object({
+        id: z.string(),
+        version: z.string().optional()
+      }).optional().describe("Managed prompt ID and version"),
+      input: z.array(z.any()).optional().describe("Input array for the response"),
+      instructions: z.string().optional().describe("Instructions for the response"),
+      max_output_tokens: z.number().optional().describe("Maximum output tokens"),
+      reasoning: z.any().optional().describe("Reasoning configuration (e.g. { summary: 'auto' })"),
+      tools: z.array(z.any()).optional().describe("Tools configuration (including file_search)"),
+      store: z.boolean().optional().describe("Whether to store the response"),
+      include: z.array(z.string()).optional().describe("Fields to include in the response"),
+      extra_params: z.any().optional().describe("Additional provider-specific parameters")
+    },
+    handler: async ({ provider, model, prompt, input, instructions, max_output_tokens, reasoning, tools, store, include, extra_params }) => {
+      try {
+        const providerName = (provider || 'openai_responses').toLowerCase();
+        const client = providers.get(providerName);
+        if (!client) {
+          throw new Error(`Provider "${providerName}" not found in MCP Gateway config.`);
+        }
+
+        console.log(`[ai.responses] Routing to ${providerName} | Model: ${model || 'default'} | Prompt ID: ${prompt?.id || 'none'}`);
+
+        const params = {
+          model,
+          prompt,
+          input,
+          instructions,
+          max_output_tokens,
+          reasoning,
+          tools,
+          store,
+          include,
+          ...extra_params
+        };
+
+        // Clean up undefined and handle prompt/model exclusion
+        Object.keys(params).forEach(key => params[key] === undefined && delete params[key]);
+        
+        if (params.prompt && params.model) {
+          console.log(`[ai.responses] Removing model "${params.model}" because managed prompt is present.`);
+          delete params.model;
+        }
+
+        const response = await client.responses.create(params);
+        console.log(`[ai.responses] Response received from ${providerName}`);
+
+        // Format response content
+        let text = '';
+        if (response.output) {
+          for (const item of response.output) {
+            if (item.type === 'message' && item.content) {
+              for (const part of item.content) {
+                if (part.type === 'output_text') text += part.text;
+                if (part.type === 'reasoning_text') text = `<think>\n${part.text}\n</think>\n\n` + text;
+                if (part.type === 'reasoning_summary_text') text = `<think_summary>\n${part.text}\n</think_summary>\n\n` + text;
+              }
+            }
+          }
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: `[MCP_GATEWAY_DEBUG] Responses API | Provider: ${providerName} | Model: ${params.model || 'baked-in'}\n` + (text || `Response completed (status: ${response.status})`)
+            }
+          ]
+        };
+      } catch (error) {
+        console.error("[ai.responses] Error:", error.message);
+        return {
+          isError: true,
+          content: [{ type: "text", text: `MCP Responses Error: ${error.message}` }]
         };
       }
     }

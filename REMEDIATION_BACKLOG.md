@@ -54,8 +54,8 @@
 - [ ] ModelGateway boundary: вынос логики выбора провайдера.
 - [ ] Configuration cleanup: разделение конфигов по модулям.
 
-## Sprint R8: QA, observability and release readiness (P1/P2)
-- [ ] Replace dashboard placeholders: реальные метрики вместо заглушек.
-- [ ] Trace and metrics: расширение событий Trace Bus.
-- [ ] Load & Chaos tests.
-- [ ] Security review & Release package.
+## Sprint R8: QA, observability and release readiness (P1/P2) — ✅ Завершён 2026-05-08
+- [x] Replace dashboard placeholders: реальные метрики вместо заглушек.
+- [x] Trace and metrics: расширение событий Trace Bus.
+- [x] Load & Chaos tests.
+- [x] Security review & Release package.
