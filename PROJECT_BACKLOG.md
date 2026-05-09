@@ -1,4 +1,4 @@
-﻿# 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
+# 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
 Текущая стадия: **Finalizing Core & Security (Sprint F1)**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Final_Release_Path.md`](workdoc/ChatAVG_v2.3_Final_Release_Path.md)
@@ -543,12 +543,12 @@
 - **Gate:** test:unit + test:contract + test:security:smoke + test:sandbox + test:integration:smoke
 - **Git:** git commit -m "Fix(R1): P0 runtime bugs and sandbox execution safety" && git push
 
-### Sprint R2: Core Security
-- [ ] R2.1: Secure Admin Boot (fail-fast без CHATAVG_ADMIN_PASSWORD в production)
-- [ ] R2.2: Sandbox fail-closed (LocalAdapter запрещён в production)
-- [ ] R2.3: SSRF Guard tests (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x)
-- [ ] R2.4: Secret logging audit (API keys, JWT, passwords не в логах)
-- **Gate:** test:security + test:integration:smoke
+### Sprint R2: Core Security — ✅ Завершён (2026-05-09)
+- [x] R2.1: Secure Admin Boot (fail-fast без CHATAVG_ADMIN_PASSWORD в production) — 2026-05-09
+- [x] R2.2: Sandbox fail-closed (LocalAdapter запрещён в production) — 2026-05-09
+- [x] R2.3: SSRF Guard tests (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x) — 2026-05-09
+- [x] R2.4: Secret logging audit (API keys, JWT, passwords не в логах) — 2026-05-09
+- **Gate:** test:security + test:integration:smoke — ✅ Pass
 - **Git:** git commit -m "Fix(R2): Core security fail-closed behavior and SSRF tests" && git push
 
 ### Sprint R3: Project Entry & Test Harness
@@ -612,11 +612,11 @@ npm run test:release — green)
 |---|---|---|
 | G0 Runtime | P0 runtime bugs fixed | 🔴 |
 | G1 Sandbox Safety | No unguarded host command execution | 🔴 |
-| G2 Security Boot | Production fail-fast works | 🔴 |
+| G2 Security Boot | Production fail-fast works | ✅ |
 | G3 Project Entry | Root setup/test/start works | 🔴 |
 | G4 Provider Compat | system/search/tool events do not break flow | 🔴 |
 | G5 Regression | test:release green | 🔴 |
-| G6 Security | test:security green + red-team pass | 🔴 |
+| G6 Security | test:security green + red-team pass | ✅ |
 | G7 Report | RC1 report committed | 🔴 |
 
 

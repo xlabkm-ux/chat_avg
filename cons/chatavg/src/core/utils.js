@@ -36,7 +36,7 @@ function validateProviderUrl(endpointUrl, allowLocal = false) {
     const urlObj = new URL(endpointUrl);
     const host = urlObj.hostname.toLowerCase();
 
-    // 1. Check common public providers allowlist (optional but good for speed and avoiding false positives)
+    // 1. Check common public providers allowlist
     const publicAllowList = [
       'api.openai.com',
       'api.anthropic.com',
@@ -51,17 +51,36 @@ function validateProviderUrl(endpointUrl, allowLocal = false) {
 
     // 2. Check for private/localhost if not explicitly allowed
     if (!allowLocal) {
-      const isPrivate = 
-        host === 'localhost' || 
+      // Basic hostname checks
+      const isLocalhost = host === 'localhost' || host === 'localhost.localdomain' || host.endsWith('.localhost');
+      
+      // IPv4 private ranges and loopback
+      const isIPv4Private = 
         host === '127.0.0.1' || 
-        host === '::1' ||
         host.startsWith('10.') ||
         host.startsWith('192.168.') ||
         host.startsWith('169.254.') ||
         /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(host);
 
-      if (isPrivate) {
-        const err = new Error('SSRF Protection: Private IP ranges and localhost are forbidden for external providers.');
+      // IPv6 private ranges and loopback
+      const isIPv6Private = 
+        host === '::1' || 
+        host === '[::1]' ||
+        host.startsWith('fe80:') || 
+        host.startsWith('fc00:') || 
+        host.startsWith('fd00:') ||
+        host.includes(':ffff:127.0.0.1') ||
+        host.includes(':ffff:7f00:1');
+
+      // Common DNS-based bypasses (nip.io, sslip.io, etc.)
+      const isDnsBypass = 
+        host.includes('.127.0.0.1.') || 
+        host.includes('.10.0.0.') || 
+        host.endsWith('.nip.io') || 
+        host.endsWith('.sslip.io');
+
+      if (isLocalhost || isIPv4Private || isIPv6Private || isDnsBypass) {
+        const err = new Error(`SSRF Protection: Host ${host} is forbidden for external providers.`);
         err.status = 403;
         err.code = 'ssrf_blocked';
         throw err;
@@ -69,7 +88,7 @@ function validateProviderUrl(endpointUrl, allowLocal = false) {
     }
   } catch (e) {
     if (e.code === 'ssrf_blocked') throw e;
-    const err = new Error('Invalid URL format');
+    const err = new Error('Invalid URL format or SSRF block');
     err.status = 400;
     throw err;
   }

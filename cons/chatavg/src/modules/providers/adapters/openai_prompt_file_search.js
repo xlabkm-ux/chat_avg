@@ -214,7 +214,8 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
       try {
         const adminRouter = require('../admin/admin.routes');
         if (adminRouter.pushDebugLog) {
-          const safeParams = { ...params };
+          const { RedactionService } = require('../../policy/redaction.service');
+          const safeParams = RedactionService.redact({ ...params });
           delete safeParams.stream;
           adminRouter.pushDebugLog({
             level: 'debug',

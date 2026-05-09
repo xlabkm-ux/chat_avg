@@ -19,9 +19,13 @@ const PROVIDER_ENDPOINT_PATTERNS = [
   /^https:\/\/api\.x\.ai\//,
   /^https:\/\/dashscope\.aliyuncs\.com\//,
   /^https:\/\/api\.deepseek\.com\//,
-  /^http:\/\/127\.0\.0\.1:/,        // local litellm / llamacpp
-  /^http:\/\/localhost:/,
 ];
+
+// Local endpoints are only permitted in development/test
+if (process.env.NODE_ENV !== 'production') {
+  PROVIDER_ENDPOINT_PATTERNS.push(/^http:\/\/127\.0\.0\.1:/);
+  PROVIDER_ENDPOINT_PATTERNS.push(/^http:\/\/localhost:/);
+}
 
 class EgressPolicy {
   /**

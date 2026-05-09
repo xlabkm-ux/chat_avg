@@ -21,6 +21,12 @@ class LocalAdapter {
   get name() { return 'local'; }
 
   async provision(session) {
+    if (process.env.NODE_ENV === 'production') {
+      throw Object.assign(
+        new Error('LocalAdapter is prohibited in production. Use a secure remote sandbox adapter like E2B.'),
+        { code: 'LOCAL_ADAPTER_PROHIBITED' }
+      );
+    }
     const handle = { pid: process.pid, createdAt: Date.now() };
     this._sessions.set(session.sandboxId, handle);
     return { ...session, state: SandboxState.RUNNING, adapterHandle: handle };

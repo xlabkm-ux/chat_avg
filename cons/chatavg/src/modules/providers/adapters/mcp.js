@@ -43,8 +43,9 @@ class MCPProvider extends BaseProvider {
       if (config.temperature !== undefined) args.temperature = config.temperature;
       if (options.max_tokens) args.max_tokens = options.max_tokens;
 
+      const { RedactionService } = require('../../policy/redaction.service');
       yield ProviderEvents.delta(`[MCP_ADAPTER] Connected to ${endpointUrl}. Calling tool: ai.chat...\n`);
-      yield ProviderEvents.delta(`[MCP_ADAPTER] Payload: ${JSON.stringify(args).slice(0, 300)}...\n`);
+      yield ProviderEvents.delta(`[MCP_ADAPTER] Payload: ${JSON.stringify(RedactionService.redact(args)).slice(0, 300)}...\n`);
 
       // Call the ai.chat tool on the MCP server
       const result = await client.callTool({

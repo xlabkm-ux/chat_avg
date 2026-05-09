@@ -56,10 +56,11 @@ function errorHandler(err, req, res, _next) {
   const code = err.code || 'server_error';
   const message = err.message || 'Внутренняя ошибка сервера';
 
+  const { RedactionService } = require('../modules/policy/redaction.service');
   if (status === 500) {
-    console.error(`[CRITICAL] ${req.method} ${req.path}:`, err);
+    console.error(`[CRITICAL] ${req.method} ${req.path}:`, RedactionService.redact(err));
   } else {
-    console.warn(`[Warning] ${req.method} ${req.path}: ${message}`);
+    console.warn(`[Warning] ${req.method} ${req.path}: ${RedactionService.redact(message)}`);
   }
 
   if (res.headersSent) return;

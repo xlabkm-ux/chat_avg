@@ -50,9 +50,10 @@ router.post('/users/:username', asyncHandler(async (req, res) => {
     return res.status(400).json({ detail: err.message });
   }
 
+  const { RedactionService } = require('../policy/redaction.service');
   const parseResult = adminUserSchema.safeParse(req.body);
   if (!parseResult.success) {
-    console.error('[Admin] User validation failed:', JSON.stringify(parseResult.error.format(), null, 2));
+    console.error('[Admin] User validation failed:', JSON.stringify(RedactionService.redact(parseResult.error.format()), null, 2));
     return res.status(400).json({ detail: 'Некорректный формат данных пользователя', errors: parseResult.error.issues });
   }
   const data = parseResult.data;
@@ -174,7 +175,8 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
   
   const parseResult = categorySchema.safeParse(req.body);
   if (!parseResult.success) {
-    console.error('[Admin] Category validation failed:', parseResult.error.format());
+    const { RedactionService } = require('../policy/redaction.service');
+    console.error('[Admin] Category validation failed:', RedactionService.redact(parseResult.error.format()));
     return res.status(400).json({ detail: 'Некорректный формат данных категории', errors: parseResult.error.issues });
   }
 
@@ -418,7 +420,9 @@ const debugLogStore = [];
 const MAX_DEBUG_STORE = 500;
 
 function pushDebugLog(entry) {
-  debugLogStore.unshift(entry);
+  const { RedactionService } = require('../policy/redaction.service');
+  const redacted = RedactionService.redact(entry);
+  debugLogStore.unshift(redacted);
   if (debugLogStore.length > MAX_DEBUG_STORE) debugLogStore.pop();
 }
 
