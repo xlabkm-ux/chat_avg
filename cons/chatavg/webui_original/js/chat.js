@@ -3,7 +3,7 @@ import { $, t, showToast } from './index.js';
 import { updateContextBadge, updateTokenInfo, autoResizeTextarea, renderMarkdown, estimateTokens, getTotalDocTokens, showTypingIndicator, renderDocChip, removeDoc } from './ui.js';
 import { SessionManager } from './sessions.js';
 
-export function newChat() {
+export function newChat(reloadList = true) {
   state.chatHistory = [];
   state.attachedDocs = [];
   state.currentSessionId = null;
@@ -14,8 +14,10 @@ export function newChat() {
   $('welcome-screen')?.classList.remove('hidden');
   updateContextBadge();
   updateTokenInfo();
-  SessionManager.renderList([]);
-  SessionManager.loadList();
+  if (reloadList) {
+    SessionManager.renderList([]);
+    SessionManager.loadList();
+  }
 }
 
 export async function handleFiles(fileList) {
@@ -174,17 +176,6 @@ export async function handleSend() {
       renderMarkdown(contentEl, fullText);
     }
   }
-
-  const endTime = Date.now();
-  const duration = (endTime - startTime) / 1000;
-  const speed = duration > 0 ? (tokenCount / duration).toFixed(1) : 0;
-  
-  const statsEl = document.createElement('div');
-  statsEl.className = 'msg-meta';
-  statsEl.innerHTML = DOMPurify.sanitize(`<span>🕒 ${t('stats_time', {s: duration.toFixed(1)})}</span> 
-                       <span>💎 ${t('stats_tokens', {t: tokenCount})}</span>
-                       <span>⚡ ${t('stats_speed', {ts: speed})}</span>`);
-  msgEl.querySelector('.msg-body').appendChild(statsEl);
 
   state.chatHistory.push({ role: 'assistant', content: fullText });
   finishGeneration();

@@ -219,15 +219,55 @@
   padding-right: 4px;
 }
 
+.session-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-sm) 14px 4px;
+  margin-top: var(--sp-sm);
+}
+
 .session-group-label {
   font-size: 0.7rem;
   font-weight: 700;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: var(--sp-sm) 14px 4px;
-  margin-top: var(--sp-sm);
   opacity: 0.6;
+}
+
+.session-group-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--transition-base);
+}
+
+.session-group-header:hover .session-group-actions {
+  opacity: 1;
+}
+
+.group-action-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-base);
+}
+
+.group-action-btn:hover {
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.group-action-btn.delete:hover {
+  color: var(--danger);
+  background: rgba(239, 68, 68, 0.1);
 }
 
 .session-item {
@@ -265,7 +305,7 @@
 
 .session-actions {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   opacity: 0;
   transition: all var(--transition-base);
   margin-left: auto;

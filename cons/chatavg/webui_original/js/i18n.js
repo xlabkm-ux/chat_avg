@@ -20,7 +20,11 @@ export const I18N = {
     error_server:"Ошибка: не удалось связаться с сервером.",
     stats_time:"Время: {s}с", stats_tokens:"Токены: {t}", stats_speed:"Скорость: {ts} т/с",
     prompt_explain_code:"Проконсультируй меня: ", prompt_write_text:"Напиши краткий текст на тему: ",
-    prompt_analyze_doc:"Проанализируй загруженный документ и дай краткое изложение.", prompt_translate:"Переведи следующий текст на английский: "
+    prompt_analyze_doc:"Проанализируй загруженный документ и дай краткое изложение.", prompt_translate:"Переведи следующий текст на английский: ",
+    rename:"Переименовать", delete:"Удалить", save:"Сохранить в CSV", delete_all:"Удалить всё", save_all:"Сохранить всё в CSV",
+    confirm_delete:"Удалить этот чат?", confirm_delete_group:"Удалить все чаты в этой группе?",
+    rename_prompt:"Введите новое название чата:", export_failed:"Ошибка экспорта", delete_failed:"Ошибка удаления",
+    load_failed:"Ошибка загрузки чата", rename_failed:"Ошибка переименования"
   },
   en: {
     new_chat:"New Chat", chat:"Chat", setup:"Settings",
@@ -41,7 +45,11 @@ export const I18N = {
     error_server:"Error: could not connect to the server.",
     stats_time:"Time: {s}s", stats_tokens:"Tokens: {t}", stats_speed:"Speed: {ts} t/s",
     prompt_explain_code:"Explain how this code works: ", prompt_write_text:"Write a short text about: ",
-    prompt_analyze_doc:"Analyze the uploaded document and provide a summary.", prompt_translate:"Translate the following text to Russian: "
+    prompt_analyze_doc:"Analyze the uploaded document and provide a summary.", prompt_translate:"Translate the following text to Russian: ",
+    rename:"Rename", delete:"Delete", save:"Export CSV", delete_all:"Delete All", save_all:"Export All CSV",
+    confirm_delete:"Delete this chat?", confirm_delete_group:"Delete all chats in this group?",
+    rename_prompt:"Enter new chat title:", export_failed:"Export failed", delete_failed:"Delete failed",
+    load_failed:"Failed to load chat", rename_failed:"Failed to rename chat"
   }
 };
 
