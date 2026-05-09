@@ -207,6 +207,10 @@ class ChatService {
       }
     }
 
+    if (isStreaming) {
+      res.end();
+    }
+
     if (!isStreaming) {
       const responseData = mapper.buildResponse(modelName, fullText, finalUsage || { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 });
       responseData.choices[0].finish_reason = finalFinishReason;

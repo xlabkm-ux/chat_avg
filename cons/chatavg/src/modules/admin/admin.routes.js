@@ -53,7 +53,7 @@ router.post('/users/:username', asyncHandler(async (req, res) => {
   const parseResult = adminUserSchema.safeParse(req.body);
   if (!parseResult.success) {
     console.error('[Admin] User validation failed:', JSON.stringify(parseResult.error.format(), null, 2));
-    return res.status(400).json({ detail: 'Некорректный формат данных пользователя', errors: parseResult.error.errors });
+    return res.status(400).json({ detail: 'Некорректный формат данных пользователя', errors: parseResult.error.issues });
   }
   const data = parseResult.data;
   
@@ -175,7 +175,7 @@ router.post('/categories/:category_name', asyncHandler(async (req, res) => {
   const parseResult = categorySchema.safeParse(req.body);
   if (!parseResult.success) {
     console.error('[Admin] Category validation failed:', parseResult.error.format());
-    return res.status(400).json({ detail: 'Некорректный формат данных категории', errors: parseResult.error.errors });
+    return res.status(400).json({ detail: 'Некорректный формат данных категории', errors: parseResult.error.issues });
   }
 
   let category = await categoryRepository.findByName(catName) || {};

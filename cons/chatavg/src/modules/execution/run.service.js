@@ -49,6 +49,7 @@ class AgentRunService extends EventEmitter {
     await new Promise(r => setTimeout(r, 1000));
     await this.updateState(runId, 'requires_action', { step: 'model' });
     await new Promise(r => setTimeout(r, 1000));
+    await this.updateState(runId, 'running', { step: 'finalizing' });
     await this.updateState(runId, 'completed');
   }
 

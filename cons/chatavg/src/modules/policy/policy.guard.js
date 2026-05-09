@@ -1,5 +1,5 @@
 const { PolicyEngine } = require('./policy.engine');
-const { AuditService } = require('../audit/audit.service');
+const AuditService = require('../audit/audit.service');
 
 /**
  * PolicyGuard middleware.
@@ -34,7 +34,7 @@ function policyGuard(actionType) {
           risk_class: decision.riskClass
         },
         req.ip || req.connection.remoteAddress
-      ).catch(() => {});
+      );
     }
 
     if (decision.resolution === 'deny') {

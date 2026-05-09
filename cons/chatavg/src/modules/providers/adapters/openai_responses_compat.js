@@ -92,8 +92,6 @@ class OpenAIResponsesProvider extends BaseProvider {
               inReasoning = false;
             }
             yield ProviderEvents.delta(text);
-          } else if (event.type === 'response.reasoning_summary_text.delta') {
-            yield ProviderEvents.delta(`<think_summary>\n${event.delta}\n</think_summary>\n\n`);
           } else if (event.type === 'response.tool_call.created') {
             const toolName = event.tool_call.name;
             yield ProviderEvents.delta(`\n<tool name="${toolName}">\n`);

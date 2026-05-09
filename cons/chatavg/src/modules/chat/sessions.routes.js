@@ -46,7 +46,7 @@ const sessionSaveSchema = z.object({
 router.post('/', asyncHandler(async (req, res) => {
   const parseResult = sessionSaveSchema.safeParse(req.body);
   if (!parseResult.success) {
-    return res.status(400).json({ detail: 'Некорректный формат данных сессии', errors: parseResult.error.errors });
+    return res.status(400).json({ detail: 'Некорректный формат данных сессии', errors: parseResult.error.issues });
   }
 
   const { id, title, messages, updatedAt } = parseResult.data;
@@ -86,7 +86,7 @@ const sessionPatchSchema = z.object({
 router.patch('/:id', asyncHandler(async (req, res) => {
   const parseResult = sessionPatchSchema.safeParse(req.body);
   if (!parseResult.success) {
-    return res.status(400).json({ detail: 'Некорректный формат данных', errors: parseResult.error.errors });
+    return res.status(400).json({ detail: 'Некорректный формат данных', errors: parseResult.error.issues });
   }
 
   try {

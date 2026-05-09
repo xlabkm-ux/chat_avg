@@ -48,7 +48,7 @@ router.post('/completions', authenticate, asyncHandler(async (req, res) => {
   const parseResult = chatCompletionSchema.safeParse(req.body);
   if (!parseResult.success) {
     console.error('[Chat] Validation failed:', parseResult.error.format());
-    return res.status(400).json({ error: 'Неверный формат запроса', details: parseResult.error.errors });
+    return res.status(400).json({ error: 'Неверный формат запроса', details: parseResult.error.issues });
   }
 
   await chatController.handleCompletion(req, res);

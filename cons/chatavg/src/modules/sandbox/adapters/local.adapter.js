@@ -27,6 +27,12 @@ class LocalAdapter {
   }
 
   async runCommand(session, command, timeoutMs = 30_000) {
+    if (process.env.ALLOW_LOCAL_COMMAND_EXECUTION !== 'true') {
+      throw Object.assign(
+        new Error('Local command execution is disabled. Set ALLOW_LOCAL_COMMAND_EXECUTION=true only in trusted dev/test environments.'),
+        { code: 'LOCAL_COMMAND_EXEC_DISABLED' }
+      );
+    }
     try {
       const shell = process.platform === 'win32' ? 'cmd' : 'sh';
       const flag  = process.platform === 'win32' ? '/c' : '-c';

@@ -354,7 +354,7 @@ class SandboxManager {
 
   _emit(event, data = {}) {
     if (this.auditService && typeof this.auditService.log === 'function') {
-      this.auditService.log({ action: event, ...data }).catch(() => {});
+      this.auditService.log({ action: event, ...data });
     }
   }
 

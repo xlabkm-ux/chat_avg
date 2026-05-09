@@ -27,7 +27,7 @@ router.patch('/me', authenticate, asyncHandler(async (req, res) => {
   
   const parseResult = userPatchSchema.safeParse(req.body);
   if (!parseResult.success) {
-    return res.status(400).json({ detail: 'Некорректный формат данных', errors: parseResult.error.errors });
+    return res.status(400).json({ detail: 'Некорректный формат данных', errors: parseResult.error.issues });
   }
 
   const { password, email } = parseResult.data;

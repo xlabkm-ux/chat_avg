@@ -141,7 +141,7 @@
 - [x] ✅ Сделать bridge: simple chat → fast path, complex/mission tasks → AgentRun — 2026-05-07
 - [x] ✅ Не смешивать SessionRepository с execution history — 2026-05-07
 
-**Файлы:** `src/modules/mission/mission.repository.js`, `src/modules/mission/mission.routes.js`, `src/modules/execution/run.repository.js`, `src/modules/execution/run.service.js`, `src/modules/execution/execution.routes.js`, `src/modules/chat/chat.service.js`, `docs/04_specs/SPEC-006-AGENT_RUN_STATE_MACHINE.md`, `docs/04_specs/SPEC-007-AGENT_RUN_EVENT.md`, `docs/04_specs/SPEC-008-MISSION_MODEL.md`, `tests/agent_run.test.js`
+**Файлы:** `src/modules/mission/mission.repository.js`, `src/modules/mission/mission.routes.js`, `src/modules/execution/run.repository.js`, `src/modules/execution/rrun.service.js`, `src/modules/execution/execution.routes.js`, `src/modules/chat/chat.service.js`, `docs/04_specs/SPEC-006-AGENT_RUN_STATE_MACHINE.md`, `docs/04_specs/SPEC-007-AGENT_RUN_EVENT.md`, `docs/04_specs/SPEC-008-MISSION_MODEL.md`, `tests/agent_run.test.js`
 **Итог:** Реализована архитектура Missions и AgentRuns. Missions служат контейнером контекста, AgentRuns управляют жизненным циклом исполнения (8 состояний). Реализован SSE-стрим событий. Сделан bridge в ChatService: если в запросе передан `runId`, события дублируются в стрим агента и обновляется его стейт.
 **Deliverables:** SPEC-006, SPEC-007, SPEC-008, SSE event stream MVP, AgentRun API MVP, Semantic context attached to run.
 **Testing Gate:** State transition tests (queued->running->completed) — pass, event stream accessibility — pass, cancel run — pass.
@@ -161,7 +161,7 @@
 - [x] ✅ Добавить payload policy: small events в Temporal, large artifacts → external storage — 2026-05-07
 - [x] ✅ Написать RUNBOOK-001 restart/replay/recovery — 2026-05-07
 
-**Файлы:** `src/modules/temporal/workflows.js`, `src/modules/temporal/activities.js`, `src/modules/temporal/worker.js`, `src/modules/temporal/client.js`, `src/modules/execution/run.service.js`, `package.json`, `docs/04_specs/SPEC-009-DURABLE_RUNTIME.md`, `docs/09_runbooks/RUNBOOK-001-TEMPORAL_RECOVERY.md`
+**Файлы:** `src/modules/temporal/workflows.js`, `src/modules/temporal/activities.js`, `src/modules/temporal/worker.js`, `src/modules/temporal/client.js`, `src/modules/execution/rrun.service.js`, `package.json`, `docs/04_specs/SPEC-009-DURABLE_RUNTIME.md`, `docs/09_runbooks/RUNBOOK-001-TEMPORAL_RECOVERY.md`
 **Deliverables:** SPEC-009, Temporal worker MVP, AgentRun workflow v0, RUNBOOK-001.
 **Testing Gate:** Worker restart/replay, approval signal, cancellation, Temporal unavailable degradation.
 
@@ -477,22 +477,6 @@
 **Testing Gate:** `npm test` all pass, `npm run test:latency` TTFT P95 < 200ms — pass.
 
 ---
-
-### Sprint R8: QA, observability and release readiness — ✅ Завершён 2026-05-08
-*Цель: Перейти от placeholders к реальным метрикам, нагрузочному тестированию и проверке готовности к релизу.*
-
-**Задачи:**
-- [x] ✅ Реальный дашборд: замена placeholders на данные из `MetricsService` и `SandboxManager` — 2026-05-08
-- [x] ✅ Trace Bus hardening: инъекция трейсов во все ключевые компоненты (Model, RAG, Tools, Sandbox) — 2026-05-08
-- [x] ✅ Load testing harness: скрипты для симуляции нагрузки и проверки сбора метрик — 2026-05-08
-- [x] ✅ Chaos testing harness: симуляция сбоев и проверка устойчивости observability — 2026-05-08
-- [x] ✅ Eval reporting: автоматическое сохранение результатов в `EVALS_REPORT.json` — 2026-05-08
-- [x] ✅ Release Readiness: создание `SPEC-024` (Checklist) и `RUNBOOK-003` (Rollback) — 2026-05-08
-
-**Итог:** Система полностью наблюдаема. Дашборд показывает реальные P95 latency, error rate и состояние песочниц. Проведены нагрузочные тесты, подтвердившие корректность сбора телеметрии.
-**Deliverables:** `MetricsService`, `LoadHarness`, `ChaosHarness`, `SPEC-024`, `RUNBOOK-003`, `EVALS_REPORT.json`.
-**Testing Gate:** `node verify_dashboard.js` — pass.
-
 ---
 
 ### Sprint R9: Provider UX Hardening & Debug Infrastructure — ✅ Завершён (2026-05-09)
@@ -541,65 +525,98 @@
 
 ---
 
-## 🏁 Финальная траектория релиза (Sprint F-Series)
-*Подробный план с описанием каждой задачи: [workdoc/ChatAVG_v2.3_Final_Release_Path.md](workdoc/ChatAVG_v2.3_Final_Release_Path.md)*
+---
 
-### Sprint F1: Критические баги кода (P0)
-- [ ] F1.1: sandbox.routes.js — operation устанавливается после policyGuard
-- [ ] F1.2: Streaming — соединение зависает (нет res.end() после [DONE])
-- [ ] F1.3: AgentRun — нелегальный переход requires_action → completed
-- [ ] F1.4: openai_responses_compat — дублирующаяся ветка reasoning_summary
-- [ ] F1.5: LocalAdapter — выполнение sh -c без env-guard
+## 🏁 RC1 Stabilization Plan (Активный план)
 
-### Sprint F2: Безопасность ядра (P0 Security)
-- [ ] F2.1: Secure Admin Boot (fail-fast при старте без пароля)
-- [ ] F2.2: Sandbox fail-closed в production (LocalAdapter запрещён)
-- [ ] F2.3: SSRF Guard — аудит и unit-тест validateProviderUrl
-- [ ] F2.4: Idempotency keys TTL (очистка устаревших ключей)
+**Эталонный документ:** [workdoc/ChatAVG_v2.3_RC1_Stabilization_Plan.md](workdoc/ChatAVG_v2.3_RC1_Stabilization_Plan.md)
 
-### Sprint F3: Проектная гигиена и тестовый контур
-- [ ] F3.1: ROOT package.json (точка входа проекта)
-- [ ] F3.2: npm test scripts — добавить policy/knowledge/execution/tools/remediation
-- [ ] F3.3: README.md Quick Start секция
-- [ ] F3.4: README для cons/chatavg
+> **Правило:** Каждый спринт = код + тесты + отладка + git commit && git push. Без прохождения gate — следующий спринт не начинается.
 
-### Sprint F4: MCP Gateway hardening
-- [ ] F4.1: SSE Streaming в ai.chat и ai.responses
-- [ ] F4.2: Tool Call события (file_search, web_search) в ответе
-- [ ] F4.3: Системные сообщения — не теряются при system role
-- [ ] F4.4: web_search_call обработка в openai_prompt_file_search
+### Sprint R1: P0 Runtime & Sandbox Safety
+- [ ] R1.1: sandbox.routes.js — policyGuard видит пустой operation
+- [ ] R1.2: local.adapter.js — запретить host command execution без флага
+- [ ] R1.3: chat.service.js — res.end() после [DONE]
+- [ ] R1.4: run.service.js — нелегальный переход requires_action → completed
+- [ ] R1.5: openai_responses_compat.js — удалить дублирующую ветку
+- [ ] R1.6: Zod v4 — заменить error.errors на error.issues
+- **Gate:** test:unit + test:contract + test:security:smoke + test:sandbox + test:integration:smoke
+- **Git:** git commit -m "Fix(R1): P0 runtime bugs and sandbox execution safety" && git push
 
-### Sprint F5: Durable Runtime (Temporal)
-- [ ] F5.1: Hardened Temporal Activities (замена моков)
-- [ ] F5.2: Workflow Replay Safety (аудит детерминизма)
-- [ ] F5.3: AgentRun Events 100% coverage
+### Sprint R2: Core Security
+- [ ] R2.1: Secure Admin Boot (fail-fast без CHATAVG_ADMIN_PASSWORD в production)
+- [ ] R2.2: Sandbox fail-closed (LocalAdapter запрещён в production)
+- [ ] R2.3: SSRF Guard tests (127.x, 10.x, 172.16-31.x, 192.168.x, 169.254.x)
+- [ ] R2.4: Secret logging audit (API keys, JWT, passwords не в логах)
+- **Gate:** test:security + test:integration:smoke
+- **Git:** git commit -m "Fix(R2): Core security fail-closed behavior and SSRF tests" && git push
 
-### Sprint F6: Knowledge Gateway — реальный RAG
-- [ ] F6.1: Production SQLite FTS5 Retriever
-- [ ] F6.2: Ingestion Pipeline
-- [ ] F6.3: Answerability Policy
-- [ ] F6.4: Citation Validation
+### Sprint R3: Project Entry & Test Harness
+- [ ] R3.1: ROOT package.json (setup/gateway/worker/test)
+- [ ] R3.2: Расширить test scripts (policy/knowledge/execution/tools/remediation)
+- [ ] R3.3: README.md Quick Start секция
+- [ ] R3.4: cons/chatavg/README.md (env vars, modules, safety checklist)
+- **Gate:** 
+npm run setup && npm test + все новые test:* скрипты
+- **Git:** git commit -m "Chore(R3): Root package.json, expanded tests, README quick start" && git push
 
-### Sprint F7: Semantic Layer стабилизация
-- [ ] F7.1: Persistent Claim Ledger (100% SQLite)
-- [ ] F7.2: Artifact Versioning and Diff
-- [ ] F7.3: Hybrid Extraction stabilization
+### Sprint R4: Minimal Provider / MCP Compatibility
+- [ ] R4.1: System messages не теряются (system → instructions если нет prompt.id)
+- [ ] R4.2: web_search_call / file_search_call не ломают stream (safe ignore + debug log)
+- [ ] R4.3: Debug log показывает финальные params (instructions, input, tools, model)
+- **Gate:** test:unit + test:contract + ручные проверки
+- **Git:** git commit -m "Fix(R4): Minimal provider and MCP compatibility for RC1" && git push
 
-### Sprint F8: UX/UI доводка
-- [ ] F8.1: Canonical Error UI/UX
-- [ ] F8.2: Latency Optimization (TTFT < 500ms)
-- [ ] F8.3: Admin Dashboard — Cost/Quality charts
-- [ ] F8.4: Mobile Audit (iOS/Android)
+### Sprint R5: RC1 QA & Release Report
+- [ ] R5.1: Full regression (
+npm run test:release — green)
+- [ ] R5.2: Security red-team RC1 scope (bypass, sandbox, SSRF, injection, Zod, SSE)
+- [ ] R5.3: SSE smoke/load (50 parallel sessions, disconnect, provider failure)
+- [ ] R5.4: RC1 Report → docs/05_delivery/RELEASE_CANDIDATE_REPORT_RC1.md
+- **Gate:** test:release + test:security + manual red-team pass
+- **Git:** git commit -m "QA(R5): RC1 regression, security checks, and release candidate report" && git push
 
-### Sprint F9: Full QA and Release Candidate
-- [ ] F9.1: Full Regression Suite (все 12+ категорий тестов)
-- [ ] F9.2: Security Red-Teaming
-- [ ] F9.3: Load and Chaos Testing
-- [ ] F9.4: Release Candidate Report
+---
 
-### Sprint F10: Production Handover
-- [ ] F10.1: MIGRATION-002 выполнение
-- [ ] F10.2: Shadow Deployment and Canary
-- [ ] F10.3: Production Environment Checklist
-- [ ] F10.4: Final Operations Handover
+## 🗺️ Post-RC1 Roadmap
+
+### RC2 — Durable Runtime & Knowledge
+- Hardened Temporal activities (замена моков)
+- Workflow replay safety
+- Production SQLite FTS5 retriever
+- Ingestion pipeline
+- Answerability policy
+- Citation validation
+
+### RC3 — Semantic Layer & UX
+- Persistent Claim Ledger
+- Artifact versioning and diff view
+- Semantic extraction tuning
+- Canonical error UX
+- Admin dashboard charts
+- Mobile audit
+- Latency optimization (TTFT < 500ms)
+
+### Production Handover (после RC1 sign-off + RC2/RC3)
+- DB migration (MIGRATION-002)
+- Shadow deployment
+- Canary rollout
+- Production checklist
+- Handover docs
+
+---
+
+## 📊 RC1 Release Gates
+
+| Gate | Критерий | Статус |
+|---|---|---|
+| G0 Runtime | P0 runtime bugs fixed | 🔴 |
+| G1 Sandbox Safety | No unguarded host command execution | 🔴 |
+| G2 Security Boot | Production fail-fast works | 🔴 |
+| G3 Project Entry | Root setup/test/start works | 🔴 |
+| G4 Provider Compat | system/search/tool events do not break flow | 🔴 |
+| G5 Regression | test:release green | 🔴 |
+| G6 Security | test:security green + red-team pass | 🔴 |
+| G7 Report | RC1 report committed | 🔴 |
+
 
