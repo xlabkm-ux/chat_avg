@@ -19,9 +19,15 @@
     "eval:rag": "node tests/evals/rag.eval.js",
     "eval:full": "npm run eval:semantic:full && npm run eval:rag",
     "test:sandbox": "node --test tests/sandbox/sandbox_manager.test.js",
+    "test:policy": "node --test tests/policy/*.test.js",
+    "test:knowledge": "node --test tests/knowledge/*.test.js",
+    "test:execution": "node --test tests/execution/*.test.js",
+    "test:tools": "node --test tests/tools/*.test.js",
+    "test:remediation": "node --test tests/remediation/*.test.js",
+    "test:semantic": "node --test tests/semantic/*.test.js",
     "test:pr": "node --test tests/provider_events.test.js tests/errors.test.js tests/deterministic_provider.test.js tests/contract_canonical_event.test.js tests/fast_path_guardrail.test.js tests/security_assertions.test.js tests/health.test.js tests/sandbox/sandbox_manager.test.js",
-    "test:nightly": "node --test tests/*.test.js tests/semantic/*.test.js tests/sandbox/*.test.js",
-    "test:release": "node --test tests/*.test.js tests/semantic/*.test.js tests/sandbox/*.test.js && node tests/semantic/semantic.eval.js"
+    "test:nightly": "node --test tests/*.test.js tests/semantic/*.test.js tests/sandbox/*.test.js tests/policy/*.test.js tests/knowledge/*.test.js tests/execution/*.test.js tests/tools/*.test.js",
+    "test:release": "node --test tests/*.test.js tests/semantic/*.test.js tests/sandbox/*.test.js tests/policy/*.test.js tests/knowledge/*.test.js tests/execution/*.test.js tests/tools/*.test.js && node tests/semantic/semantic.eval.js"
   },
   "dependencies": {
     "@e2b/code-interpreter": "^2.4.2",
@@ -33,6 +39,7 @@
     "@temporalio/workflow": "^1.17.0",
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^12.9.0",
+    "chatavg-platform": "file:../..",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^4.21.0",

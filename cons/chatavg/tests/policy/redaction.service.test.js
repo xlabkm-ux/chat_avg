@@ -8,6 +8,7 @@ describe('RedactionService', () => {
     const result = RedactionService.redact(input);
     assert.match(result, /\[REDACTED_SECRET\]/);
     assert.doesNotMatch(result, /sk-1234567890abcdef123/);
+    assert.match(result, /Bearer \[REDACTED\]/);
   });
 
   it('should redact secrets in objects', () => {

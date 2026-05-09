@@ -15,8 +15,8 @@ class RedactionService {
     // 4. Basic Auth headers
     const secretsRegex = [
       /(Bearer\s+)[A-Za-z0-9\-\._~\+\/]{10,}/gi,
-      /(sk-[a-zA-Z0-9]{20,})/gi,
-      /((api[_\-]?)?key[=:]\s*['"]?)[a-zA-Z0-9\-_]{16,}(['"]?)/gi,
+      /sk-[a-zA-Z0-9]{15,}/gi,
+      /((?:api[_\-]?)?key[=:]\s*['"]?)[a-zA-Z0-9\-_]{12,}(['"]?)/gi,
       /(password[=:]\s*['"]?)[^'"\s]{4,}(['"]?)/gi,
       /(Authorization:\s*Basic\s+)[A-Za-z0-9\+/=]{5,}/gi
     ];
@@ -24,8 +24,14 @@ class RedactionService {
     if (typeof payload === 'string') {
       let result = payload;
       for (const regex of secretsRegex) {
-        result = result.replace(regex, (match, group1) => {
-          return group1 ? group1 + '[REDACTED]' : '[REDACTED_SECRET]';
+        result = result.replace(regex, (match, ...args) => {
+          // In JS replace callback: (match, p1, p2, ..., offset, string)
+          // If p1 is a string, it's a capture group. If it's a number, it's the offset (meaning no groups).
+          const group1 = args[0];
+          if (typeof group1 === 'string') {
+            return group1 + '[REDACTED]';
+          }
+          return '[REDACTED_SECRET]';
         });
       }
       return result;

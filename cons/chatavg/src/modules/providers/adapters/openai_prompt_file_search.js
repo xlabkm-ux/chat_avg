@@ -26,13 +26,19 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
 
   _convertMessages(messages = []) {
     const input = [];
+    let instructions = '';
 
     for (const msg of messages) {
-      if (!msg || !msg.role || msg.role === 'system') continue;
+      if (!msg || !msg.role) continue;
 
       const text = Array.isArray(msg.content)
         ? msg.content.map(part => part.text || part.content || '').join('\n')
         : String(msg.content || '');
+
+      if (msg.role === 'system') {
+        instructions += (instructions ? '\n' : '') + text;
+        continue;
+      }
 
       if (!text) continue;
 
@@ -49,7 +55,7 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
       }
     }
 
-    return input;
+    return { input, instructions };
   }
 
   _normalizeVectorStoreIds(extraParams = {}) {
@@ -76,10 +82,12 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
     const prompt = extraParams.prompt || config.prompt;
     const vectorStoreIds = this._normalizeVectorStoreIds(extraParams);
 
+    const { input, instructions: systemFromHistory } = this._convertMessages(messages);
+
     const params = {
       input: Object.prototype.hasOwnProperty.call(extraParams, 'input')
         ? extraParams.input
-        : this._convertMessages(messages),
+        : input,
 
       reasoning: extraParams.reasoning || { summary: 'auto' },
 
@@ -100,6 +108,8 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
 
       stream: !!options.stream,
     };
+
+    if (systemFromHistory) params.instructions = systemFromHistory;
 
     // 1. Mapping from config/options
     const maxTokens = options.max_tokens || config.max_tokens;
@@ -211,20 +221,10 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
 
     // Debug logging (only when debug_mode is enabled for this category)
     if (config.debug_mode) {
-      try {
-        const adminRouter = require('../admin/admin.routes');
-        if (adminRouter.pushDebugLog) {
-          const { RedactionService } = require('../../policy/redaction.service');
-          const safeParams = RedactionService.redact({ ...params });
-          delete safeParams.stream;
-          adminRouter.pushDebugLog({
-            level: 'debug',
-            provider: 'openai_prompt_file_search',
-            message: `REQUEST PARAMS:\n${JSON.stringify(safeParams, null, 2)}`,
-            ts: Date.now()
-          });
-        }
-      } catch (e) { /* non-critical */ }
+      const { RedactionService } = require('../../policy/redaction.service');
+      const safeParams = RedactionService.redact({ ...params });
+      delete safeParams.stream;
+      this._pushDebugLog(config, 'debug', `REQUEST PARAMS:\n${JSON.stringify(safeParams, null, 2)}`);
     }
 
     try {
@@ -262,11 +262,36 @@ class OpenAIPromptFileSearchProvider extends BaseProvider {
               name: 'file_search',
               arguments: JSON.stringify({ status: event.item.status || 'started' }),
             });
+          } else if (
+            event.type === 'response.output_item.added' &&
+            event.item?.type === 'web_search_call'
+          ) {
+            // R4.2: web_search_call safe ignore + debug log
+            if (config.debug_mode) {
+              this._pushDebugLog(config, 'debug', `WEB_SEARCH_CALL (ignored): ${event.item.id}`);
+            }
+            yield ProviderEvents.toolCall({
+              id: event.item.id,
+              name: 'web_search',
+              arguments: JSON.stringify({ status: event.item.status || 'started' }),
+            });
           } else if (event.type === 'response.completed') {
             yield ProviderEvents.done('stop', this._normalizeUsage(event.response?.usage));
             return;
           } else if (event.type === 'response.failed') {
             throw new Error(event.response?.error?.message || 'OpenAI response failed');
+          } else {
+            // R4.2: Catch-all for other events to avoid breaking stream
+            const noisyEvents = [
+              'response.created', 
+              'response.output_item.done', 
+              'response.done',
+              'response.content_part.added',
+              'response.content_part.done'
+            ];
+            if (config.debug_mode && event.type && !noisyEvents.includes(event.type)) {
+              this._pushDebugLog(config, 'debug', `UNHANDLED EVENT: ${event.type}\n${JSON.stringify(event, null, 2)}`);
+            }
           }
         }
 

@@ -104,6 +104,27 @@ class BaseProvider {
   async getModels(config) {
     return this.models;
   }
+
+  /**
+   * Internal helper for debug logging to the admin panel
+   */
+  _pushDebugLog(config, level, message) {
+    if (!config || !config.debug_mode) return;
+    try {
+      // Lazy load to avoid circular deps if any, and only if we are in node env with admin routes
+      const adminRouter = require('../admin/admin.routes');
+      if (adminRouter && typeof adminRouter.pushDebugLog === 'function') {
+        adminRouter.pushDebugLog({
+          level,
+          provider: this.id,
+          message,
+          ts: Date.now()
+        });
+      }
+    } catch (e) {
+      // Fail silently, debug logging is non-critical
+    }
+  }
 }
 
 module.exports = BaseProvider;

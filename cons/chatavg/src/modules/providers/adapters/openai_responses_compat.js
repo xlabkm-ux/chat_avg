@@ -72,6 +72,16 @@ class OpenAIResponsesProvider extends BaseProvider {
     if (instructions) params.instructions = instructions;
     params.input = input;
 
+    // Debug logging (only when debug_mode is enabled for this category)
+    if (config.debug_mode) {
+      try {
+        const { RedactionService } = require('../../policy/redaction.service');
+        const safeParams = RedactionService.redact({ ...params });
+        delete safeParams.stream;
+        this._pushDebugLog(config, 'debug', `REQUEST PARAMS:\n${JSON.stringify(safeParams, null, 2)}`);
+      } catch (e) { /* non-critical */ }
+    }
+
     try {
       if (params.stream) {
         const stream = await client.responses.create(params);
@@ -97,6 +107,25 @@ class OpenAIResponsesProvider extends BaseProvider {
             yield ProviderEvents.delta(`\n<tool name="${toolName}">\n`);
           } else if (event.type === 'response.tool_call.output') {
             yield ProviderEvents.delta(`\n</tool>\n\n`);
+          } else if (event.type === 'response.output_item.added') {
+             // Safe ignore search/etc calls if they appear here
+             if (config.debug_mode && event.item?.type) {
+               this._pushDebugLog(config, 'debug', `ITEM ADDED (ignored): ${event.item.type} ${event.item.id || ''}`);
+             }
+          } else if (event.type === 'response.failed') {
+             throw new Error(event.response?.error?.message || 'OpenAI response failed');
+          } else {
+            // Catch-all to avoid breaking stream
+            const noisyEvents = [
+              'response.created', 
+              'response.output_item.done', 
+              'response.done',
+              'response.content_part.added',
+              'response.content_part.done'
+            ];
+            if (config.debug_mode && event.type && !noisyEvents.includes(event.type)) {
+              this._pushDebugLog(config, 'debug', `UNHANDLED EVENT: ${event.type}`);
+            }
           }
         }
         yield ProviderEvents.done('stop');

@@ -551,20 +551,20 @@
 - **Gate:** test:security + test:integration:smoke — ✅ Pass
 - **Git:** git commit -m "Fix(R2): Core security fail-closed behavior and SSRF tests" && git push
 
-### Sprint R3: Project Entry & Test Harness
-- [ ] R3.1: ROOT package.json (setup/gateway/worker/test)
-- [ ] R3.2: Расширить test scripts (policy/knowledge/execution/tools/remediation)
-- [ ] R3.3: README.md Quick Start секция
-- [ ] R3.4: cons/chatavg/README.md (env vars, modules, safety checklist)
+### Sprint R3: Project Entry & Test Harness — ✅ Завершён (2026-05-09)
+- [x] R3.1: ROOT package.json (setup/gateway/worker/test) — 2026-05-09
+- [x] R3.2: Расширить test scripts (policy/knowledge/execution/tools/remediation) — 2026-05-09
+- [x] R3.3: README.md Quick Start секция — 2026-05-09
+- [x] R3.4: cons/chatavg/README.md (env vars, modules, safety checklist) — 2026-05-09
 - **Gate:** 
-npm run setup && npm test + все новые test:* скрипты
+npm run setup && npm test + все новые test:* скрипты — ✅ Pass
 - **Git:** git commit -m "Chore(R3): Root package.json, expanded tests, README quick start" && git push
 
-### Sprint R4: Minimal Provider / MCP Compatibility
-- [ ] R4.1: System messages не теряются (system → instructions если нет prompt.id)
-- [ ] R4.2: web_search_call / file_search_call не ломают stream (safe ignore + debug log)
-- [ ] R4.3: Debug log показывает финальные params (instructions, input, tools, model)
-- **Gate:** test:unit + test:contract + ручные проверки
+### Sprint R4: Minimal Provider / MCP Compatibility — ✅ Завершён (2026-05-09)
+- [x] R4.1: System messages не теряются (system → instructions если нет prompt.id) — 2026-05-09
+- [x] R4.2: web_search_call / file_search_call не ломают stream (safe ignore + debug log) — 2026-05-09
+- [x] R4.3: Debug log показывает финальные params (instructions, input, tools, model) — 2026-05-09
+- **Gate:** test:unit + test:contract + ручные проверки — ✅ Pass
 - **Git:** git commit -m "Fix(R4): Minimal provider and MCP compatibility for RC1" && git push
 
 ### Sprint R5: RC1 QA & Release Report
@@ -613,8 +613,8 @@ npm run test:release — green)
 | G0 Runtime | P0 runtime bugs fixed | 🔴 |
 | G1 Sandbox Safety | No unguarded host command execution | 🔴 |
 | G2 Security Boot | Production fail-fast works | ✅ |
-| G3 Project Entry | Root setup/test/start works | 🔴 |
-| G4 Provider Compat | system/search/tool events do not break flow | 🔴 |
+| G3 Project Entry | Root setup/test/start works | ✅ |
+| G4 Provider Compat | system/search/tool events do not break flow | ✅ |
 | G5 Regression | test:release green | 🔴 |
 | G6 Security | test:security green + red-team pass | ✅ |
 | G7 Report | RC1 report committed | 🔴 |

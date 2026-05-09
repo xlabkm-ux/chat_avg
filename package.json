@@ -4,11 +4,22 @@
   "description": "ChatAVG: Semantic Agent Platform",
   "private": true,
   "scripts": {
+    "setup": "npm install --prefix cons/chatavg && npm install --prefix cons/mcp_gateway",
     "start": "npm run start --prefix cons/chatavg",
     "gateway": "npm run start --prefix cons/mcp_gateway",
     "worker": "npm run worker --prefix cons/chatavg",
     "test": "npm run test:release --prefix cons/chatavg",
-    "setup": "npm install --prefix cons/chatavg && npm install --prefix cons/mcp_gateway"
+    "test:unit": "npm run test:unit --prefix cons/chatavg",
+    "test:contract": "npm run test:contract --prefix cons/chatavg",
+    "test:security": "npm run test:security --prefix cons/chatavg",
+    "test:policy": "npm run test:policy --prefix cons/chatavg",
+    "test:knowledge": "npm run test:knowledge --prefix cons/chatavg",
+    "test:execution": "npm run test:execution --prefix cons/chatavg",
+    "test:tools": "npm run test:tools --prefix cons/chatavg",
+    "test:remediation": "npm run test:remediation --prefix cons/chatavg",
+    "test:sandbox": "npm run test:sandbox --prefix cons/chatavg",
+    "test:semantic": "npm run test:semantic --prefix cons/chatavg",
+    "test:all": "npm run test:release && npm run test:remediation"
   },
   "engines": {
     "node": ">=20.0.0"

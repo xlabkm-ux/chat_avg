@@ -20,6 +20,30 @@
 - **Inference:** OpenAI (Responses API), llama.cpp, LiteLLM.
 - **Frontend:** Vanilla JS / HTML / CSS.
 
+## 🚀 Быстрый старт (Quick Start)
+1.  **Настройка окружения:**
+    ```bash
+    npm run setup
+    ```
+2.  **Запуск шлюза (MCP Gateway):**
+    ```bash
+    npm run gateway
+    ```
+3.  **Запуск основного приложения (ChatAVG):**
+    ```bash
+    npm run start
+    ```
+4.  **Запуск воркера (Temporal):**
+    ```bash
+    npm run worker
+    ```
+
+## 🧪 Тестирование
+- `npm test` — запуск всех тестов (релизный цикл).
+- `npm run test:unit` — только модульные тесты.
+- `npm run test:security` — проверка безопасности.
+- `npm run test:all` — полный прогон, включая тесты исправлений (remediation).
+
 ## 🚦 План развития
 
 Актуальный план подготовки к релизу находится здесь:
