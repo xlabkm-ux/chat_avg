@@ -20,6 +20,9 @@ let sessionId = 'durability-session-' + Date.now();
 let missionId;
 const adminPass = 'TestAdminPass123!';
 
+// Mock background execution to prevent interference with state machine tests
+runService.inMemoryExecution = async () => { /* do nothing */ };
+
 test('AgentRun Durability & State Machine Tests', async (t) => {
   t.before((done) => {
     const hash = bcrypt.hashSync(adminPass, 10);
@@ -126,8 +129,11 @@ test('AgentRun Durability & State Machine Tests', async (t) => {
 
   await t.test('SSE Recoverability: sinceEventId', async () => {
     const run = await runService.createRun(missionId, {}, 'admin');
+    await new Promise(r => setTimeout(r, 50));
     runService.emitEvent(run.id, 'event.1', { n: 1 });
+    await new Promise(r => setTimeout(r, 50));
     runService.emitEvent(run.id, 'event.2', { n: 2 });
+    await new Promise(r => setTimeout(r, 50));
     runService.emitEvent(run.id, 'event.3', { n: 3 });
 
     const allEvents = runRepository.getEvents(run.id);

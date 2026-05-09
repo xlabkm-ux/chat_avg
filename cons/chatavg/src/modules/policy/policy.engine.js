@@ -82,7 +82,7 @@ class PolicyEngine {
       }
     } else if (action.type === 'sandbox_operation') {
       const op = action.payload?.operation || '';
-      if (['run', 'snapshot'].includes(op)) {
+      if (['run', 'snapshot', 'assign'].includes(op)) {
         riskScore = 80;
         riskClass = RiskClass.CODE_EXECUTION;
         resolution = 'require_approval';
@@ -93,6 +93,11 @@ class PolicyEngine {
         riskClass = RiskClass.PRIVILEGED;
         resolution = 'allow'; // termination is generally safe but privileged
         reason = 'Sandbox lifecycle operation allowed.';
+      } else {
+        resolution = 'deny';
+        reason = `Invalid or missing sandbox operation: ${op}`;
+        riskScore = 100;
+        riskClass = RiskClass.PRIVILEGED;
       }
     } else if (action.type === 'agent_run') {
       riskScore = 40;

@@ -1,4 +1,6 @@
 'use strict';
+process.env.ALLOW_LOCAL_COMMAND_EXECUTION = 'true';
+
 /**
  * SandboxManager Integration Tests
  * SPEC-019 Testing Gate:

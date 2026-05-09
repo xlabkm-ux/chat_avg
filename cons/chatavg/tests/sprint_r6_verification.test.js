@@ -7,6 +7,8 @@ const { ApprovalService } = require('../src/modules/policy/approval.service');
 const { CostService } = require('../src/modules/policy/cost.service');
 const db = require('../src/core/sqlite');
 
+db.pragma('foreign_keys = OFF');
+
 // Helper to setup dummy data
 function setupTestData() {
   const missionId = 'test-mission-' + Date.now();

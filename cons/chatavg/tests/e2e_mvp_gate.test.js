@@ -102,7 +102,7 @@ test('Sprint 9 MVP Release Gate - E2E Flow', async (t) => {
   await t.test('5. Semantic Claim Extraction', async () => {
     const { DomainBoundary } = require('../src/modules/semantic/domain.boundary');
     const extractor = new ClaimExtractor();
-    const rawClaims = extractor.extractClaims('Пользователь утверждает, что у него диагностирована депрессия.', sessionId);
+    const rawClaims = await extractor.extractClaims('Пользователь утверждает, что у него диагностирована депрессия.', sessionId);
     
     const boundary = new DomainBoundary();
     const result = boundary.enforceBoundaries(rawClaims);

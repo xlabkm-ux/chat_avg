@@ -3,6 +3,9 @@ const assert = require('node:assert');
 const { ToolRegistry, ToolDefinitionVersion, RiskClass } = require('../../src/modules/tools/tool.registry');
 const { ToolGateway, ToolCallState } = require('../../src/modules/tools/tool.gateway');
 const { ProviderError } = require('../../src/modules/providers/providerErrors');
+const db = require('../../src/core/sqlite');
+
+db.exec('PRAGMA foreign_keys = OFF');
 
 describe('MCP Tool Gateway & Versioned Registry', () => {
   test('ToolRegistry cache key generation and retrieval', () => {
@@ -41,7 +44,7 @@ describe('MCP Tool Gateway & Versioned Registry', () => {
     const gateway = new ToolGateway(registry);
 
     try {
-      await gateway.executeTool(def.cacheKey, { path: 'test.txt' }, null, async () => true);
+      await gateway.executeTool(def.cacheKey, { path: 'test.txt' }, 'test-run', null, async () => true);
       assert.fail('Should have thrown an error');
     } catch (err) {
       assert.strictEqual(err.message, 'IdempotencyKey is required for side-effect tools');
@@ -66,7 +69,7 @@ describe('MCP Tool Gateway & Versioned Registry', () => {
       return { content: 'hello' };
     };
 
-    const call = await gateway.executeTool(def.cacheKey, { path: 'test.txt' }, null, mcpExecutorFn);
+    const call = await gateway.executeTool(def.cacheKey, { path: 'test.txt' }, 'test-run', null, mcpExecutorFn);
 
     assert.strictEqual(executed, true);
     assert.strictEqual(call.state, ToolCallState.COMPLETED);
@@ -90,7 +93,7 @@ describe('MCP Tool Gateway & Versioned Registry', () => {
     };
 
     try {
-      await gateway.executeTool(def.cacheKey, {}, null, mcpExecutorFn);
+      await gateway.executeTool(def.cacheKey, {}, 'test-run', null, mcpExecutorFn);
       assert.fail('Should have timed out');
     } catch (err) {
       assert.strictEqual(err.message, 'Tool execution timed out');

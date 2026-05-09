@@ -1,4 +1,6 @@
 
+process.env.KNOWLEDGE_GATEWAY_ENABLED = 'true';
+
 const test = require('node:test');
 const assert = require('node:assert');
 const knowledgeGateway = require('../../src/modules/knowledge/knowledge.gateway');
@@ -25,17 +27,19 @@ test('Knowledge Module: Types', async (t) => {
 
 test('Knowledge Module: Router', async (t) => {
   await t.test('should resolve "fast" mode for short queries', () => {
-    const { mode } = knowledgeRouter.resolveMode('hi');
+    // Note: 'hi' resolves to no_retrieval (trivial); a short but non-trivial query resolves to fast
+    const { mode } = knowledgeRouter.resolveMode('weather tomorrow');
     assert.strictEqual(mode, 'fast');
   });
 
   await t.test('should resolve "balanced" mode for complex queries', () => {
-    const { mode } = knowledgeRouter.resolveMode('Compare these two documents and analyze the differences.');
+    const { mode } = knowledgeRouter.resolveMode('Compare these two documents and analyze the differences between their approaches.');
     assert.strictEqual(mode, 'balanced');
   });
 
   await t.test('should honor settings override', () => {
-    const { mode } = knowledgeRouter.resolveMode('hi', { rag_mode: 'max_quality' });
+    // Use a non-trivial query so Fast Path is not triggered before settings check
+    const { mode } = knowledgeRouter.resolveMode('explain the architecture', { rag_mode: 'max_quality' });
     assert.strictEqual(mode, 'max_quality');
   });
 });

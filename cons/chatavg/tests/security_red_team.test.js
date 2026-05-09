@@ -10,6 +10,9 @@ const { ToolRegistry } = require('../src/modules/tools/tool.registry');
 const missionRepository = require('../src/modules/mission/mission.repository');
 const db = require('../src/core/sqlite');
 
+// Disable FK constraints for unit-level security tests (no test DB fixtures)
+db.exec('PRAGMA foreign_keys = OFF');
+
 // 1. Tool Escalation & Idempotency Bypass
 test('Security: Tool Escalation & Idempotency Bypass', async (t) => {
   const registry = new ToolRegistry();
@@ -27,7 +30,7 @@ test('Security: Tool Escalation & Idempotency Bypass', async (t) => {
 
   await t.test('rejects high-risk tool call without idempotency key', async () => {
     try {
-      await gateway.executeTool(definition.cacheKey, { db: 'prod' }, null);
+      await gateway.executeTool(definition.cacheKey, { db: 'prod' }, 'test-run-id');
       assert.fail('Should have thrown an error for missing idempotency key');
     } catch (err) {
       assert.match(err.message, /IdempotencyKey is required/);

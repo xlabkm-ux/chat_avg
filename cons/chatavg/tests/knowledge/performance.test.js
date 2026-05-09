@@ -1,4 +1,6 @@
 
+process.env.KNOWLEDGE_GATEWAY_ENABLED = 'true';
+
 const test = require('node:test');
 const assert = require('node:assert');
 const knowledgeGateway = require('../../src/modules/knowledge/knowledge.gateway');

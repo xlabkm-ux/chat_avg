@@ -187,15 +187,18 @@ class ChatService {
             });
           }
         } else if (event.type === 'done') {
-          const chunk = mapper.buildChunk(modelName, '', event.finishReason || 'stop');
+          finalUsage = event.usage;
+          finalFinishReason = event.finishReason || 'stop';
+          const chunk = mapper.buildChunk(modelName, '', finalFinishReason);
           res.write(`data: ${JSON.stringify(chunk)}\n\n`);
           res.write('data: [DONE]\n\n');
           if (runId && AGENT_RUNS_ENABLED) {
              getAgentRunService().emitEvent(runId, 'model.step_completed', { 
-               finishReason: event.finishReason || 'stop',
-               usage: event.usage 
+               finishReason: finalFinishReason,
+               usage: finalUsage 
              });
           }
+          break;
         }
       } else {
         if (event.type === 'delta') {
@@ -234,7 +237,11 @@ class ChatService {
     }
 
     if (runId && AGENT_RUNS_ENABLED) {
-      await getAgentRunService().updateState(runId, 'completed');
+      if (finalFinishReason === 'tool_calls' || finalFinishReason === 'function_call') {
+        await getAgentRunService().updateState(runId, 'requires_action', { reason: 'Waiting for tool outputs' });
+      } else {
+        await getAgentRunService().updateState(runId, 'completed');
+      }
     }
 
     traceBus.emitTrace('ChatService', 'model.completed', { 

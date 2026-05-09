@@ -27,6 +27,12 @@ class LocalAdapter {
         { code: 'LOCAL_ADAPTER_PROHIBITED' }
       );
     }
+    if (process.env.ALLOW_LOCAL_COMMAND_EXECUTION !== 'true') {
+      throw Object.assign(
+        new Error('Local command execution is disabled. Set ALLOW_LOCAL_COMMAND_EXECUTION=true to use LocalAdapter.'),
+        { code: 'LOCAL_COMMAND_EXEC_DISABLED' }
+      );
+    }
     const handle = { pid: process.pid, createdAt: Date.now() };
     this._sessions.set(session.sandboxId, handle);
     return { ...session, state: SandboxState.RUNNING, adapterHandle: handle };

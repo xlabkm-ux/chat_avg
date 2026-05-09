@@ -57,7 +57,7 @@ router.use((req, res, next) => {
  * POST /api/sandboxes
  * Assign a new sandbox session.
  */
-router.post('/', authenticate, asyncHandler(async (req, res) => {
+router.post('/', authenticate, setSandboxOperation('assign'), policyGuard('sandbox_operation'), asyncHandler(async (req, res) => {
   const { runId, executionClass, workspaceMount, egressPolicy, maxTtlMs, idleTimeoutMs } = req.body;
 
   if (!runId || !executionClass) {

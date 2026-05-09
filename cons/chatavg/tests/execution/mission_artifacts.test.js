@@ -6,6 +6,7 @@ const artifactService = require('../../src/modules/execution/artifact.service');
 const missionService = require('../../src/modules/execution/mission.service');
 const chatService = require('../../src/modules/chat/chat.service');
 const categoryRepository = require('../../src/modules/admin/category.repository');
+const db = require('../../src/core/sqlite');
 
 test('Sprint 13: Mission & Artifact Workspace', async (t) => {
 
@@ -46,7 +47,12 @@ test('Sprint 13: Mission & Artifact Workspace', async (t) => {
       model_name: 'mock'
     });
 
+    // Ensure DB is ready
+    db.exec('PRAGMA foreign_keys = OFF');
+
     const missionId = `test-mission-${Date.now()}`;
+    missionService.startMission({ id: missionId, goal: 'Diagnose Goal' });
+
     const user = { username: 'tester', category: 'User' };
     const body = { 
       missionId, 
@@ -63,7 +69,8 @@ test('Sprint 13: Mission & Artifact Workspace', async (t) => {
     // Enable semantic layer for test
     process.env.SEMANTIC_LAYER_ENABLED = 'true';
 
-    await chatService.handleCompletion({ user, body, res });
+    const catSettings = { provider: 'test', model_name: 'mock' };
+    await chatService.handleCompletion({ user, body, catSettings, res, missionId });
 
     const m = missionService.getMission(missionId);
     assert.ok(m, 'Mission should be initialized');

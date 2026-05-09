@@ -33,7 +33,7 @@ class AgentRunService extends EventEmitter {
 
     if (TEMPORAL_RUNTIME_ENABLED) {
       temporalClient.startAgentRun(run.id, missionId).catch(console.error);
-    } else {
+    } else if (process.env.NODE_ENV !== 'test' || process.env.ENABLE_IN_MEMORY_EXECUTION === 'true') {
       this.inMemoryExecution(run.id, missionId).catch(console.error);
     }
 

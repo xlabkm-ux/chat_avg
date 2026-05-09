@@ -84,9 +84,10 @@ class OpenAIResponsesProvider extends BaseProvider {
 
     try {
       if (params.stream) {
-        const stream = await client.responses.create(params);
+        const stream = await client.responses.create(params, { signal: options.signal });
         
         let inReasoning = false;
+        let finalUsage = null;
         for await (const event of stream) {
           if (event.type === 'response.reasoning_summary_text.delta') {
             let text = event.delta;
@@ -126,11 +127,19 @@ class OpenAIResponsesProvider extends BaseProvider {
             if (config.debug_mode && event.type && !noisyEvents.includes(event.type)) {
               this._pushDebugLog(config, 'debug', `UNHANDLED EVENT: ${event.type}`);
             }
+            if (event.type === 'response.done' && event.response?.usage) {
+              const u = event.response.usage;
+              finalUsage = {
+                prompt_tokens: u.input_tokens || 0,
+                completion_tokens: u.output_tokens || 0,
+                total_tokens: (u.input_tokens || 0) + (u.output_tokens || 0),
+              };
+            }
           }
         }
-        yield ProviderEvents.done('stop');
+        yield ProviderEvents.done('stop', finalUsage);
       } else {
-        const response = await client.responses.create(params);
+        const response = await client.responses.create(params, { signal: options.signal });
 
         // Extract text from Responses API output
         let text = '';

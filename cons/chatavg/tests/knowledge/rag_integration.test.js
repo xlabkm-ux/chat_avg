@@ -1,69 +1,106 @@
 
+process.env.NODE_ENV = 'test';
+process.env.KNOWLEDGE_GATEWAY_ENABLED = 'true';
+process.env.AGENT_RUNS_ENABLED = 'false';
+
 const test = require('node:test');
 const assert = require('node:assert');
-const chatService = require('../../src/modules/chat/chat.service');
 const knowledgeGateway = require('../../src/modules/knowledge/knowledge.gateway');
-const categoryRepository = require('../../src/modules/admin/category.repository');
+const knowledgeCache = require('../../src/modules/knowledge/knowledge.cache');
+const knowledgeRouter = require('../../src/modules/knowledge/knowledge.router');
 
-// Mock category repository
-const originalFindByName = categoryRepository.findByName;
+// RAG Integration: Validates that the KnowledgeGateway retrieval plumbing works
+// end-to-end without requiring a running LLM provider.
+test('RAG Integration: KnowledgeGateway Pipeline', async (t) => {
 
-test('RAG Integration: ChatService', async (t) => {
-  
-  await t.test('should call KnowledgeGateway when rag_enabled is true', async () => {
-    // 1. Setup Mock Category
-    categoryRepository.findByName = async () => ({
-      rag_enabled: true,
-      rag_mode: 'fast',
-      provider: 'test',
-      model_name: 'mock'
-    });
+  await t.test('should retrieve chunks and build augmented context', async () => {
+    knowledgeCache.clear();
 
-    // 2. Setup Mock Retriever to return a specific chunk
-    knowledgeGateway.registerRetriever('default', {
+    // Mock response object
+    let responseData = null;
+    const res = {
+      status: (code) => res, // Add status method for error handling
+      json: (data) => { responseData = data; },
+      req: { on: () => {}, off: () => {}, body: {} }
+    };
+
+    // Register a mock retriever with deterministic results
+    knowledgeGateway.registerRetriever('rag_test', {
       search: async () => [
-        { 
-          id: 'c1', 
-          sourceId: 's1', 
-          text: 'The secret code is 12345', 
-          score: 1.0, 
-          provenance: { title: 'Secret Doc' } 
+        {
+          id: 'chunk-1',
+          sourceId: 'source-doc-1',
+          text: 'The secret code is 12345',
+          score: 0.95,
+          provenance: { title: 'Secret Doc', uri: 'http://example.com/doc1' }
         }
       ]
     });
 
-    // 3. Prepare request
-    const user = { username: 'testuser', category: 'User' };
-    const body = { 
-      messages: [{ role: 'user', content: 'What is the secret code?' }],
-      stream: false 
-    };
-    
-    // Mock response object
-    let responseData = null;
-    const res = {
-      json: (data) => { responseData = data; },
-      req: { on: () => {}, off: () => {}, body }
-    };
+    const result = await knowledgeGateway.retrieve(
+      'What is the secret code?',
+      { settings: { retriever_id: 'rag_test', rag_answerability_policy: 'balanced' } }
+    );
 
-    // 4. Execute
-    await chatService.handleCompletion({ user, body, res });
-
-    // 5. Assertions
-    assert.ok(responseData, 'Response should not be null');
-    assert.ok(responseData._retrieval, 'Should contain retrieval metadata');
-    assert.strictEqual(responseData._retrieval.chunks.length, 1);
-    assert.strictEqual(responseData._retrieval.chunks[0].text, 'The secret code is 12345');
-    
-    // Check if the deterministic provider saw the augmented prompt
-    // The DeterministicProvider typically echoes back or returns a fixed string.
-    // Let's verify the assistant response contains expected text if possible, 
-    // or just that the retrieval metadata is present.
-    assert.ok(responseData.choices[0].message.content, 'Should have assistant content');
+    assert.ok(result, 'Should return a RetrievalResult');
+    assert.strictEqual(result.chunks.length, 1, 'Should return 1 chunk');
+    assert.strictEqual(result.chunks[0].text, 'The secret code is 12345');
+    assert.ok(result.chunks[0].score >= 0.9, 'Score should be high');
+    assert.strictEqual(result.metadata.shouldRefuse, false, 'Should not refuse — high quality chunk');
   });
 
-  // Restore
-  t.after(() => {
-    categoryRepository.findByName = originalFindByName;
+  await t.test('should honor settings override', () => {
+    const { mode } = knowledgeRouter.resolveMode('Explain the process of nuclear fission and the chain reaction mechanism.', { rag_mode: 'max_quality' });
+    assert.strictEqual(mode, 'max_quality');
+  });
+
+  await t.test('should format retrieved chunks into augmented context string', async () => {
+    const result = await knowledgeGateway.retrieve(
+      'What is the secret code?',
+      { settings: { retriever_id: 'rag_test' } }
+    );
+
+    const contextText = knowledgeGateway.formatContext(result);
+    assert.ok(contextText.includes('The secret code is 12345'), 'Context should contain chunk text');
+    assert.ok(contextText.includes('Secret Doc'), 'Context should contain source title');
+    assert.ok(contextText.includes('95.0%'), 'Context should show relevance score');
+    assert.ok(contextText.includes('RETRIEVED CONTEXT START'), 'Context should have boundary markers');
+  });
+
+  await t.test('should apply refusal policy when no chunks found', async () => {
+    knowledgeCache.clear();
+
+    knowledgeGateway.registerRetriever('empty_retriever', {
+      search: async () => []
+    });
+
+    const result = await knowledgeGateway.retrieve(
+      'What is the unanswerable query?',
+      { settings: { retriever_id: 'empty_retriever', rag_answerability_policy: 'refusal' } }
+    );
+
+    assert.strictEqual(result.chunks.length, 0, 'Should return no chunks');
+    assert.strictEqual(result.metadata.shouldRefuse, true, 'Should trigger refusal policy');
+  });
+
+  await t.test('should cache retrieval results to avoid redundant DB hits', async () => {
+    knowledgeCache.clear();
+
+    let callCount = 0;
+    knowledgeGateway.registerRetriever('counting_retriever', {
+      search: async () => {
+        callCount++;
+        return [{
+          id: 'c1', sourceId: 's1', text: 'cached content', score: 0.8,
+          provenance: { title: 'Doc', uri: 'http://doc' }
+        }];
+      }
+    });
+
+    await knowledgeGateway.retrieve('cache test query for rag', { settings: { retriever_id: 'counting_retriever' } });
+    const result2 = await knowledgeGateway.retrieve('cache test query for rag', { settings: { retriever_id: 'counting_retriever' } });
+
+    assert.strictEqual(callCount, 1, 'Retriever should only be called once (cache hit on second)');
+    assert.strictEqual(result2.metadata.cacheHit, true, 'Second call should be a cache hit');
   });
 });
