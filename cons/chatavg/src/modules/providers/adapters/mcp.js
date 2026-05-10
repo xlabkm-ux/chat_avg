@@ -58,8 +58,11 @@ class MCPProvider extends BaseProvider {
         delete bastionArgs.extra_params.endpoint_url;
       }
 
-      yield ProviderEvents.delta(`[MCP_ADAPTER] Connected to ${endpointUrl}. Calling tool: ai.chat...\n`);
-      yield ProviderEvents.delta(`[MCP_ADAPTER] Payload: ${JSON.stringify(RedactionService.redact(bastionArgs)).slice(0, 300)}...\n`);
+      // Debug logging
+      if (config.debug_mode) {
+        this._pushDebugLog(config, 'debug', `[MCP_ADAPTER] Connected to ${endpointUrl}. Calling tool: ai.chat...`);
+        this._pushDebugLog(config, 'debug', `[MCP_ADAPTER] Payload: ${JSON.stringify(RedactionService.redact(bastionArgs))}`);
+      }
 
       // Call the ai.chat tool on the MCP server
       const result = await client.callTool({
