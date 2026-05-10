@@ -104,7 +104,6 @@ const DEFAULT_CATEGORY_PARAMS = {
   repeat_penalty: 1.1,
   max_tokens: 1024,
   system_prompt: '',
-  mcp_gateway: '',
 };
 
 const DEFAULT_SYSTEM_PROMPT = 'Ты — полезный ИИ-ассистент Gemma 4. Отвечай точно и по существу.';

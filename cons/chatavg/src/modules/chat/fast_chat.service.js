@@ -35,9 +35,13 @@ class FastChatService {
     return modelGateway.handleChat({
       messages,
       settings: {
+        // 1. Start with provider defaults from env
+        ...providerCfg,
+        // 2. Override with category explicit fields (model_name, temperature, etc.)
         ...mergedSettings,
-        endpoint_url: effectiveEndpointUrl,
-        api_key: providerCfg.api_key
+        // 3. Override with Additional parameters (JSON) - highest priority for specific keys
+        endpoint_url: mergedSettings.extra_params?.endpoint_url || mergedSettings.endpoint_url || providerCfg.endpoint_url,
+        api_key: mergedSettings.extra_params?.api_key || mergedSettings.api_key || providerCfg.api_key
       },
       options,
       route

@@ -313,6 +313,24 @@ function updateProviderUI(providerId) {
   }
 }
 
+async function updateJsonTemplate() {
+  const providerId = $('admin-cat-provider').value;
+  const modelName = $('admin-cat-model').value;
+  if (!providerId || !modelName) return;
+
+  try {
+    const r = await fetch(`/api/admin/providers/template/${encodeURIComponent(providerId)}/${encodeURIComponent(modelName)}`, {
+      headers: { 'Authorization': 'Bearer ' + state.authToken }
+    });
+    if (r.ok) {
+      const template = await r.json();
+      $('admin-cat-extra-params').value = JSON.stringify(template, null, 2);
+    }
+  } catch (e) {
+    console.error('Failed to load template:', e);
+  }
+}
+
 async function editAdminCategory(name, data) {
   await loadProvidersList();
   currentEditCategory = name;
@@ -329,7 +347,6 @@ async function editAdminCategory(name, data) {
   updateProviderUI(providerId);
 
   $('admin-cat-system-prompt').value = data.system_prompt || '';
-  $('admin-cat-mcp-gateway').value = data.mcp_gateway || '';
   $('admin-cat-extra-params').value = data.extra_params ? JSON.stringify(data.extra_params, null, 2) : '';
   
   const debugEl = $('admin-cat-debug-mode');
@@ -338,16 +355,15 @@ async function editAdminCategory(name, data) {
   $('admin-cat-edit-card').scrollIntoView({ behavior: 'smooth' });
 }
 
-$('admin-cat-provider')?.addEventListener('change', (e) => {
+$('admin-cat-provider')?.addEventListener('change', async (e) => {
   const pid = e.target.value;
   updateModelDropdown(pid, '');
   updateProviderUI(pid);
+  await updateJsonTemplate();
 });
 
-$('admin-cat-model-select')?.addEventListener('change', (e) => {
-  if (e.target.value) {
-    $('admin-cat-model').value = e.target.value;
-  }
+$('admin-cat-model')?.addEventListener('change', async (e) => {
+  await updateJsonTemplate();
 });
 
 $('btn-cancel-cat')?.addEventListener('click', (e) => {
@@ -391,7 +407,6 @@ $('btn-save-cat')?.addEventListener('click', async (e) => {
   const payload = {
     provider: $('admin-cat-provider').value || 'llamacpp',
     model_name: $('admin-cat-model').value || null,
-    mcp_gateway: $('admin-cat-mcp-gateway').value.trim() || null,
     system_prompt: $('admin-cat-system-prompt').value || null,
     debug_mode: !!($('admin-cat-debug-mode')?.checked),
     extra_params: null
@@ -434,7 +449,6 @@ $('btn-test-cat')?.addEventListener('click', async (e) => {
   try {
     const payload = {
       provider: $('admin-cat-provider').value,
-      mcp_gateway: $('admin-cat-mcp-gateway').value.trim() || null
     };
 
     const r = await fetch(`/api/admin/categories/${encodeURIComponent(catName)}/test`, {

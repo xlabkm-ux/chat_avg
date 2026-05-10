@@ -132,4 +132,14 @@ function createProvider(config) {
   return new OpenAICompatProvider(config);
 }
 
-module.exports = { OpenAICompatProvider, createProvider };
+module.exports = { 
+  OpenAICompatProvider, 
+  createProvider,
+  id: 'openai_compat',
+  handleChat: (m, c, o) => createProvider({ id: 'openai_compat', name: 'OpenAI-Compat Generic' }).handleChat(m, c, o)
+};
+
+// Also export as a direct instance for factory registration
+const defaultInstance = createProvider({ id: 'openai_compat', name: 'OpenAI-Compat Generic' });
+Object.assign(module.exports, defaultInstance);
+

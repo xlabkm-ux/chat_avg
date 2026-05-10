@@ -18,6 +18,8 @@ const builtins = [
   require('./adapters/grok'),
   require('./adapters/grok_responses'),
   require('./adapters/mcp'),
+  require('./adapters/openai_compat'),
+  require('./adapters/openai_responses_compat'),
 ];
 
 for (const p of builtins) {
@@ -52,11 +54,13 @@ function getProvider(configProviderId) {
  * @returns {Array} [{id, name, models: [modelId1, modelId2, ...]}]
  */
 function listProviders() {
-  return Object.entries(providersConfig).map(([id, cfg]) => ({
-    id,
-    name: cfg.name || id,
-    models: Object.keys(cfg.models || {}),
-  }));
+  return Object.entries(providersConfig)
+    .filter(([id]) => id !== 'mcp' && id !== 'test') // Hide mcp and test from UI
+    .map(([id, cfg]) => ({
+      id,
+      name: cfg.name || id,
+      models: Object.keys(cfg.models || {}),
+    }));
 }
 
 module.exports = { getProvider, listProviders, adapters };

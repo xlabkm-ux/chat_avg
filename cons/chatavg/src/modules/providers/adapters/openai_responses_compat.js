@@ -211,4 +211,14 @@ function createResponsesProvider(config) {
   return new OpenAIResponsesProvider(config);
 }
 
-module.exports = { OpenAIResponsesProvider, createResponsesProvider };
+module.exports = { 
+  OpenAIResponsesProvider, 
+  createResponsesProvider,
+  id: 'openai_responses_compat',
+  handleChat: (m, c, o) => createResponsesProvider({ id: 'openai_responses_compat', name: 'OpenAI-Responses Generic' }).handleChat(m, c, o)
+};
+
+// Also export as a direct instance for factory registration
+const defaultInstance = createResponsesProvider({ id: 'openai_responses_compat', name: 'OpenAI-Responses Generic' });
+Object.assign(module.exports, defaultInstance);
+

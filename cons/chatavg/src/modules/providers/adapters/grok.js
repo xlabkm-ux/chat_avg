@@ -1,6 +1,6 @@
 /**
  * Provider: Grok (xAI)
- * Models: grok-3, grok-3-mini, grok-2
+ * Models: grok-3, grok-3-mini
  * Endpoint: https://api.x.ai/v1
  * 
  * Special Features:
@@ -215,10 +215,9 @@ module.exports = new GrokProvider({
   defaultModel: 'grok-4-1-fast-non-reasoning',
   models: [
     'grok-4-1-fast-non-reasoning',
-    'grok-4-1-fast-non-reasoning-latest',
+    'grok-4-1-fast-reasoning',
     'grok-3',
     'grok-3-mini',
-    'grok-2',
   ],
 });
 

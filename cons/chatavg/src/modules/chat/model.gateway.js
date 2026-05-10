@@ -38,108 +38,132 @@ class ModelGateway {
 
     for (const currentProviderObj of providersToTry) {
       const currentProviderId = currentProviderObj.id;
-      let currentProvider = currentProviderObj.provider;
-      const providerMergedSettings = { ...settings };
-
-      // Backpressure check
-      const currentActive = activeRequests.get(currentProviderId) || 0;
-      if (currentActive >= MAX_CONCURRENT_PER_PROVIDER) {
-         const bpError = new Error(`Provider ${currentProviderId} is overloaded.`);
-         bpError.status = 429;
-         bpError.isRetryable = true;
-         
-         if (fallbackPolicy.shouldFallback(bpError)) {
-           console.warn(`[ModelGateway] Provider ${currentProviderId} overloaded, falling back.`);
-           continue;
-         } else {
-           throw bpError;
-         }
+      const originalProvider = currentProviderObj.provider;
+      
+      // We attempt each provider in two modes if necessary: direct and mcp_proxy
+      const modes = ['direct'];
+      if (providersConfig.mcp?.endpoint_url && currentProviderId !== 'mcp' && currentProviderId !== 'deterministic') {
+        modes.push('mcp_proxy');
       }
 
-      activeRequests.set(currentProviderId, currentActive + 1);
+      let directFailed = false;
 
-      // MCP Gateway Logic
-      if (settings.mcp_gateway && settings.mcp_gateway.trim().length > 0) {
-        const mcpAdapter = adapters.mcp;
-        if (mcpAdapter) {
-          const originalModel = settings.model_name || 'default';
-          let mcpProviderId = currentProviderId;
-          
-          providerMergedSettings.endpoint_url = settings.mcp_gateway;
-          providerMergedSettings.model_name = `${mcpProviderId}:${originalModel}`;
-          currentProvider = mcpAdapter;
-        }
-      }
+      for (const mode of modes) {
+        if (mode === 'mcp_proxy' && !directFailed) continue;
 
-      try {
-        let chatStream;
-        
-        // Emulate streaming if needed
-        if (options.stream && currentProvider.capabilities && !currentProvider.capabilities.stream) {
-          const fallbackOptions = { ...options, stream: false };
-          const tempStream = currentProvider.handleChat(messages, providerMergedSettings, fallbackOptions);
-          
-          let fullText = '';
-          let finalUsage = null;
-          for await (const event of tempStream) {
-            if (event.type === 'error') throw event;
-            if (event.type === 'delta') fullText += event.text;
-            if (event.type === 'done') finalUsage = event.usage;
+        let currentProvider = originalProvider;
+        const providerMergedSettings = { ...settings };
+
+        if (mode === 'mcp_proxy') {
+          const mcpAdapter = adapters.mcp;
+          if (mcpAdapter) {
+            console.log(`[ModelGateway] Attempting ${currentProviderId} via MCP Proxy...`);
+            providerMergedSettings.endpoint_url = providersConfig.mcp.endpoint_url;
+            providerMergedSettings.model_name = `${currentProviderId}:${settings.model_name || 'default'}`;
+            currentProvider = mcpAdapter;
+          } else {
+            continue;
           }
-          chatStream = this._createEmulatedAsyncIterable(fullText, finalUsage);
-        } else {
-          chatStream = currentProvider.handleChat(messages, providerMergedSettings, options);
         }
 
-        // Test connection
-        const iterator = chatStream[Symbol.asyncIterator]();
-        const firstResult = await iterator.next();
-
-        if (!firstResult.done && firstResult.value && firstResult.value.type === 'error') {
-          throw firstResult.value;
+        // Backpressure check
+        const currentActive = activeRequests.get(currentProviderId) || 0;
+        if (currentActive >= MAX_CONCURRENT_PER_PROVIDER) {
+           const bpError = new Error(`Provider ${currentProviderId} is overloaded.`);
+           bpError.status = 429;
+           bpError.isRetryable = true;
+           
+           if (fallbackPolicy.shouldFallback(bpError)) {
+             console.warn(`[ModelGateway] Provider ${currentProviderId} overloaded, falling back.`);
+             directFailed = true;
+             continue;
+           } else {
+             throw bpError;
+           }
         }
 
-        // Yield provider info first (meta event)
-        yield { 
-          type: 'provider_selected', 
-          providerId: currentProviderId, 
-          providerName: currentProvider.name,
-          model: settings.model_name
-        };
+        activeRequests.set(currentProviderId, currentActive + 1);
 
-        // Reassemble and yield the rest
-        if (!firstResult.done) yield firstResult.value;
-        for await (const item of iterator) {
-          yield item;
-        }
+        try {
+          let chatStream;
+          
+          // Emulate streaming if needed
+          if (options.stream && currentProvider.capabilities && !currentProvider.capabilities.stream) {
+            const fallbackOptions = { ...options, stream: false };
+            const tempStream = currentProvider.handleChat(messages, providerMergedSettings, fallbackOptions);
+            
+            let fullText = '';
+            let finalUsage = null;
+            for await (const event of tempStream) {
+              if (event.type === 'error') throw event;
+              if (event.type === 'delta') fullText += event.text;
+              if (event.type === 'done') finalUsage = event.usage;
+            }
+            chatStream = this._createEmulatedAsyncIterable(fullText, finalUsage);
+          } else {
+            chatStream = currentProvider.handleChat(messages, providerMergedSettings, options);
+          }
 
-        traceBus.emitTrace('ModelGateway', 'model.completed', {
-           providerId: currentProviderId,
-           model: settings.model_name,
-           latencyMs: Date.now() - startTimeMs
-        });
+          // Test connection
+          const iterator = chatStream[Symbol.asyncIterator]();
+          const firstResult = await iterator.next();
 
-        activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
-        return; // Success
+          if (!firstResult.done && firstResult.value && firstResult.value.type === 'error') {
+            throw firstResult.value;
+          }
 
-      } catch (err) {
-        activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
-        
-        traceBus.emitTrace('ModelGateway', 'model.failed', { 
-          providerId: currentProviderId, 
-          model: settings.model_name,
-          error: err.message,
-          latencyMs: Date.now() - startTimeMs
-        });
+          // Yield provider info first (meta event)
+          yield { 
+            type: 'provider_selected', 
+            providerId: currentProviderId, 
+            providerName: currentProvider.name,
+            model: settings.model_name,
+            mode: mode
+          };
 
-        if (err.message === 'Client disconnected') throw err;
-        
-        lastError = err;
-        if (fallbackPolicy.shouldFallback(err)) {
-          console.warn(`[ModelGateway] Provider "${currentProviderId}" failed (${err.message}). Falling back.`);
-          continue;
-        } else {
-          break;
+          // Reassemble and yield the rest
+          if (!firstResult.done) yield firstResult.value;
+          for await (const item of iterator) {
+            yield item;
+          }
+
+          traceBus.emitTrace('ModelGateway', 'model.completed', {
+             providerId: currentProviderId,
+             model: settings.model_name,
+             mode: mode,
+             latencyMs: Date.now() - startTimeMs
+          });
+
+          activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
+          return; // Success!
+
+        } catch (err) {
+          activeRequests.set(currentProviderId, Math.max(0, (activeRequests.get(currentProviderId) || 1) - 1));
+          
+          traceBus.emitTrace('ModelGateway', 'model.failed', { 
+            providerId: currentProviderId, 
+            model: settings.model_name,
+            mode: mode,
+            error: err.message,
+            latencyMs: Date.now() - startTimeMs
+          });
+
+          if (err.message === 'Client disconnected') throw err;
+          
+          lastError = err;
+
+          if (mode === 'direct' && fallbackPolicy.shouldFallback(err) && modes.includes('mcp_proxy')) {
+            directFailed = true;
+            console.warn(`[ModelGateway] Provider "${currentProviderId}" direct call failed (${err.message}). Retrying via MCP Proxy.`);
+            continue; // try mcp_proxy mode
+          }
+
+          if (fallbackPolicy.shouldFallback(err)) {
+            console.warn(`[ModelGateway] Provider "${currentProviderId}" failed (${err.message}). Falling back to next provider.`);
+            break; // go to next provider in providersToTry
+          } else {
+            throw err; // terminal error
+          }
         }
       }
     }

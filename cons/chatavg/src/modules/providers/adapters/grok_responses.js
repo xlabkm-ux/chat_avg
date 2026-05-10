@@ -2,7 +2,7 @@
  * Provider: Grok Responses API (xAI)
  * Uses openai.responses.create() via OpenAI SDK compatibility
  * Supports: file_search, tools
- * Models: grok-3, grok-3-mini, grok-2
+ * Models: grok-3, grok-3-mini
  * Endpoint: https://api.x.ai/v1
  */
 const { createResponsesProvider } = require('./openai_responses_compat');
@@ -15,6 +15,5 @@ module.exports = createResponsesProvider({
   models: [
     'grok-3',
     'grok-3-mini',
-    'grok-2',
   ],
 });

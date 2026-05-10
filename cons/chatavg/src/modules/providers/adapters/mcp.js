@@ -35,6 +35,8 @@ class MCPProvider extends BaseProvider {
     try {
       console.log(`[MCP Adapter] Connecting to ${endpointUrl}...`);
       await client.connect(transport);
+      const { RedactionService } = require('../../policy/redaction.service');
+      
       const args = {
         messages,
         model: config.model_name || this.defaultModel,
@@ -43,18 +45,28 @@ class MCPProvider extends BaseProvider {
       if (config.temperature !== undefined) args.temperature = config.temperature;
       if (options.max_tokens) args.max_tokens = options.max_tokens;
 
-      const { RedactionService } = require('../../policy/redaction.service');
+      // Bastion Mode: Pass credentials if provided in the category config
+      const bastionArgs = {
+        ...args,
+        api_key: config.api_key,
+        endpoint_url: config.extra_params?.endpoint_url,
+        extra_params: { ...config.extra_params }
+      };
+      
+      // Cleanup extra_params so we don't send duplicate endpoint_url
+      if (bastionArgs.extra_params) {
+        delete bastionArgs.extra_params.endpoint_url;
+      }
+
       yield ProviderEvents.delta(`[MCP_ADAPTER] Connected to ${endpointUrl}. Calling tool: ai.chat...\n`);
-      yield ProviderEvents.delta(`[MCP_ADAPTER] Payload: ${JSON.stringify(RedactionService.redact(args)).slice(0, 300)}...\n`);
+      yield ProviderEvents.delta(`[MCP_ADAPTER] Payload: ${JSON.stringify(RedactionService.redact(bastionArgs)).slice(0, 300)}...\n`);
 
       // Call the ai.chat tool on the MCP server
       const result = await client.callTool({
         name: "ai.chat",
-        arguments: {
-          ...args,
-          extra_params: config.extra_params
-        }
+        arguments: bastionArgs
       });
+
 
       // Map response to CanonicalChatEvent
       if (result && result.content) {

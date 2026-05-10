@@ -348,16 +348,13 @@
                             <select id="admin-cat-model" class="setup-input" aria-label="Выбор модели"></select>
                         </div>
 
-                        <h4 class="section-subtitle--light mt-sm">MCP Шлюз (Gateway) <span class="hint-text">(Опционально. Если указан, запрос пойдет через этот URL)</span></h4>
-                        <input type="text" id="admin-cat-mcp-gateway" class="setup-input" placeholder="Например: http://127.0.0.1:8202/mcp" aria-label="MCP Шлюз">
-
                         <h4 class="section-subtitle--light mt-sm">Системный промпт <span class="hint-text">(добавляется к промпту пользователя)</span></h4>
                         <textarea id="admin-cat-system-prompt" class="setup-textarea admin-textarea" rows="3" placeholder="Опциональный системный промпт для этой категории..." aria-label="Системный промпт категории"></textarea>
 
-                        <h4 class="section-subtitle--light mt-sm">Дополнительные параметры (JSON) <span class="hint-text">(например, Managed Prompt: {"prompt": {"id": "pmpt_..."}})</span></h4>
-                        <textarea id="admin-cat-extra-params" class="setup-textarea admin-textarea" rows="3" placeholder='{"prompt": {"id": "pmpt_..."}}' aria-label="Дополнительные параметры (JSON)"></textarea>
+                        <h4 class="section-subtitle--light mt-sm">Параметры (JSON) <span class="hint-text">(Все настройки провайдера: ключи, эндпоинты, лимиты)</span></h4>
+                        <textarea id="admin-cat-extra-params" class="setup-textarea admin-textarea" rows="8" placeholder='{"endpoint_url": "...", "api_key": "...", "temperature": 0.7}' aria-label="Параметры (JSON)"></textarea>
 
-                        <h4 class="section-subtitle--light mt-sm">Режим отладки провайдера</h4>
+                        <h4 class="section-subtitle--light mt-sm">Режим отладки</h4>
                         <label class="toggle-option">
                             <span class="toggle-label">🐛 Включить отладочный журнал для этой категории</span>
                             <input type="checkbox" id="admin-cat-debug-mode">

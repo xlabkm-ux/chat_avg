@@ -117,7 +117,7 @@ router.delete('/users/:username', asyncHandler(async (req, res) => {
 const CATEGORY_FIELDS = [
   'provider', 'model_name',
   'temperature', 'top_p', 'top_k', 'min_p', 'repeat_penalty',
-  'max_tokens', 'system_prompt', 'routing_mode', 'fallback_provider', 'mcp_gateway',
+  'max_tokens', 'system_prompt', 'routing_mode', 'fallback_provider',
   'extra_params', 'debug_mode'
 ];
 
@@ -156,7 +156,6 @@ const categorySchema = z.object({
   system_prompt: z.string().max(4000).optional().nullable(),
   routing_mode: z.string().max(32).optional().nullable(),
   fallback_provider: z.string().max(64).optional().nullable(),
-  mcp_gateway: z.string().max(256).optional().nullable(),
   extra_params: z.record(z.any()).optional().nullable(),
   debug_mode: z.boolean().optional().nullable(),
 });
@@ -251,62 +250,61 @@ router.post('/categories/:category_name/test', asyncHandler(async (req, res) => 
   const providerId = data.provider || savedCat.provider || 'llamacpp';
   const providerCfg = providersConfig[providerId] || {};
   
-  let endpointUrl = (providerCfg.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
-  const mcpGateway = data.mcp_gateway || savedCat.mcp_gateway;
-  let isMcpGatewayUsed = false;
+  let endpointUrl = (data.endpoint_url || savedCat.endpoint_url || providerCfg.endpoint_url || 'http://127.0.0.1:8201').replace(/\/$/, '');
+  const isLocalProvider = ['llamacpp', 'ollama', 'mcp'].includes(providerCfg.adapter || providerId);
   
-  if (mcpGateway && mcpGateway.trim().length > 0) {
-    endpointUrl = mcpGateway.trim().replace(/\/$/, '');
-    isMcpGatewayUsed = true;
-  }
-  
-  const isLocalProvider = isMcpGatewayUsed || ['llamacpp', 'ollama', 'mcp'].includes(providerCfg.adapter || providerId);
   try {
     validateProviderUrl(endpointUrl, isLocalProvider);
   } catch (err) {
     return res.status(err.status || 400).json({ error: err.message });
   }
 
-  const apiKey = providerCfg.api_key || '';
-
+  const apiKey = data.api_key || savedCat.api_key || providerCfg.api_key || '';
   const provider = getProvider(providerId);
   if (!provider) return res.status(500).json({ error: 'Провайдер не найден' });
 
-  // Use provider-specific health check if available or if testing through MCP Gateway
-  if (isMcpGatewayUsed || provider.checkHealth) {
+  // Helper to run health check
+  const checkProvider = async (p, config) => {
+    if (p.checkHealth) {
+      return await p.checkHealth(config);
+    }
+    
+    // Generic fetch fallback
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TEST_TIMEOUT);
+    const headers = {};
+    if (config.api_key) headers['Authorization'] = `Bearer ${config.api_key}`;
     try {
-      const healthChecker = isMcpGatewayUsed ? getProvider('mcp') : provider;
-      const ok = await healthChecker.checkHealth({ endpoint_url: endpointUrl, api_key: apiKey });
-      if (ok) {
-        return res.json({ status: 'success', message: 'Соединение установлено успешно' });
-      } else {
-        return res.status(502).json({ error: 'Не удалось установить соединение через MCP Gateway' });
+      const r = await fetch(`${config.endpoint_url}/models`, { headers, signal: controller.signal });
+      clearTimeout(timeout);
+      return r.ok;
+    } catch (e) {
+      clearTimeout(timeout);
+      return false;
+    }
+  };
+
+  // 1. Try direct
+  const isDirectOk = await checkProvider(provider, { endpoint_url: endpointUrl, api_key: apiKey });
+  if (isDirectOk) {
+    return res.json({ status: 'success', message: 'Соединение установлено напрямую' });
+  }
+
+  // 2. Try via MCP Proxy if available
+  const mcpUrl = providersConfig.mcp?.endpoint_url;
+  if (mcpUrl) {
+    try {
+      const mcpProvider = getProvider('mcp');
+      const isMcpOk = await mcpProvider.checkHealth({ endpoint_url: mcpUrl });
+      if (isMcpOk) {
+        return res.json({ status: 'success', message: 'Прямое соединение не удалось, но MCP шлюз доступен' });
       }
     } catch (e) {
-      return res.status(502).json({ error: `Ошибка тестирования шлюза: ${e.message}` });
+      // ignore mcp failure here
     }
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), TEST_TIMEOUT);
-
-  const headers = {};
-  if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
-
-  try {
-    const r = await fetch(`${endpointUrl}/models`, { headers, signal: controller.signal });
-    clearTimeout(timeout);
-
-    if (r.ok) {
-      res.json({ status: 'success', message: 'Соединение установлено успешно' });
-    } else {
-      const errText = await r.text();
-      res.status(r.status).json({ error: `Ошибка сервера (${r.status}): ${errText.slice(0, 100)}` });
-    }
-  } catch (e) {
-    clearTimeout(timeout);
-    res.status(502).json({ error: `Ошибка подключения: ${e.message}` });
-  }
+  res.status(502).json({ error: 'Не удалось установить соединение ни напрямую, ни через MCP шлюз' });
 }));
 
 // ── Stats ───────────────────────────────────────────────
@@ -445,6 +443,28 @@ router.post('/debug/log', asyncHandler(async (req, res) => {
 router.delete('/debug/log', asyncHandler(async (req, res) => {
   debugLogStore.length = 0;
   res.json({ ok: true });
+}));
+
+router.get('/providers/template/:providerId/:modelName', asyncHandler(async (req, res) => {
+  const { providerId, modelName } = req.params;
+  const providersConfig = require('../../core/providers.config');
+  const cfg = providersConfig[providerId];
+  
+  if (!cfg) return res.status(404).json({ error: 'Provider not found' });
+  
+  const template = {
+    endpoint_url: cfg.endpoint_url || '',
+    api_key: cfg.api_key || '',
+    temperature: 0.7,
+    max_tokens: 2048,
+    ...cfg.extra_params
+  };
+
+  if (cfg.models && cfg.models[modelName]) {
+    Object.assign(template, cfg.models[modelName].extra_params || {});
+  }
+
+  res.json(template);
 }));
 
 module.exports = router;

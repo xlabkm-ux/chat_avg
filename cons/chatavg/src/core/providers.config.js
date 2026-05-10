@@ -15,6 +15,7 @@ const providerEnv = config.providerEnv || {
   GROK_API_KEY: process.env.GROK_API_KEY,
   MCP_GATEWAY_URL: process.env.MCP_GATEWAY_URL,
   MCP_API_KEY: process.env.MCP_API_KEY,
+  OPENAI_RESPONSES_KEY: process.env.OPENAI_RESPONSES_KEY,
 };
 
 /**
@@ -66,7 +67,7 @@ const providersConfig = {
     "name": "OpenAI Responses API",
     "adapter": "openai_responses",
     "endpoint_url": providerEnv.OPENAI_URL || "https://api.openai.com/v1",
-    "api_key": providerEnv.OPENAI_API_KEY || "",
+    "api_key": providerEnv.OPENAI_RESPONSES_KEY || providerEnv.OPENAI_API_KEY || "",
     "extra_params": {},
     "models": {
       "gpt-4.1": { "name": "GPT-4.1 (Responses API)", "extra_params": {} },
@@ -77,9 +78,9 @@ const providersConfig = {
   },
   "openai_prompt_file_search": {
     "name": "OpenAI Prompt + File Search",
-    "adapter": "openai_prompt_file_search",
-    "endpoint_url": providerEnv.OPENAI_URL || "https://api.openai.com/v1",
-    "api_key": providerEnv.OPENAI_API_KEY || "",
+    "adapter": "mcp",
+    "endpoint_url": providerEnv.MCP_GATEWAY_URL || "http://127.0.0.1:8202/mcp",
+    "api_key": providerEnv.OPENAI_RESPONSES_KEY || providerEnv.OPENAI_API_KEY || "",
     "extra_params": {
       "prompt": {
         "id": "pmpt_69fe0facab7c8190845f8e803d634d9f0986bd6fdbb91195",
@@ -103,7 +104,7 @@ const providersConfig = {
       ]
     },
     "models": {
-      "prompt": {
+      "openai_prompt_file_search:prompt": {
         "name": "Stored Prompt v2 + File Search",
         "extra_params": {}
       }
@@ -148,12 +149,13 @@ const providersConfig = {
     "endpoint_url": providerEnv.GROK_URL || "https://api.x.ai/v1",
     "api_key": providerEnv.GROK_API_KEY || "",
     "extra_params": {
-      "collection_ids": ["collection_82226a3f-f5b0-4a74-a818-55f7b3e71fdc"]
+      "collection_ids": ["collection_fede36be-2b0b-4ef3-a69e-5e8ccc6fcc53"]
     },
     "models": {
       "grok-4-1-fast-non-reasoning": { "name": "Grok 4.1 Fast (Non-reasoning)", "extra_params": {} },
-      "grok-3": { "name": "Grok 3", "extra_params": {} },
-      "grok-2": { "name": "Grok 2", "extra_params": {} }
+      "grok-4-1-fast-reasoning": { "name": "Grok 4.1 Fast", "extra_params": {} },
+      "grok-3-mini": { "name": "Grok 3 mini", "extra_params": {} },
+      "grok-3": { "name": "Grok 3", "extra_params": {} }
     }
   },
   "mcp": {

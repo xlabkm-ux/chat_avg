@@ -16,7 +16,7 @@ class ChatController {
     const catSettings = await categoryRepository.findByName(user.category) || {};
 
     // 1. Determine Path (Fast Path Isolation)
-    const isFastPath = !catSettings.mcp_gateway && !catSettings.rag_enabled && !catSettings.sandbox_enabled && !body.run_id && !body.runId;
+    const isFastPath = !catSettings.rag_enabled && !catSettings.sandbox_enabled && !body.run_id && !body.runId;
     
     // 2. Mission Binding (always needed for tracking)
     let missionId = body.mission_id || body.missionId;
