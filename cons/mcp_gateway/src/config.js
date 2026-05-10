@@ -50,10 +50,9 @@ function loadProviderConfigs() {
   ];
 
   for (const def of KNOWN_PROVIDERS) {
-    const apiKey = resolveEnv(env, def.keyEnv);
-    if (!apiKey) continue;
-
+    const apiKey = resolveEnv(env, def.keyEnv) || 'bastion-mode-only';
     const url = resolveEnv(env, def.urlEnv) || def.defaultUrl;
+    
     configs.push({
       name: def.name,
       apiKey,
