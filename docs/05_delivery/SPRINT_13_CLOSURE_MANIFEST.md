@@ -34,10 +34,10 @@ This manifest documents the closure of the Knowledge Gateway and Semantic Worksp
 | **Test Coverage** | 100% (Knowledge) | 100% (Knowledge) | ✅ Passed |
 
 ## 4. Key Artifacts
-- [SPEC-014: Knowledge Gateway](file:///c:/AG/agsys/docs/04_specs/SPEC-014-KNOWLEDGE_GATEWAY.md)
-- [SPEC-015: Retrieval Contract](file:///c:/AG/agsys/docs/04_specs/SPEC-015-RETRIEVAL_CONTRACT.md)
-- [SPEC-016: RolePass](file:///c:/AG/agsys/docs/04_specs/SPEC-016-ROLE_PASS.md)
-- [SPEC-017: Artifact Workspace](file:///c:/AG/agsys/docs/04_specs/SPEC-017-ARTIFACT_WORKSPACE.md)
+- [SPEC-014: Knowledge Gateway](../04_specs/SPEC-014-KNOWLEDGE_GATEWAY.md)
+- [SPEC-015: Retrieval Contract](../04_specs/SPEC-015-RETRIEVAL_CONTRACT.md)
+- [SPEC-016: RolePass](../04_specs/SPEC-016-ROLE_PASS.md)
+- [SPEC-017: Artifact Workspace](../04_specs/SPEC-017-ARTIFACT_WORKSPACE.md)
 
 ## 5. Transition to Sprint 14
 - **Focus**: Tool Gateway and MCP Integration.

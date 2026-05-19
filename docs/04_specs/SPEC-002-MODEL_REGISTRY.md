@@ -1,3 +1,13 @@
+---
+id: SPEC-002
+title: Model Registry
+version: 1.0.0
+owner: Core Team
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 3
+---
+
 # SPEC-002: ModelRegistry
 
 **Status:** Accepted  
@@ -7,6 +17,61 @@
 ## Summary
 
 ModelRegistry provides a unified API for dynamic model discovery, provider health monitoring, and model metadata across all configured AI providers in ChatAVG.
+
+## Architecture
+
+```mermaid
+graph TB
+    Client[Client Application]
+    
+    subgraph "Model Registry System"
+        Router[API Router]
+        Registry[ModelRegistry Service]
+        HealthMonitor[Health Monitor]
+        ConfigDB[(providers.config.js)]
+    end
+    
+    subgraph "Provider Adapters"
+        OpenAI[OpenAI Adapter]
+        DeepSeek[DeepSeek Adapter]
+        Gemini[Gemini Adapter]
+        Qwen[Qwen Adapter]
+        Grok[Grok Adapter]
+        LlamaCpp[Llama.cpp Adapter]
+    end
+    
+    subgraph "External Providers"
+        OpenAIAPI[OpenAI API]
+        DeepSeekAPI[DeepSeek API]
+        GeminiAPI[Google Gemini API]
+        QwenAPI[Alibaba Qwen API]
+        GrokAPI[xAI Grok API]
+        LocalLLM[Local Llama.cpp]
+    end
+    
+    Client --> Router
+    Router --> Registry
+    Router --> HealthMonitor
+    
+    Registry --> ConfigDB
+    Registry --> OpenAI
+    Registry --> DeepSeek
+    Registry --> Gemini
+    Registry --> Qwen
+    Registry --> Grok
+    Registry --> LlamaCpp
+    
+    HealthMonitor --> OpenAI
+    HealthMonitor --> DeepSeek
+    HealthMonitor --> Gemini
+    
+    OpenAI --> OpenAIAPI
+    DeepSeek --> DeepSeekAPI
+    Gemini --> GeminiAPI
+    Qwen --> QwenAPI
+    Grok --> GrokAPI
+    LlamaCpp --> LocalLLM
+```
 
 ## API Endpoints
 

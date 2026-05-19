@@ -19,7 +19,11 @@
     "test:remediation": "npm run test:remediation --prefix cons/chatavg",
     "test:sandbox": "npm run test:sandbox --prefix cons/chatavg",
     "test:semantic": "npm run test:semantic --prefix cons/chatavg",
-    "test:all": "npm run test:release && npm run test:remediation"
+    "test:all": "npm run test:release && npm run test:remediation",
+    "docs:validate": "bash scripts/validate_docs.sh",
+    "docs:dashboard": "python3 scripts/generate_quality_dashboard.py docs/ > docs/QUALITY_REPORT.md",
+    "docs:check-metadata": "python3 scripts/check_doc_metadata.py docs/",
+    "docs:lint": "markdownlint '**/*.md' --config .markdownlint.jsonc --ignore node_modules --ignore .git"
   },
   "engines": {
     "node": ">=20.0.0"

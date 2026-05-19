@@ -1,3 +1,13 @@
+---
+id: SPEC-007
+title: AgentRun Event Contract
+version: 1.0.0
+owner: Core Team
+status: Draft
+last_updated: 2026-05-07
+sprint: Sprint 5
+---
+
 # SPEC-007: AgentRun Event Contract
 
 **Status:** Draft | **Version:** 1.0 | **Date:** 2026-05-07

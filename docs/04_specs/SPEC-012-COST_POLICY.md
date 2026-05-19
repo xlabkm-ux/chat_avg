@@ -1,3 +1,13 @@
+---
+id: SPEC-012
+title: Cost Policy and Run Estimate
+version: 1.0.0
+owner: Backend + SRE
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 5
+---
+
 # SPEC-012: Cost Policy and Run Estimate
 
 **ID:** SPEC-012 | **Версия:** 1.0 | **Статус:** Active  

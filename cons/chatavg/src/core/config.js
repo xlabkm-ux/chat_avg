@@ -95,8 +95,8 @@ const ALLOWED_EXTRA_PARAMS = {
 };
 
 const DEFAULT_CATEGORY_PARAMS = {
-  provider: 'llamacpp',
-  model_name: 'default',
+  provider: 'openai',
+  model_name: 'gpt-4o-mini',
   temperature: 0.7,
   top_p: 0.9,
   top_k: 40,
@@ -106,7 +106,7 @@ const DEFAULT_CATEGORY_PARAMS = {
   system_prompt: '',
 };
 
-const DEFAULT_SYSTEM_PROMPT = 'Ты — полезный ИИ-ассистент Gemma 4. Отвечай точно и по существу.';
+const DEFAULT_SYSTEM_PROMPT = 'Ты — профессиональный консультационный ИИ-ассистент. Твоя задача — предоставлять точные, полезные и понятные ответы на вопросы пользователей. Отвечай вежливо, по существу, адаптируя стиль общения под контекст вопроса. Если вопрос требует уточнения, задавай дополнительные вопросы для лучшего понимания потребности пользователя.';
 
 // Feature Flags
 const FEATURE_FLAGS = {

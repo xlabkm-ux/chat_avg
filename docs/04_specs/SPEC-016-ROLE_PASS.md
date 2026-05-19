@@ -1,3 +1,13 @@
+---
+id: SPEC-016
+title: RolePass (Agent Capabilities)
+version: 1.0.0
+owner: Core Team
+status: Draft
+last_updated: 2026-05-07
+sprint: Sprint 10
+---
+
 # SPEC-016: RolePass (Agent Capabilities)
 
 ## 1. Overview

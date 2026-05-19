@@ -1,5 +1,15 @@
 # 📋 Центральный бэклог (PROJECT_BACKLOG.md) - ChatAVG v2.3
 
+> ⚠️ **IMPORTANT: Reality Check**
+>
+> This backlog reflects *planned and partially implemented* work. Many items marked as "completed" represent **skeleton implementations** or **MVP proofs-of-concept**, not production-ready features.
+>
+> For an honest assessment of current state, see:
+> - [CURRENT_REALITY_AUDIT.md](CURRENT_REALITY_AUDIT.md)
+> - [RELEASE_BLOCKERS.md](RELEASE_BLOCKERS.md)
+>
+> We are currently in a **Hardening Phase** (Sprints F1-F8) to bring implementation up to par with our architectural vision.
+
 Текущая стадия: **Finalizing Core & Security (Sprint F1)**
 Эталонный план: [`workdoc/ChatAVG_v2.3_Final_Release_Path.md`](workdoc/ChatAVG_v2.3_Final_Release_Path.md)
 
@@ -461,7 +471,8 @@
 **Итог:** KnowledgeGateway теперь использует реальный поиск через SQLite FTS5. Реализован пайплайн индексации документов и строгая политика цитирования.
 **Deliverables:** `KNOWLEDGE_GATEWAY_DESIGN.md`, `knowledge_mvp.test.js`, `rag_dataset.json` (30 cases).
 **Testing Gate:** `node --test tests/knowledge/knowledge_mvp.test.js` — pass.
-### Sprint R7: Architecture boundary refactor — ✅ Завершён 2026-05-08
+
+### Sprint R7: Architecture boundary refactor — ✅ Завершён 2026-05-08
 *Цель: Декомпозировать монолит ChatService, выделить ModelGateway и изолировать Fast Path.*
 
 **Задачи:**

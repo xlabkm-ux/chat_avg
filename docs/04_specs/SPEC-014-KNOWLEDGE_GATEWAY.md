@@ -1,3 +1,13 @@
+---
+id: SPEC-014
+title: Knowledge Gateway
+version: 1.0.0
+owner: Core Team
+status: Draft
+last_updated: 2026-05-07
+sprint: Sprint 10
+---
+
 # SPEC-014: Knowledge Gateway
 
 **Status:** Proposed  
@@ -10,23 +20,53 @@ KnowledgeGateway is the central orchestrator for all retrieval-augmented generat
 
 ## Architecture
 
+```mermaid
+sequenceDiagram
+    participant User
+    participant ChatService
+    participant KnowledgeGateway
+    participant ModeRouter
+    participant Retriever
+    participant VectorDB
+    participant AnswerabilityPolicy
+    
+    User->>ChatService: Send query with RAG mode
+    ChatService->>KnowledgeGateway: retrieve(query, mode)
+    
+    KnowledgeGateway->>ModeRouter: Select retriever by mode
+    
+    alt no_retrieval mode
+        ModeRouter-->>KnowledgeGateway: Skip retrieval
+        KnowledgeGateway-->>ChatService: Empty context
+    else fast/balanced/max_quality mode
+        ModeRouter->>Retriever: Get retriever instance
+        
+        Retriever->>VectorDB: search(query, limit, minScore)
+        VectorDB-->>Retriever: Ranked chunks
+        
+        Retriever->>AnswerabilityPolicy: Evaluate results
+        AnswerabilityPolicy-->>Retriever: Policy decision
+        
+        alt Can answer
+            Retriever-->>KnowledgeGateway: Retrieved chunks
+            KnowledgeGateway->>KnowledgeGateway: Format context with boundaries
+            KnowledgeGateway-->>ChatService: Context + confidence
+        else Cannot answer
+            Retriever-->>KnowledgeGateway: Refusal signal
+            KnowledgeGateway-->>ChatService: Cannot answer from knowledge
+        end
+    end
+    
+    ChatService->>User: Response with/without context
 ```
-┌─────────────┐     ┌─────────────────────┐     ┌───────────────────┐
-│  ChatService │────▶│  KnowledgeGateway   │────▶│  Mode Router      │
-│  (Core)      │     │  (Orchestrator)     │     │  (Mode Selection) │
-└─────────────┘     └─────────────────────┘     └───────────────────┘
-                            │                         │
-                            │                         ▼
-                            │               ┌───────────────────────┐
-                            │               │  Retrieval Adapters   │
-                            │               │  (Vector DB / Search) │
-                            └───────────────┴───────────────────────┘
-                                    │
-                                    ▼
-                        ┌───────────────────────┐
-                        │ Answerability Policy  │
-                        └───────────────────────┘
-```
+
+**Diagram Description:**
+- **User** initiates a query with optional RAG mode selection
+- **ChatService** delegates to KnowledgeGateway for retrieval
+- **ModeRouter** selects appropriate retriever based on mode (fast/balanced/max_quality)
+- **Retriever** queries VectorDB and ranks results
+- **AnswerabilityPolicy** evaluates if retrieved context is sufficient
+- If policy allows, formatted context is returned; otherwise refusal signal is sent
 
 ## RAG Modes
 

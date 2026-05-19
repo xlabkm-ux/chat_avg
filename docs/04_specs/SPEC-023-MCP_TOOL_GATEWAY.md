@@ -1,3 +1,14 @@
+---
+id: SPEC-023
+title: MCP Tool Gateway and Registry
+version: 1.0.0
+owner: Core Team
+status: Draft
+last_updated: 2026-05-07
+sprint: Sprint 15
+note: "This is a condensed overview; see SPEC-018 for detailed implementation"
+---
+
 # SPEC-023: MCP Tool Gateway and Registry
 
 ## Overview

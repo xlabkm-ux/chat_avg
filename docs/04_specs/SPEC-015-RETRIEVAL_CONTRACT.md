@@ -1,3 +1,13 @@
+---
+id: SPEC-015
+title: Retrieval and Citation Contract
+version: 1.0.0
+owner: Core Team
+status: Draft
+last_updated: 2026-05-07
+sprint: Sprint 10
+---
+
 # SPEC-015: Retrieval & Citation Contract
 
 **Status:** Proposed  

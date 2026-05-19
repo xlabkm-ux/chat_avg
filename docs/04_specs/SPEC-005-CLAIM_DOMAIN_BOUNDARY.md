@@ -1,3 +1,14 @@
+---
+id: SPEC-005
+title: Claim and Domain Boundary
+version: 0.1.0
+owner: Semantic Lead + Backend
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 5
+adr_references: ADR-005
+---
+
 # Claim и DomainBoundary v0 (Спецификация)
 
 **ID:** SPEC-005 | **Версия:** 0.1 (PoC) | **Статус:** Active  

@@ -1,3 +1,13 @@
+---
+id: SPEC-003
+title: Model Gateway
+version: 1.0.0
+owner: Core Team
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 4
+---
+
 # SPEC-003: ModelGateway
 
 **Status:** Accepted  
@@ -19,20 +29,54 @@ ModelGateway defines the boundary between ChatAVG core and AI model inference. I
 
 ## Architecture
 
+```mermaid
+graph TB
+    subgraph "ChatAVG Core"
+        ChatService[ChatService]
+        PolicyRouter[Policy Router]
+        FallbackPolicy[Fallback Policy]
+    end
+    
+    subgraph "Model Gateway Layer"
+        ModelGateway[ModelGateway<br/>Routing & Orchestration]
+        LiteLLM[LiteLLM Proxy<br/>Primary Gateway]
+        DirectAdapter[Direct Provider Adapter<br/>Legacy/Fallback Path]
+    end
+    
+    subgraph "External AI Providers"
+        OpenAI[OpenAI API]
+        DeepSeek[DeepSeek API]
+        Gemini[Gemini API]
+        Qwen[Qwen API]
+        Grok[Grok API]
+        Other[Other Providers]
+    end
+    
+    ChatService --> ModelGateway
+    ModelGateway --> PolicyRouter
+    PolicyRouter --> FallbackPolicy
+    
+    ModelGateway --> LiteLLM
+    FallbackPolicy --> DirectAdapter
+    
+    LiteLLM --> OpenAI
+    LiteLLM --> DeepSeek
+    LiteLLM --> Gemini
+    LiteLLM --> Qwen
+    LiteLLM --> Grok
+    
+    DirectAdapter --> OpenAI
+    DirectAdapter --> DeepSeek
+    DirectAdapter --> Gemini
 ```
-┌─────────────┐     ┌───────────────────┐     ┌──────────────────┐
-│  ChatService │────▶│   ModelGateway     │────▶│  LiteLLM Proxy   │
-│  (Core)      │     │   (Routing Layer)  │     │  (Primary GW)    │
-└─────────────┘     └───────────────────┘     └──────────────────┘
-                            │                         │
-                            │ fallback                │ routes to:
-                            ▼                         ▼
-                    ┌───────────────┐         ┌──────────────┐
-                    │ Direct Adapter │         │ OpenAI/DS/   │
-                    │ (Legacy Path)  │         │ Gemini/Qwen/ │
-                    └───────────────┘         │ Grok/etc.    │
-                                              └──────────────┘
-```
+
+**Diagram Description:**
+- **ChatService** initiates model requests
+- **ModelGateway** handles routing decisions and provider selection
+- **PolicyRouter** determines which provider to use based on category settings
+- **FallbackPolicy** manages fallback logic on retryable errors
+- **LiteLLM Proxy** serves as the primary gateway, routing to multiple providers
+- **Direct Adapter** provides legacy/fallback path when LiteLLM is disabled
 
 ## LiteLLM Integration
 

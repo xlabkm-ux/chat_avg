@@ -1,3 +1,13 @@
+---
+id: SPEC-022
+title: Policy, Cost, and Audit Control Plane
+version: 1.0.0
+owner: Core Team
+status: Draft
+last_updated: 2026-05-07
+sprint: Sprint 15
+---
+
 # SPEC-022: Policy, Cost, and Audit Control Plane
 
 ## Overview

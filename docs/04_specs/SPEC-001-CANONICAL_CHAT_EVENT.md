@@ -1,3 +1,13 @@
+---
+id: SPEC-001
+title: Canonical Chat Event
+version: 1.0.0
+owner: Core Team
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 2
+---
+
 # SPEC-001: CanonicalChatEvent
 
 **Status:** Accepted  
@@ -7,6 +17,42 @@
 ## Summary
 
 `CanonicalChatEvent` is the canonical event contract for all streaming and non-streaming chat responses in ChatAVG. Every provider adapter MUST yield events conforming to this contract. The contract is enforced through the `providerEvents.js` factory module.
+
+## Event Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant ChatService
+    participant ProviderAdapter
+    participant ModelAPI
+    
+    User->>ChatService: Send message
+    ChatService->>ProviderAdapter: handleChat()
+    ProviderAdapter->>ModelAPI: Stream request
+    
+    loop Streaming Response
+        ModelAPI-->>ProviderAdapter: Text chunk
+        ProviderAdapter-->>ChatService: delta event
+        ChatService-->>User: SSE delta
+    end
+    
+    alt Tool Call Required
+        ModelAPI-->>ProviderAdapter: Tool call request
+        ProviderAdapter-->>ChatService: tool_call event
+        ChatService-->>User: Tool call notification
+    end
+    
+    ModelAPI-->>ProviderAdapter: Stream complete
+    ProviderAdapter-->>ChatService: done event (with usage)
+    ChatService-->>User: SSE [DONE]
+    
+    alt Error Occurs
+        ModelAPI-->>ProviderAdapter: Error
+        ProviderAdapter-->>ChatService: error event
+        ChatService-->>User: SSE error
+    end
+```
 
 ## Event Types
 

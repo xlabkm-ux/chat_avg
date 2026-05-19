@@ -1,3 +1,13 @@
+---
+id: SPEC-013
+title: Approval Request (Human-in-the-Loop)
+version: 1.0.0
+owner: UX + Backend
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 5
+---
+
 # SPEC-013: Approval Request (Human-in-the-Loop)
 
 **ID:** SPEC-013 | **Версия:** 1.0 | **Статус:** Active  

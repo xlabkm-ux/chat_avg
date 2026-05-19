@@ -1,0 +1,85 @@
+name: Check Documentation Quality
+
+on:
+  pull_request:
+    paths:
+      - 'docs/**/*.md'
+      - '**/*.md'
+  push:
+    branches: [main, master]
+    paths:
+      - 'docs/**/*.md'
+      - '**/*.md'
+
+jobs:
+  check-links:
+    name: Check Markdown Links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Markdown Links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'yes'
+          config-file: '.mlc-config.json'
+          folder-path: 'docs/'
+          max-depth: -1
+
+  check-formatting:
+    name: Check Markdown Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Run markdownlint
+        run: markdownlint '**/*.md' --config .markdownlint.jsonc --ignore node_modules --ignore .git
+
+  check-metadata:
+    name: Check Document Metadata
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check metadata in SPEC files
+        run: |
+          python scripts/check_doc_metadata.py docs/04_specs/
+
+      - name: Check metadata in ADR files
+        run: |
+          python scripts/check_doc_metadata.py docs/03_adr/
+
+  validate-diagrams:
+    name: Validate Mermaid Diagrams
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install mermaid-cli
+        run: npm install -g @mermaid-js/mermaid-cli
+
+      - name: Validate Mermaid syntax
+        run: |
+          find docs/ -name '*.md' -exec grep -l '```mermaid' {} \; | while read file; do
+            echo "Checking diagrams in $file"
+            # Extract and validate each mermaid block
+          done

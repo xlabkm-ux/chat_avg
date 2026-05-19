@@ -1,3 +1,13 @@
+---
+id: SPEC-010
+title: Error Contract
+version: 1.0.0
+owner: Backend + QA
+status: Active
+last_updated: 2026-05-07
+sprint: Sprint 5
+---
+
 # Error Contract (Канонический формат ошибок)
 
 **ID:** SPEC-010 | **Версия:** 1.0 | **Статус:** Active  
